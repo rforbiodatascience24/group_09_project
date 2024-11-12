@@ -1,0 +1,1 @@
+As github does not store empty directories
