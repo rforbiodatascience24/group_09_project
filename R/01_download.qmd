@@ -38,7 +38,6 @@ if (already_present) {
   # Authenticate and download the file
   response <- GET(
     url = str_c("https://www.kaggle.com/api/v1/datasets/download/", dataset_slug),
-    add_headers(Authorization = paste("Bearer", fromJSON("../kaggle.json")$key)),
     write_disk(output_file, overwrite = TRUE)
   )
   
@@ -61,11 +60,4 @@ if (already_present) {
     }
   }
 }
-```
-
-```{r}
-# # verify that the data can be loaded
-# data <- read.csv(str_c(target_dir, wanted_file))
-# # show the first rows of the dataset
-# head(data)
 ```
