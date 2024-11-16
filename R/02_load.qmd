@@ -1,0 +1,36 @@
+---
+title: "02_load"
+author: 
+  - "Andreis Marco(s243116)" 
+  - "Asiya Mohamad Yusuf Muse (s243930)"
+  - "Magnus Harthimmer (s233426)"  
+  - "Anita Skovbjerg Hjort-Gregersen (s201190)"
+  - "Rebecca Hjermind Millum (s215024)"
+  
+format: html
+editor: visual
+---
+
+This files verifies that the dataset can be loaded and creates a copy of it in the data folder (the \_raw should be left alone not touched by anyone).
+
+```{r}
+suppressMessages({
+  library('tidyverse')
+})
+```
+
+```{r}
+# verify that the dataset can be loaded successfully
+data_path <- "../_raw/abundance.csv"
+dataset <- read_csv(data_path, show_col_types = FALSE)
+```
+
+```{r}
+# show a couple of rows from the dataset
+head(dataset)
+```
+
+```{r}
+# save the dataset in the data fodler
+write_tsv(dataset, "../data/02_dat_load.tsv")
+```
