@@ -1,0 +1,136 @@
+---
+title: "03_clean_NAN"
+format: html
+editor: visual
+---
+
+## Lode in the data
+
+```{r}
+# verify that the dataset can be loaded successfully
+data_path <- "../data/02_dat_load.tsv"
+dataset <- read_tsv(data_path,na = c( "NA","nd","-"), show_col_types = FALSE)
+```
+
+```{r}
+head(dataset)
+```
+
+### Remove NAN
+
+```{r}
+na_counts_df <- dataset |> 
+  summarise(across(everything(), ~ sum(is.na(.)))) %>%
+  pivot_longer(cols = everything(), names_to = "Column", values_to = "NA_Counts")
+
+# Print the NA counts for inspection
+print(na_counts_df)
+
+```
+
+```{r}
+
+na_counts_df |> 
+  ggplot(mapping = aes(x = NA_Counts)) +
+  geom_histogram(fill = "skyblue", color = "black") +
+  labs(
+    title = "Histogram of NA Counts per Column",
+    x = "Number of NA Values",
+    y = "Frequency"
+  ) +
+  theme_minimal()
+```
+
+```{r}
+na_counts_df |> 
+  filter(NA_Counts > 0) |> 
+  ggplot(mapping = aes(x = NA_Counts)) +
+  geom_histogram(fill = "skyblue", color = "black") +
+  labs(
+    title = "Histogram of NA Counts per Column",
+    x = "Number of NA Values",
+    y = "Frequency"
+  ) +
+  theme_minimal()
+```
+
+```{r}
+Columes_NAN_3000 <- na_counts_df |> 
+  filter(NA_Counts > 3000) |> 
+  pull(Column)
+```
+
+```{r}
+#Columes_NAN_3000 <- as.list(Columes_NAN_3000 )
+
+```
+
+```{r}
+dataset_filtered <- dataset |> 
+  select(-all_of(Columes_NAN_3000))
+```
+
+```{r}
+dataset_filtered 
+```
+
+```{r}
+dataset_filtered |> 
+  select(starts_with("k__Bac"))
+  
+```
+
+```{r}
+dataset_filtered_remove <-  dataset_filtered |> 
+  filter(k__Bacteria > 0)
+
+dataset_filtered_remove |> 
+  count()
+```
+
+```{r}
+dataset_filtered_remove_rename <- dataset_filtered_remove |> 
+  rename("Total_Bacteria" = k__Bacteria)
+```
+
+```{r}
+dataset_filtered_remove_rename <- dataset_filtered_remove_rename |> 
+  select(!starts_with("k__"))
+```
+
+```{r}
+dataset_filtered_remove_rename |> 
+  group_by(sequencing_technology) |> 
+  count()
+```
+
+```{r}
+dataset_filtered_remove_rename <- dataset_filtered_remove_rename |> 
+  select(-sequencing_technology,pubmedid)
+```
+
+```{r}
+dataset_filtered_remove_rename
+```
+
+```{r}
+dataset_filtered_remove_rename |> 
+  group_by(subjectID) |> 
+  count() |> 
+  filter(n > 1)
+  
+```
+
+```{r}
+dataset_filtered_remove_rename |> 
+  distinct(sampleID,subjectID, dataset_name) 
+  
+```
+
+```{r}
+dataset_filtered_remove_rename |> 
+  group_by(sampleID)|> 
+  count()
+```
+
+### Exporet clean data
