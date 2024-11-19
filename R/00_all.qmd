@@ -1,0 +1,28 @@
+---
+title: "00_all"
+author: 
+  - "Andreis Marco(s243116)" 
+  - "Asiya Mohamad Yusuf Muse (s243930)"
+  - "Magnus Harthimmer (s233426)"  
+  - "Anita Skovbjerg Hjort-Gregersen (s201190)"
+  - "Rebecca Hjermind Millum (s215024)"
+  
+format: html
+editor: visual
+---
+
+This file runs the whole project
+
+```{r}
+library('quarto')
+```
+
+```{r}
+# Download the dataset
+quarto_render("01_download.qmd", execute = TRUE, output_file = NULL)
+
+# Load and create a copy of the dataset in the data folder
+quarto_render("02_load.qmd", execute = TRUE, output_file = NULL)
+
+unlink("*_files", recursive = TRUE)
+```
