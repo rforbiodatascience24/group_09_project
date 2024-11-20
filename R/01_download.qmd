@@ -11,7 +11,7 @@ format: html
 editor: visual
 ---
 
-In this file we check if the dataset is alreayd present, if it is not we collect it programmatically from kaggle and save it in the \_raw folder.
+In this file we check if the dataset is already present, if it is not we collect it programmatically from kaggle and save it in the \_raw folder.
 
 ```{r}
 suppressMessages({
@@ -25,6 +25,11 @@ suppressMessages({
 wanted_file <- "abundance.csv"
 target_dir <- "../_raw/"
 
+# Create the _raw folder if it does not exist 
+if (!file.exists(target_dir)) {
+  dir.create(target_dir, recursive = TRUE)
+}
+  
 # check if the file is already present 
 already_present <- file.exists(str_c(target_dir, wanted_file))
 
