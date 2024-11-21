@@ -1,0 +1,14 @@
+---
+title: "04_analysis"
+author: "Andreis Marco"
+format: html
+editor: visual
+---
+
+# Load the dataset
+
+```{r}
+# verify that the dataset can be loaded successfully
+data_path <- "../data/03_dat_clean.csv"
+dataset <- read_csv(data_path, show_col_types = FALSE)
+```
