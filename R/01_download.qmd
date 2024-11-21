@@ -23,7 +23,13 @@ suppressMessages({
 
 ```{r}
 wanted_file <- "abundance.csv"
-target_dir <- "../_raw/"
+target_path <- "../_raw/"
+
+# Create the data folder if it does not exist
+if (!file.exists(target_path)) {
+  # Create the folder if it doesn't exist
+  dir.create(target_path, recursive = TRUE)
+  }
 
 # check if the file is already present 
 already_present <- file.exists(str_c(target_dir, wanted_file))
