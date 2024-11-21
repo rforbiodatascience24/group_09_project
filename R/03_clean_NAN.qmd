@@ -228,7 +228,7 @@ dataset |>
 The NAs correspond to the subjects described as having "normal glucose tolerance people" in the paper, which are therefore healthy.
 
 ```{r}
-dataset <- dataset %>%
+dataset <- dataset |> 
   mutate(disease = replace_na(disease, "healthy"))
 ```
 
@@ -274,7 +274,7 @@ na_counts |>
   geom_histogram(binwidth = 1)
 ```
 
-We can see that the vast majority of metadata columns completely empty, so we can remove them.
+We can see that the vast majority of metadata columns completely empty, so we can remove them. We also remove the il-1 column, as it only contain NAs or FALSE.
 
 ```{r}
 columns_to_drop <- na_counts |> 
@@ -283,6 +283,9 @@ columns_to_drop <- na_counts |>
 
 metadata <- metadata |> 
   select(-columns_to_drop)
+
+metadata <- metadata |> 
+  select(-`il-1`)
 ```
 
 Now we remove all the colums that contain the same value across all the rows, as they do not provide any information.
@@ -325,107 +328,18 @@ non_zero_values |>
   geom_histogram(binwidth = 1)
 ```
 
-```{r}
+This tells us that many of the columns are really sparse. But this could be simply due to the many species observed not being present in many samples.
 
-na_counts_df |> 
-  ggplot(mapping = aes(x = NA_Counts)) +
-  geom_histogram(fill = "skyblue", color = "black") +
-  labs(
-    title = "Histogram of NA Counts per Column",
-    x = "Number of NA Values",
-    y = "Frequency"
-  ) +
-  theme_minimal()
+Now the data columns are also cleaned. So we merge the two dataset back together (In both cleaning we did not change the number of rows so we can blindly merge the dataset side by side).
+
+```{r}
+full_dataset <- bind_cols(metadata, data)
 ```
 
-```{r}
-na_counts_df |> 
-  filter(NA_Counts > 0) |> 
-  ggplot(mapping = aes(x = NA_Counts)) +
-  geom_histogram(fill = "skyblue", color = "black") +
-  labs(
-    title = "Histogram of NA Counts per Column",
-    x = "Number of NA Values",
-    y = "Frequency"
-  ) +
-  theme_minimal()
-```
+Save the full dataset
 
 ```{r}
-Columes_NAN_3000 <- na_counts_df |> 
-  filter(NA_Counts > 3000) |> 
-  pull(Column)
-```
-
-```{r}
-#Columes_NAN_3000 <- as.list(Columes_NAN_3000 )
-
-```
-
-```{r}
-dataset_filtered <- dataset |> 
-  select(-all_of(Columes_NAN_3000))
-```
-
-```{r}
-dataset_filtered 
-```
-
-```{r}
-dataset_filtered |> 
-  select(starts_with("k__Bac"))
-  
-```
-
-```{r}
-dataset_filtered_remove <-  dataset_filtered |> 
-  filter(k__Bacteria > 0)
-
-dataset_filtered_remove |> 
-  count()
-```
-
-```{r}
-dataset_filtered_remove_rename <- dataset_filtered_remove |> 
-  rename("Total_Bacteria" = k__Bacteria)
-```
-
-```{r}
-dataset_filtered_remove_rename <- dataset_filtered_remove_rename |> 
-  select(!starts_with("k__"))
-```
-
-```{r}
-dataset_filtered_remove_rename |> 
-  group_by(sequencing_technology) |> 
-  count()
-```
-
-```{r}
-dataset_filtered_remove_rename <- dataset_filtered_remove_rename |> 
-  select(-sequencing_technology,pubmedid)
-```
-
-```{r}
-dataset_filtered_remove_rename
-```
-
-```{r}
-dataset_filtered_remove_rename |> 
-  group_by(subjectID) |> 
-  count() |> 
-  filter(n > 1)
-  
-```
-
-```{r}
-dataset_filtered_remove_rename |> 
-  distinct(sampleID,subjectID, dataset_name) 
-  
-```
-
-```{r}
-dataset_filtered_remove_rename |> 
-  group_by(sampleID)|> 
-  count()
+target_path <- "../data"
+# save the dataset in the data fodler
+write_csv(full_dataset, str_c(target_path, "/03_dat_clean.csv"))
 ```
