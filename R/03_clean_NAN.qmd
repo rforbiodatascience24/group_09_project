@@ -13,7 +13,7 @@ suppressMessages(library("tidyverse"))
 ```{r}
 # verify that the dataset can be loaded successfully
 data_path <- "../data/02_dat_load.csv"
-dataset <- read_csv(data_path,na = c( "NA","nd","-"), show_col_types = FALSE)
+dataset <- read_csv(data_path,na = c( "NA","nd","-", "n"), show_col_types = FALSE)
 head(dataset)
 ```
 
