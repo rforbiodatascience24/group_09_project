@@ -46,12 +46,14 @@ dataset |>
 We can see that all rows are unique, so the hypothesis of duplicated rows is wrong.
 
 ```{r}
+#Find the sampel ID's that are there more than ones and put it in to a vector
 duplicates_samples <- dataset |>
   group_by(sampleID) |> 
   summarise(n_of_samples = n()) |> 
   filter(n_of_samples > 1) |> 
   pull(sampleID)
 
+#Now for each sub dataset we check how menny duplicat of sampel ID they have dupplicat off, we see only the studyes that have dupplicats 
 dataset |>
   group_by(dataset_name) |>
   summarise(
@@ -61,15 +63,26 @@ dataset |>
   filter(duplicates > 0)
 ```
 
+```{r}
+#the names of dupplica sample 
+print(duplicates_samples)
+print(length(duplicates_samples))
+
+```
+
 What we DO instead see is that there are samples id which are duplicated (243 duplicates), and these are contained in the datasets found above.
 
+This is because som of the sampelID are dupplicat more than one time
+
 ```{r}
+#Find the subject ID's that are there more than ones and put it in to a vector
 duplicates_subjects <- dataset |>
   group_by(subjectID) |> 
   summarise(n_of_samples = n()) |> 
   filter(n_of_samples > 1) |> 
   pull(subjectID)
 
+#then for each dataset we see if som of the "person" are in the study more then ones
 dataset |>
   group_by(dataset_name) |>
   summarise(
@@ -80,7 +93,7 @@ dataset |>
   filter(duplicates > 0)
 ```
 
-The subjectID are also duplicated (1805 duplicates).
+The subjectID are also duplicated (1805 duplicates). (this can men that one perseon can have patisapate more ones but we woud need to test if this is is the same value for the hole study.
 
 ```{r}
 dataset |> 
@@ -94,13 +107,15 @@ Having this information, now we can try to localize which datasets may have not 
 
 Here we have the first big obstacle to understanding the dataset... despite the original paper only citing 8 papers, in the dataset we have 18, and, even though, we can trace a link between the two lists for some this is really difficult. By examining the number of samples declared in the paper (and keeping in mind that some samples were discarded during preprocessing) and the ones observed we can hypothesise the following:
 
+The fist is the value in the paper
+
 -   WT2D: 145 vs 145 –\> perfect match
 -   Segre_Human_Skin: 291 vs 291 –\> perfect match
 -   Chatelier_gut_obesity: 292 vs 278 –\> acceptable due to preproccesing
 -   metahit: 124 vs 110 –\> acceptable due to preproccesing
 -   Quin_gut_liver_cirrhosis: 327 vs 232 –\> acceptable due to preproccesing
 -   Zeller_fecal_colorectal_cancer: 156 vs 134 –\> acceptable due to preproccesing
--   hmp / hmpii: mentioned in the paper, but number of samples unspecified
+-   hmp / hmpii: mentioned in the paper, but number of samples unspecified we have 762 + 219
 -   t2dmeta_long / short: 344 vs 363 –\> more samples than expected, possible duplicates???
 -   Loman2013_EcoliOutbreak_DNA_HiSeq / Miseq: never mentioned
 -   Neilsen_genome_assembly: never mentioned
@@ -113,24 +128,42 @@ Here we have the first big obstacle to understanding the dataset... despite the 
 ```{r}
 mentioned <- c("Chatelier_gut_obesity", "Quin_gut_liver_cirrhosis", "Segre_Human_Skin", "WT2D", "Zeller_fecal_colorectal_cancer", "hmp", "hmpii", "metahit", "t2dmeta_long", "t2dmeta_short")
 
-dataset |> 
-   
+val <- dataset |> 
+  filter(dataset_name %in% mentioned) |>
   nrow()
+
+val-2424
 ```
 
 By only considering the dataset mentioned in the paper the number of examples is still higher than the declared 2424 (by 110 samples). So there must be some duplicates between the mentioned datasets.
 
 ```{r}
+#We need to updata our list of  dupplicat sampel ID's after we remove som of the studyes
+
+#Find the sampel ID's that are there more than ones and put it in to a vector
+duplicates_samples_update <- dataset |>
+  filter(dataset_name %in% mentioned) |>
+  group_by(sampleID) |> 
+  summarise(n_of_samples = n()) |> 
+  filter(n_of_samples > 1) |> 
+  pull(sampleID)
+```
+
+```{r}
+#We take the datt, and for the studys in the paper we look for the dupplicats
+
+#We se her that there is dupplicets
 dataset |>
   filter(dataset_name %in% mentioned) |>
   group_by(dataset_name) |>
   summarise(
     total = n(),
-    duplicates = sum(sampleID %in% duplicates_samples),
+    duplicates = sum(sampleID %in% duplicates_samples_update),
     uniques = n_distinct(sampleID)
   ) |> 
   filter(duplicates > 0)
 
+#Her we study if of the 2 studyes that show duppicats have duplicats if we considere tham alone
 dataset |>
   filter(dataset_name == "Chatelier_gut_obesity") |>
   group_by(sampleID) |>
@@ -138,7 +171,7 @@ dataset |>
   filter(n_samples > 1)
 
 dataset |>
-  filter(dataset_name == "Chatelier_gut_obesity") |>
+  filter(dataset_name == "metahit") |>
   group_by(sampleID) |>
   summarise(n_samples = n()) |>
   filter(n_samples > 1)
