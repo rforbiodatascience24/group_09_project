@@ -33,6 +33,7 @@ head(dataset)
 ```{r}
 target_path <- "../data"
 
+
 # Create the data folder if it does not exist
 if (!file.exists(target_path)) {
   # Create the folder if it doesn't exist
@@ -41,4 +42,5 @@ if (!file.exists(target_path)) {
 
 # save the dataset in the data fodler
 write_csv(dataset, str_c(target_path, "/02_dat_load.csv"))
+
 ```
