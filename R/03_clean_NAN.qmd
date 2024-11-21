@@ -242,7 +242,7 @@ na_counts |>
   geom_histogram(binwidth = 1)
 ```
 
-We can see that the vast majority of metadata columns completely empty, so we can remove them.
+We can see that the vast majority of metadata columns completely empty, so we can remove them. We also remove the il-1 column, as it only contain NAs or FALSE.
 
 ```{r}
 columns_to_drop <- na_counts |> 
@@ -304,7 +304,7 @@ Now the data columns are also cleaned. So we merge the two dataset back together
 full_dataset <- bind_cols(metadata, data)
 ```
 
-Save th full dataset
+Save the full dataset
 
 ```{r}
 target_path <- "../data"
