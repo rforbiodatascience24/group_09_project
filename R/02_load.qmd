@@ -40,5 +40,5 @@ if (!file.exists(target_path)) {
   }
 
 # save the dataset in the data fodler
-write_tsv(dataset, str_c(target_path, "/02_dat_load.tsv"))
+write_csv(dataset, str_c(target_path, "/02_dat_load.csv"))
 ```
