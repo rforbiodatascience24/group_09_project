@@ -1,0 +1,62 @@
+---
+title: "04_analysis"
+author: "Andreis Marco"
+format: html
+editor: visual
+---
+
+# Load the dataset
+
+```{r}
+#library(readr)
+library(tidyverse)
+```
+
+```{r}
+# verify that the dataset can be loaded successfully
+data_path <- "../data/03_dat_clean.csv"
+dataset <- read_csv(data_path, show_col_types = FALSE)
+```
+
+```{r}
+dataset |> 
+  View()
+```
+
+```{r}
+dataset |> 
+  ggplot(mapping = aes(x = bmi,k__Archaea))+
+  geom_point()
+```
+
+```{r}
+library("table1")
+dataset |> 
+  table1(x = formula(~ bmi + k__Archaea + hdl + ldl | disease),
+         data = _)
+```
+
+Bace data + correlation (magnus)
+
+Linnaer regation
+
+P-value (dabies vs not for HTL, ALDL)
+
+```{r}
+dataset_dia <- dataset |> 
+  mutate(diabetes = case_when(disease == "healthy" ~ "0",
+                              disease == "impaired_glucose_tolerance" ~ "1",
+                              disease == "t2d" ~ "1") )
+```
+
+```{r}
+dataset_dia_long <- dataset_dia |> 
+  pivot_longer(cols = starts_with("k__"),
+               names_to = "backteria",
+               values_to = "level")
+```
+
+```{r}
+dataset_dia_long |> 
+  View()
+```
