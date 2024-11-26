@@ -5,22 +5,126 @@ format: html
 editor: visual
 ---
 
-# Load the dataset
+# Load the dataset and required packages
 
 ```{r}
 #library(readr)
 library(tidyverse)
 library(broom)
 library(dplyr)
+library(vegan)
 ```
-
 ```{r}
 # verify that the dataset can be loaded successfully
 data_path <- "../data/03_dat_clean.csv"
 dataset <- read_csv(data_path, show_col_types = FALSE)
 ```
 
+# Magnus analysis
+### Metadata analysis
+What does impaired glucose tolerance mean? It means that blood sugar levels are elevated but not enough to warrant a diagnosis of diabetes
+
 ```{r}
+# Let's look at the proportions of our catagorical values
+# Our data is well proportionally split between the three distincs groups of "disease"
+table(dataset$disease)
+```
+
+### Correlation analysis
+
+Using the correlation matrix on a subset of our data will tell us about linear relationships between data variables.
+
+Lets start with a subset of our data, containing metadata and a few high-level markers (e.g. LDL and HDL)
+
+```{r}
+library(corrplot)
+
+# Feature extractions
+corr_data <- dataset |> 
+  select(age,
+         bmi,
+         ldl,
+         hdl)
+
+# Compute correlation matrix 
+corr_matrix <- cor(corr_data)
+
+print("Correlation Matrix")
+print(corr_matrix)
+
+# visualizing correlogram
+corrplot(corr_matrix, method="number")
+
+```
+
+We see a slight inverse relationship between HDL levels and BMI.
+
+Farbstein D, Levy AP. HDL dysfunction in diabetes: causes and possible treatments. Expert Rev Cardiovasc Ther. 2012 Mar;10(3):353-61. doi: 10.1586/erc.11.182. PMID: 22390807; PMCID: PMC3332215.
+
+## Assessing relationships between species abundance and metadata features
+
+```{r}
+# Select kingdom level abundance features 
+kingdom_abundance <- dataset |>
+  select(matches("^k_"))
+
+# Select the metadata features
+# Also filter out "country" since it contains almost no variation 
+metadata <- dataset |> 
+  select(-starts_with("k__") & c(bmi, hdl, ldl, age))
+
+filtered_data <- dataset |>
+  select(matches("^[^|]*\\|[^|]*\\|[^|]*$"))
+```
+
+```{r}
+cor_kingdom <- cor(filtered_data, metadata, method="pearson")
+print(car_kingdom)
+corrplot(cor_kingdom)
+```
+
+### Let's analyze the diversity between class variables (T2d, healthy and glucose impaired) 
+
+We do this by calculating a distance matrix based on the microbial abundance data, which then can be used to visualize the differences in composition in a reduced dimensionality.
+
+```{r}
+# data frame containing only the abundance data
+metadata <- dataset |> 
+  select(-starts_with("k__"))
+
+# data frame containing everything else (metadata)
+data <- dataset |>
+  select(starts_with("k__"))
+
+# Calculate Beta diversity 
+bc_dist <- vegdist((data), method = "bray")
+
+# Perform PCoA on Bray-Curtis distance matrix
+pcoa_result <- cmdscale(bc_dist, k = 2)  # k = 2 for 2D PCoA
+
+# View PCoA results (coordinates of samples in PCoA space)
+head(pcoa_result)
+
+# Combine PCoA results with metadata (group labels)
+pcoa_df <- data.frame(PCoA1 = pcoa_result[, 1], PCoA2 = pcoa_result[, 2], Group = metadata$disease)
+
+# View the combined data
+head(pcoa_df)
+```
+
+```{r}
+# PCoA plot
+ggplot(pcoa_df, aes(x = PCoA1, y = PCoA2, color = Group)) +
+  geom_point(size = 4) +
+  theme_minimal() +
+  labs(title = "PCoA of Bray-Curtis Dissimilarity",
+       x = "PCoA1", 
+       y = "PCoA2") +
+  scale_color_manual(values = c("red", "blue", "green"))  # Customize colors as needed
+
+The plot does not show any indication of separation between groups.
+
+# Rebecca analysis
 dataset |> 
   View()
 ```
@@ -37,8 +141,6 @@ dataset |>
   table1(x = formula(~ bmi + k__Archaea + hdl + ldl | disease),
          data = _)
 ```
-
-Bace data + correlation (magnus)
 
 Linnaer regation
 
@@ -140,4 +242,3 @@ plot1_backteria <- dataset_dia_estimates |>
        title = "Backterie assoiat whit TC2",
        caption = "data bla")
 plot1_backteria 
-```
