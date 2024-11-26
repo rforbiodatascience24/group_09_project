@@ -11,12 +11,11 @@ editor: visual
 #library(readr)
 library(tidyverse)
 library(broom)
-library(dplyr)
 ```
 
 ```{r}
 # verify that the dataset can be loaded successfully
-data_path <- "../data/03_dat_clean.csv"
+data_path <- "../data/06_dat_augmented.csv"
 dataset <- read_csv(data_path, show_col_types = FALSE)
 ```
 
@@ -26,34 +25,22 @@ dataset |>
 ```
 
 ```{r}
-dataset |> 
-  ggplot(mapping = aes(x = bmi,k__Archaea))+
-  geom_point()
-```
-
-```{r}
 library("table1")
 dataset |> 
-  table1(x = formula(~ bmi + k__Archaea + hdl + ldl | disease),
+  table1(x = formula(~ BMI_class  + hdl_to_ldl_ratio + `gad-antibodies`+ cholesterol + creatinine| glucose_tollerance),
          data = _)
 ```
 
-Bace data + correlation (magnus)
-
-Linnaer regation
-
-P-value (dabies vs not for HTL, ALDL)
-
 ```{r}
 dataset_dia <- dataset |> 
-  mutate(diabetes = case_when(disease == "healthy" ~ 0,
-                              disease == "impaired_glucose_tolerance" ~ 1,
-                              disease == "t2d" ~ 1) )
+  mutate(diabetes = case_when(glucose_tollerance == "normal" ~ 0,
+                              glucose_tollerance == "impaired" ~ 1,
+                              glucose_tollerance == "t2d" ~ 1) )
 ```
 
 ```{r}
 dataset_dia_long <- dataset_dia |> 
-  pivot_longer(cols = starts_with("k__"),
+  pivot_longer(cols = starts_with("s_"),
                names_to = "backteria",
                values_to = "level")
 ```
@@ -69,7 +56,7 @@ dataset_dia_long_nested
 ```{r}
 #How to get the data
 dataset_dia_long_nested |> 
-  filter(backteria == "k__Archaea") |> 
+  filter(backteria == "s_Bifidobacterium_bifidum") |> 
   pull(data)
 ```
 
@@ -86,7 +73,7 @@ dataset_dia_long_nested <- dataset_dia_long_nested |>
 ```{r}
 #How to get the model
 dataset_dia_long_nested |> 
-  filter(backteria == "k__Archaea") |> 
+  filter(backteria == "s_Bifidobacterium_bifidum") |> 
   pull(model_object)
 ```
 
@@ -102,14 +89,14 @@ dataset_dia_long_nested <- dataset_dia_long_nested |>
 ```{r}
 #Eksampel how to get values
 dataset_dia_long_nested |> 
-  filter(backteria == "k__Archaea") |> 
+  filter(backteria == "s_Bifidobacterium_bifidum") |> 
   pull(model_object_tidy)
 ```
 
 ```{r}
 dataset_dia_estimates <- dataset_dia_long_nested |> 
   unnest(model_object_tidy)
-dataset_dia_est_estimates
+dataset_dia_estimates
 ```
 
 ```{r}
@@ -124,7 +111,7 @@ dataset_dia_estimates |>
 ```
 
 ```{r}
-plot1_backteria <- dataset_dia_estimates |> 
+dataset_dia_estimates |> 
   filter(is_significant == "yes") |> 
   ggplot(aes(x = estimate,
              y = fct_reorder(backteria, estimate),
@@ -133,11 +120,9 @@ plot1_backteria <- dataset_dia_estimates |>
   geom_vline(xintercept = 0) +
   geom_errorbarh() +
   geom_point() +
-  theme_minimal(base_size = 16) +
+  theme_minimal(base_size = 10) +
   theme(plot.title = element_text(hjust = 1)) +
   labs(x = "Estimates (95%CIs)",
-       y = "",
-       title = "Backterie assoiat whit TC2",
-       caption = "data bla")
-plot1_backteria 
+       y = "Bacterial species",
+       title = "Bacteria associated with TC2 and impaired glucose tolerance ")
 ```
