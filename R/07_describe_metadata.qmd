@@ -1,0 +1,172 @@
+---
+title: "07_describe_metadata"
+author: "Andreis Marco"
+format: html
+editor: visual
+---
+
+### Load the dataset
+
+```{r}
+suppressMessages(library("tidyverse"))
+library("here")
+```
+
+```{r}
+# verify that the dataset can be loaded successfully
+data_path <- here("data/06_dat_augmented.csv")
+dataset <- read_csv(data_path, show_col_types = FALSE)
+```
+
+### Metadata visualization
+
+Now we will focus on the visualization of the metadata.
+
+Our dataset contains samples taken from patients having either type II diabetes, an impaired tollerance to glucose or being healthy individuals.
+
+We have access to many information regarding markers that correlate to the insurgence of diabetes, but let's start with the basics.
+
+### General visualization
+
+```{r}
+dataset |> 
+  ggplot(aes(x = fct_infreq(country))) + 
+  geom_bar(fill = "skyblue", color = "black") + 
+  geom_text(stat = "count", aes(label = ..count..), vjust = -0.5, size = 3) +
+  labs(
+    title = "Distribution of samples by country",
+    x = "Country",
+    y = "Number of Samples"
+  ) +
+  theme_minimal() +
+  theme(
+    axis.text.x = element_text(angle = 15),
+    plot.title = element_text(size = 16, hjust = 0.5)
+  )
+```
+
+```{r}
+dataset |> 
+  ggplot(aes(x = age)) + 
+  geom_histogram(fill = "skyblue", color = "black", binwidth = 0.5) + 
+  geom_vline(
+    aes(xintercept = mean(age, na.rm = TRUE)),
+    color = "black", 
+    linetype = "dashed", 
+    size = 0.5
+  ) +
+  labs(
+    title = "Distribution of Samples by Age",
+    x = "Age",
+    y = "Number of Samples"
+  ) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(size = 16, hjust = 0.5)
+  )
+```
+
+We can say that our samples are collected from females living in nordic countries, mainly Sweden, in the age range 69-72.
+
+### Diabetes specific visualization
+
+```{r}
+dataset <- dataset |> 
+  mutate(glucose_tollerance = factor(glucose_tollerance,
+                                     levels = c("normal",
+                                                "impaired",
+                                                "t2d"))) |> 
+  mutate(BMI_class = factor(BMI_class,
+                            levels = c("Underweight",
+                                       "Normal weight",
+                                       "Overweight",
+                                       "Obese"))) 
+
+dataset |> 
+  ggplot(aes(x = BMI_class, fill = glucose_tollerance)) + 
+  geom_bar(color = "black") + 
+  labs(
+    x = "BMI",
+    y = "Number of Samples"
+  ) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(size = 16, hjust = 0.5)
+  )
+```
+
+We can see that the number of obese and overweight people increases in glucose impaired and diabetic categories.
+
+```{r}
+dataset |> 
+  pivot_longer(cols = c(insulin, statins), names_to = "variable", values_to = "category") |> 
+  ggplot(aes(x = category, y = cholesterol, fill = category)) + 
+  geom_boxplot(color = "black") + 
+  facet_wrap(~variable) + 
+  labs(
+    x = "",
+    y = "Cholesterol",
+    title = "Cholesterol levels vs assuming insuling or statins"
+  ) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(size = 16, hjust = 0.5)
+  )
+```
+
+We can see that both the treatment with statins and with insulin have the effect of lowering cholesterol, which is coherent with what's expected.
+
+```{r}
+dataset |> 
+  ggplot(aes(x = glucose_tollerance,
+             y = hdl,
+             fill = glucose_tollerance)) + 
+  geom_boxplot(color = "black") + 
+  labs(
+    x = "Glucose tolerance",
+    y = "HDL level",
+    title = "HDL level vs glucose tollerance"
+  ) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(size = 16, hjust = 0.5)
+  )
+```
+
+We can see that the HDL levels lower with the glucose tolerance decreasing, this is in agreement with the literature that tells that HDL is lowered in diabetic patients.
+
+```{r}
+dataset |> 
+  ggplot(aes(x = glucose_tollerance,
+             y = ldl,
+             fill = glucose_tollerance)) + 
+  geom_boxplot(color = "black") + 
+  labs(
+    x = "Glucose tolerance",
+    y = "LDL level",
+    title = "LDL level vs glucose tollerance"
+  ) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(size = 16, hjust = 0.5)
+  )
+```
+
+Strangely we see that same for the LDL, which instead is expected to either lower or be similar across the categories.
+
+```{r}
+dataset |> 
+  ggplot(aes(x = glucose_tollerance,
+             y = hba1c,
+             fill = glucose_tollerance)) + 
+  geom_boxplot(color = "black") + 
+  labs(
+    x = "Glucose tolerance",
+    y = "Hemoglobin A1C",
+    title = " Hemoglobin A1C vs glucose tollerance"
+  ) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(size = 16, hjust = 0.5)
+  )
+```
