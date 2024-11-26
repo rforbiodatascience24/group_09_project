@@ -32,6 +32,65 @@ dataset |>
 ```
 
 ```{r}
+
+dataset |>  
+  select(cols = starts_with("s_")) |> 
+  summarise(across(everything(), ~ sum(. > 0, na.rm = TRUE), .names = "{.col}"))
+  
+```
+
+```{r}
+
+dataset |>  
+  filter(s_Acidaminococcus_fermentans > 0) |> 
+  ggplot(mapping = aes(x = `gad-antibodies`,y = s_Acidaminococcus_fermentans)) +
+  geom_point() +
+  #geom_smooth(method = "lm") +
+  facet_wrap(~ glucose_tollerance)# +
+  #theme(legend.position = "none")
+  
+```
+
+```{r}
+
+dataset |> 
+  filter(`gad-antibodies` < 20) |> 
+  select(`gad-antibodies`,glucose_tollerance) |> 
+  ggplot(mapping = aes(x = glucose_tollerance,y = `gad-antibodies`, fill =  glucose_tollerance ))+
+  geom_violin()+
+  geom_point() +
+  theme_minimal(base_size = 10) +
+  theme(plot.title = element_text(hjust = 1)) +
+  labs(x = "glucose tollerance",
+       y = "gad-antibodies")
+  
+```
+
+```{r}
+dataset |> 
+  select(cholesterol,glucose_tollerance) |> 
+  ggplot(mapping = aes(x = glucose_tollerance,y = cholesterol, fill =  glucose_tollerance ))+
+  geom_violin()+
+  geom_point() +
+  theme_minimal(base_size = 10) +
+  theme(plot.title = element_text(hjust = 1)) +
+  labs(x = "glucose tollerance",
+       y = "cholesterol")
+```
+
+```{r}
+dataset |> 
+  select(creatinine,glucose_tollerance) |> 
+  ggplot(mapping = aes(x = glucose_tollerance,y = creatinine, fill =  glucose_tollerance ))+
+  geom_violin()+
+  geom_point() +
+  theme_minimal(base_size = 10) +
+  theme(plot.title = element_text(hjust = 1)) +
+  labs(x = "glucose tollerance",
+       y = "creatinine")
+```
+
+```{r}
 dataset_dia <- dataset |> 
   mutate(diabetes = case_when(glucose_tollerance == "normal" ~ 0,
                               glucose_tollerance == "impaired" ~ 1,
