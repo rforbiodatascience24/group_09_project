@@ -1,4 +1,9 @@
 ---
+
+---
+
+\
+---
 title: "04_analysis"
 author: "Andreis Marco"
 format: html
@@ -11,4 +16,313 @@ editor: visual
 # verify that the dataset can be loaded successfully
 data_path <- "../data/03_dat_clean.csv"
 dataset <- read_csv(data_path, show_col_types = FALSE)
+```
+
+Data exploration and analysis
+
+We hypothize that the bacteria population and abbundance differs between fit and obese people let's check it out
+
+firat we have to plot the bmi against the diffrent bactrrial poopulation and see if its a linear model . If not take the log .Then see the significance by a t test.
+
+```{r}
+library(tidyverse)
+library(dplyr)
+library(stringr)
+
+bmi_analysis <- dataset %>%
+  select(bmi, 
+         which(str_count(names(dataset), "\\|") == 2))
+```
+
+```{r}
+correlations <- bmi_analysis%>%
+  summarise(across(starts_with("k"), 
+                   ~ cor(.x, bmi, method = "pearson", use = "complete.obs"), 
+                   .names = "cor_bmi_{.col}"))
+
+# Print correlations
+print(correlations)
+```
+
+Categorization of BMI
+
+-   **Underweight**: BMI less than 18.5
+
+-   **Normal weight (healthy)**: BMI from 18.5 to 24.9
+
+-   **Overweight**: BMI from 25 to 29.9
+
+-   **Obese**: BMI from 30 to 39.9
+
+-   **Severely obese**: BMI of 40 or more
+
+    ```{r}
+    bmi_analysis <-bmi_analysis %>%
+      mutate(bmi_category = case_when(
+        bmi < 18.5 ~ "Underweight",
+        bmi >= 18.5 & bmi < 25 ~ "Healthy weight",   # Normal weight (Healthy)
+        bmi >= 25 & bmi < 30 ~ "Overweight",  
+        bmi >= 30 ~ "Obese",
+        TRUE ~ "Unknown"  # For missing or invalid BMI values
+      ))
+
+    # Print the categorized data to verify
+    print(bmi_analysis)
+
+    ```
+
+```{r}
+bmi_analysis %>%
+  group_by(bmi_category) %>%
+  summarise(count = n())
+```
+
+```{r}
+#Adds mean of abundance together with the group categories of the bmi
+```
+
+```{r}
+analysis_summary <- bmi_analysis%>%
+  group_by(bmi_category) %>%
+  summarise(across(starts_with("k__"), mean, na.rm = TRUE), .groups = "drop")
+
+# Print the summarized data (mean microbial abundances for each BMI category)
+print(analysis_summary)
+```
+
+```{r}
+#Data exploration 
+#bmi and the abundance 
+
+library(tidyr)
+
+# Reshape data from wide to long format
+analysis_long <- bmi_analysis %>%
+  pivot_longer(cols = starts_with("k__"), 
+               names_to = "microbe", 
+               values_to = "microbial_abundance")
+
+# Check the reshaped data
+head(analysis_long)
+
+
+```
+
+```{r}
+library(ggplot2)
+
+# Scatter plot of BMI vs microbial abundance for each microbe
+ggplot(analysis_long, aes(x = bmi, y = microbial_abundance)) +
+  geom_point(aes(color = microbe), alpha = 0.6) +  # Scatter plot with point color for each microbe
+  labs(title = "BMI vs Microbial Abundance", 
+       x = "BMI", 
+       y = "Microbial Abundance") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+```{r}
+ggplot(analysis_long, aes(x = microbial_abundance, y = bmi)) +
+  geom_point(alpha = 0.6) +
+  facet_wrap(~ microbe, scales = "free_y", ncol = 4) +  # Facet by microbe
+  labs(title = "BMI vs Microbial Abundance by Microbe", 
+       x = "BMI", 
+       y = "Microbial Abundance") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+```{r}
+ggplot(analysis_long, aes(x = bmi, y = microbial_abundance)) +
+  geom_point(alpha = 0.6) +
+  
+  facet_wrap(~ microbe, scales = "free_y", ncol = 4) +
+  labs(title = "BMI vs Microbial Abundance (Log Scale)", 
+       x = "BMI", 
+       y = "Microbial Abundance (Log Scale)") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+``` hjfjdcøpdsz
+skjld
+hjklfwgebjigfidkpldsiureisdjom
+```
+
+```{r}
+analysis_long <-analysis_long %>%
+  arrange(bmi) 
+```
+
+```{r}
+dataset_obese <-analysis_long %>%
+  filter(bmi_category == "Obese") %>%
+  arrange(desc(microbial_abundance))
+dataset_healthy <-analysis_long %>%
+  filter(bmi_category == "Healthy weight")  %>%
+  arrange(desc(microbial_abundance))
+dataset_overweight <-analysis_long %>%
+  filter(bmi_category == "Overweight") %>%
+  arrange(desc(microbial_abundance))
+dataset_underweight <-analysis_long %>%
+  filter(bmi_category == "Underweight") %>%
+  arrange(desc(microbial_abundance))
+```
+
+```         
+```
+
+```{r}
+
+```
+
+```{r}
+summary_healthy <- dataset_healthy %>%
+  group_by(microbe)%>%
+#mutate(mean_abundance = mean(microbial_abundance, na.rm = TRUE))
+#%>%
+  summarize(mean_abundance = mean(microbial_abundance, na.rm = TRUE))
+```
+
+```{r}
+top_microbes_healthy <- summary_healthy %>%
+  arrange(desc(mean_abundance)) %>%
+  slice_head(n = 10)
+
+```
+
+```{r}
+ggplot(top_microbes_healthy, aes(x = reorder(microbe, -mean_abundance), y = mean_abundance, fill = microbe)) +
+  geom_bar(stat = "identity") +
+  labs(title = "Top 10 Microbes - Healthy Weight",
+       x = "Microbe",
+       y = "Mean Abundance") +
+  theme(axis.text.x = element_text(angle = 1, hjust = 0.2))
+```
+
+Top microbes in Overweight
+
+The idea is to get the mean abundance of each microbiome and arrange them descending then get get the top 10 and compare the 10 ten of each category to each other.
+
+```{r}
+summary_overweight <- dataset_overweight %>%
+  group_by(microbe)%>%
+#mutate(mean_abundance = mean(microbial_abundance, na.rm = TRUE))
+summarize(mean_abundance = mean(microbial_abundance, na.rm = TRUE))
+
+top_microbes_overweight <- summary_overweight%>%
+  arrange(desc(mean_abundance)) %>%
+  slice_head(n = 10)
+```
+
+```{r}
+ggplot(top_microbes_overweight, aes(x = reorder(microbe, -mean_abundance), y = mean_abundance, fill = microbe)) +
+  geom_bar(stat = "identity") +
+  labs(title = "Top 10 Microbes - OverWeight",
+       x = "Microbe",
+       y = "Mean Abundance") +
+  theme(axis.text.x = element_text(angle = 0.1, hjust = 0.2))
+```
+
+Obese
+
+```{r}
+summary_obese <- dataset_obese %>%
+  group_by(microbe)%>%
+#mutate(mean_abundance = mean(microbial_abundance, na.rm = TRUE))
+summarize(mean_abundance = mean(microbial_abundance, na.rm = TRUE))
+
+top_microbes_obese <- summary_obese%>%
+  arrange(desc(mean_abundance)) %>%
+  slice_head(n = 10)
+```
+
+```{r}
+ggplot(top_microbes_obese, aes(x = reorder(microbe, -mean_abundance), y = mean_abundance, fill = microbe)) +
+  geom_bar(stat = "identity") +
+  labs(title = "Top 10 Microbes - Obese",
+       x = "Microbe",
+       y = "Mean Abundance") +
+  theme(axis.text.x = element_text(angle = 0.1, hjust = 0.2))
+```
+
+```{r}
+summary_underweight <- dataset_underweight %>%
+  group_by(microbe)%>%
+#mutate(mean_abundance = mean(microbial_abundance, na.rm = TRUE))
+summarize(mean_abundance = mean(microbial_abundance, na.rm = TRUE))
+
+top_microbes_underweight <- summary_underweight%>%
+  arrange(desc(mean_abundance)) %>%
+  slice_head(n = 10)
+```
+
+```{r}
+ggplot(top_microbes_underweight, aes(x = reorder(microbe, -mean_abundance), y = mean_abundance, fill = microbe)) +
+  geom_bar(stat = "identity") +
+  labs(title = "Top 10 Microbes - underweight",
+       x = "Microbe",
+       y = "Mean Abundance") +
+  theme(axis.text.x = element_text(angle = 0.1, hjust = 0.2))
+```
+
+```{r}
+normalized_data <- analysis_long %>%
+  group_by(bmi_category, microbe) %>%
+  summarize(relative_abundance = sum(microbial_abundance) / sum(microbial_abundance, na.rm = TRUE))
+
+# Plot normalized abundance
+ggplot(normalized_data, aes(x = microbe, y = relative_abundance, fill = bmi_category)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  theme(axis.text.x = element_text(angle = 1, hjust = 1)) +
+  labs(title = "Normalized Microbial Abundance Across BMI Categories",
+       x = "Microbe",
+       y = "Relative Abundance")
+```
+
+```{r}
+
+
+# Normalize microbial abundance
+normalized_data <- analysis_long %>%
+  group_by(bmi_category, microbe) %>%
+  summarize(relative_abundance = sum(microbial_abundance, na.rm = TRUE) / sum(microbial_abundance, na.rm = TRUE)) %>%
+  ungroup()
+
+# Rank microbes by mean abundance across BMI categories
+top_microbes <- normalized_data %>%
+  group_by(microbe) %>%
+  summarize(mean_abundance = mean(relative_abundance, na.rm = TRUE)) %>%
+  arrange(desc(mean_abundance)) %>%
+  slice_head(n = 10)  # Get the top 10 microbes
+
+# Filter normalized data for the top microbes
+filtered_data <- normalized_data %>%
+  filter(microbe %in% top_microbes$microbe)
+
+# Plot normalized abundance for the top 10 microbes
+ggplot(filtered_data, aes(x = microbe, y = relative_abundance, fill = bmi_category)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  theme(axis.text.x = element_text(angle = -1, hjust = 0.2)) +
+  labs(
+    title = "Top 10 Microbes by Normalized Abundance Across BMI Categories",
+    x = "Microbe",
+    y = "Relative Abundance"
+  )
+```
+
+```{r}
+ggplot(filtered_data, aes(x = microbe, y = relative_abundance, fill = bmi_category)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  theme(
+    axis.text.x = element_text(angle = 17, hjust = 1, size = 7),  # Rotate labels for better readability
+    axis.title.x = element_text(size = 0.5),  # Increase x-axis title size
+    axis.title.y = element_text(size = 0.5),  # Increase y-axis title size
+    plot.title = element_text(size = 14, face = "bold")  # Make the title bold and larger
+  ) +
+  labs(
+    title = "Top 10 Microbes by Normalized Abundance Across BMI Categories",
+    x = "Microbe",
+    y = "Relative Abundance"
+  )
 ```
