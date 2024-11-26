@@ -9,13 +9,14 @@ editor: visual
 
 ```{r}
 # verify that the dataset can be loaded successfully
-data_path <- "../data/03_dat_clean.csv"
+data_path <- "../data/06_dat_augmented.csv"
 dataset <- read_csv(data_path, show_col_types = FALSE)
 ```
 
 ```{r}
+library(corrplot)
 library(vegan)
-
+library(tidyverse)
 ```
 
 ### Metadata analysis
@@ -25,7 +26,10 @@ What does impaired glucose tolerance mean? It means that blood sugar levels are 
 ```{r}
 # Let's look at the proportions of our catagorical values
 # Our data is well proportionally split between the three distincs groups of "disease"
-table(dataset$disease)
+dataset |> 
+  count(glucose_tollerance, name = "Count") |> 
+  arrange(desc(Count))
+
 ```
 
 ### Correlation analysis
@@ -35,14 +39,18 @@ Using the correlation matrix on a subset of our data will tell us about linear r
 Lets start with a subset of our data, containing metadata and a few high-level markers (e.g. LDL and HDL)
 
 ```{r}
-library(corrplot)
 
 # Feature extractions
 corr_data <- dataset |> 
   select(age,
          bmi,
          ldl,
-         hdl)
+         hdl,
+         'gad-antibodies',
+         cholesterol,
+         triglycerides,
+         'c-peptide'
+         )
 
 # Compute correlation matrix 
 corr_matrix <- cor(corr_data)
@@ -56,61 +64,84 @@ corrplot(corr_matrix, method="number")
 
 ```
 
-We see a slight inverse relationship between HDL levels and BMI.
-
-Farbstein D, Levy AP. HDL dysfunction in diabetes: causes and possible treatments. Expert Rev Cardiovasc Ther. 2012 Mar;10(3):353-61. doi: 10.1586/erc.11.182. PMID: 22390807; PMCID: PMC3332215.
+We see a slight inverse relationship between HDL levels and BMI. This might not come as the biggest surprise. \[doi: 10.1586/erc.11.182\]
 
 ## Assessing relationships between species abundance and metadata features
 
 ```{r}
-# Select kingdom level abundance features 
-kingdom_abundance <- dataset |>
-  select(matches("^k_"))
-
-# Select the metadata features
-# Also filter out "country" since it contains almost no variation 
-metadata <- dataset |> 
-  select(-starts_with("k__") & c(bmi, hdl, ldl, age))
-
-filtered_data <- dataset |>
-  select(matches("^[^|]*\\|[^|]*\\|[^|]*$"))
-
+# Select abundance data from data set. 
+abundance_data <- dataset |>
+  select(matches("^s_"))
 
 ```
 
 ```{r}
-cor_kingdom <- cor(filtered_data, metadata, method="pearson")
-print(car_kingdom)
-corrplot(cor_kingdom)
+# Calculate the correlation matrix
+cor_kingdom <- cor(abundance_data, corr_data, method = "pearson")
+
+# Set the correlation threshold
+threshold <- 0.4  # Adjust the threshold as needed
+
+# Filter correlations above the threshold (both positive and negative)
+cor_kingdom_filtered <- cor_kingdom
+cor_kingdom_filtered[abs(cor_kingdom_filtered) < threshold] <- NA
+
+# Exclude variables (rows and columns) where the correlation is below the threshold
+cor_kingdom_filtered_no_na <- cor_kingdom_filtered[!apply(is.na(cor_kingdom_filtered), 1, all), 
+                                                  !apply(is.na(cor_kingdom_filtered), 2, all)]
+
+# Create the correlation plot including both positive and negative correlations
+corrplot(cor_kingdom_filtered_no_na, method = "number", na.label = "NA", 
+         title = "Filtered Correlation Matrix", 
+         col = colorRampPalette(c("red", "white", "blue"))(200))
+
+
 ```
 
-### Let's analyze the diversity between class variables (T2d, healthy and glucose impaired) 
+### Let's analyze the diversity between class variables (T2d, healthy and glucose impaired)
 
 We do this by calculating a distance matrix based on the microbial abundance data, which then can be used to visualize the differences in composition in a reduced dimensionality.
 
 ```{r}
-# data frame containing only the abundance data
-metadata <- dataset |> 
-  select(-starts_with("k__"))
 
-# data frame containing everything else (metadata)
-data <- dataset |>
-  select(starts_with("k__"))
+# Pull the class labels as a vector 
+group_labels <- dataset |> 
+  pull(glucose_tollerance)
 
-# Calculate Beta diversity 
-bc_dist <- vegdist((data), method = "bray")
+# Calculate Beta diversity based on Bray-Curtis distance
+bc_dist <- vegdist((abundance_data), method = "bray")
 
 # Perform PCoA on Bray-Curtis distance matrix
 pcoa_result <- cmdscale(bc_dist, k = 2)  # k = 2 for 2D PCoA
 
-# View PCoA results (coordinates of samples in PCoA space)
-head(pcoa_result)
 
 # Combine PCoA results with metadata (group labels)
-pcoa_df <- data.frame(PCoA1 = pcoa_result[, 1], PCoA2 = pcoa_result[, 2], Group = metadata$disease)
+pcoa_df <- data.frame(PCoA1 = pcoa_result[, 1], PCoA2 = pcoa_result[, 2], Group = group_labels)
 
 # View the combined data
 head(pcoa_df)
+
+# Create a data frame for top contributors to both axes
+top_contributors_df <- data.frame(
+  Variable = rownames(variable_contributions),
+  Axis1_Contribution = abs(variable_contributions[, 1]),
+  Axis2_Contribution = abs(variable_contributions[, 2])
+)
+
+# Sort by contributions to each axis and select the top 10 contributors for both
+top_contributors_df <- top_contributors_df |>
+  arrange(desc(Axis1_Contribution)) |>
+  mutate(Rank_Axis1 = row_number()) |>
+  arrange(desc(Axis2_Contribution)) |>
+  mutate(Rank_Axis2 = row_number())
+
+# Filter top 10 for each axis (combined unique variables for visibility)
+top_contributors_combined <- top_contributors_df |>
+  filter(Rank_Axis1 <= 10 | Rank_Axis2 <= 10)
+
+# View the result
+top_contributors_combined
+
 
 
 ```
@@ -123,8 +154,7 @@ ggplot(pcoa_df, aes(x = PCoA1, y = PCoA2, color = Group)) +
   labs(title = "PCoA of Bray-Curtis Dissimilarity",
        x = "PCoA1", 
        y = "PCoA2") +
-  scale_color_manual(values = c("red", "blue", "green"))  # Customize colors as needed
-
+  scale_color_manual(values = c("red", "blue", "green"))
 
 ```
 
