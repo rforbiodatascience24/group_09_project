@@ -32,11 +32,19 @@ dataset |>
 ```
 
 ```{r}
-
-dataset |>  
-  select(cols = starts_with("s_")) |> 
-  summarise(across(everything(), ~ sum(. > 0, na.rm = TRUE), .names = "{.col}"))
+#Get a list of the bacteria that have less than 10 samples where the value is different from 0 maby we move this ???
+not_much_data <- dataset |>  
+  select(starts_with("s_")) |> 
+  pivot_longer(cols = starts_with("s_"),
+               names_to = "backteria",
+               values_to = "level") |> 
+  filter(level > 0) |> 
+  group_by(backteria) |> 
+  summarise(n = n()) |> 
+  filter(n < 10) |> 
+  pull(backteria)
   
+ not_much_data 
 ```
 
 ```{r}
