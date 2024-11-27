@@ -10,10 +10,8 @@ editor: visual
 ```{r}
 #library(readr)
 library(tidyverse)
-library(broom)
-library(dplyr)
 library(vegan)
-library(corrplot)
+
 ```
 
 ```{r}
@@ -44,8 +42,27 @@ Using the correlation matrix on a subset of our data will tell us about linear r
 Lets start with a subset of our data, containing metadata and a few high-level markers (e.g. LDL and HDL)
 
 ```{r}
+# Filter for diabetics and impaired
+filtered_data <- dataset |> 
+  filter(glucose_tollerance %in% c("t2d", "impaired"))
 
-# Feature extractions
+# Choose the abundance data from the filtered data
+df_selected <- filtered_data %>% select(starts_with("s_"))
+
+# Calculate the mean of each column
+mean_values <- df_selected %>%
+  summarise(across(everything(), mean, na.rm = TRUE))
+
+# Convert to long format and get the top 5 columns with the highest mean values
+top_5_species <- mean_values %>%
+  pivot_longer(everything(), names_to = "species", values_to = "mean_value") %>%
+  arrange(desc(mean_value)) %>%
+  slice_head(n = 5) |> 
+  pull(species)
+
+```
+
+```{r}
 corr_data <- dataset |> 
   select(age,
          bmi,
@@ -54,52 +71,45 @@ corr_data <- dataset |>
          'gad-antibodies',
          cholesterol,
          triglycerides,
-         'c-peptide'
+         'c-peptide',
+         all_of(top_5_species)
          )
+# Normalize across columns
+corr_normalized <- corr_data |> 
+  mutate(across(everything(), ~ (. - mean(.)) / sd(.)))
 
-# Compute correlation matrix 
-corr_matrix <- cor(corr_data)
+# Compute the covariance matrix
+cov_matrix <- (t(as.matrix(corr_normalized)) %*% as.matrix(corr_normalized)) / 
+  (nrow(corr_normalized) - 1)
 
-print("Correlation Matrix")
-print(corr_matrix)
+# Convert the covariance matrix to a correlation matrix
+cor_matrix <- cov2cor(cov_matrix)
 
-# visualizing correlogram
-corrplot(corr_matrix, method="number")
+# Pivot the correlation matrix to long format
+melted_cor_matrix <- as.data.frame(cor_matrix) |> 
+  rownames_to_column(var = "Var1") |> 
+  pivot_longer(-Var1, names_to = "Var2", values_to = "value")
+
+# Plot values in colour squares to visualize correlation
+ggplot(data = melted_cor_matrix, aes(x = Var1, y = Var2, fill = value)) +
+  geom_tile() +
+  geom_text(aes(label = round(value, 2)), color = "black", size = 2) +  # values
+  scale_fill_gradient2(low = "blue", high = "red", mid = "white", 
+                       midpoint = 0, limit = c(-1, 1), space = "Lab", 
+                       name = "Correlation") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, vjust = 1, 
+                                   size = 12, hjust = 1),
+  axis.title.x = element_blank(),
+  axis.title.y = element_blank())+
+
+  coord_fixed()
 
 ```
 
 We see a slight inverse relationship between HDL levels and BMI. This might not come as the biggest surprise. \[doi: 10.1586/erc.11.182\]
 
 ## Assessing relationships between species abundance and metadata features
-
-```{r}
-# Select abundance data from data set. 
-abundance_data <- dataset |>
-  select(matches("^s_"))
-
-```
-
-```{r}
-# Calculate the correlation matrix
-cor_kingdom <- cor(abundance_data, corr_data, method = "pearson")
-
-# Set the correlation threshold
-threshold <- 0.5  # Adjust the threshold as needed
-
-# Filter correlations above the threshold (both positive and negative)
-cor_kingdom_filtered <- cor_kingdom
-cor_kingdom_filtered[abs(cor_kingdom_filtered) < threshold] <- NA  # Set correlations below threshold to NA
-
-# Exclude variables (rows and columns) where the correlation is below the threshold
-cor_kingdom_filtered_no_na <- cor_kingdom_filtered[!apply(is.na(cor_kingdom_filtered), 1, all), 
-                                                  !apply(is.na(cor_kingdom_filtered), 2, all)]
-
-# Create the correlation plot including both positive and negative correlations
-corrplot(cor_kingdom_filtered_no_na, method = "number", na.label = "NA", 
-         title = "Filtered Correlation Matrix", 
-         col = colorRampPalette(c("red", "white", "blue"))(200))
-
-```
 
 ### Let's analyze the diversity between class variables (T2d, healthy and glucose impaired)
 
@@ -111,39 +121,18 @@ We do this by calculating a distance matrix based on the microbial abundance dat
 group_labels <- dataset |> 
   pull(glucose_tollerance)
 
+# Select abundance data from data set to calculate distsances 
+abundance_data <- dataset |>
+  select(matches("^s_"))
+
 # Calculate Beta diversity based on Bray-Curtis distance
 bc_dist <- vegdist((abundance_data), method = "bray")
 
 # Perform PCoA on Bray-Curtis distance matrix
 pcoa_result <- cmdscale(bc_dist, k = 2)  # k = 2 for 2D PCoA
 
-
 # Combine PCoA results with metadata (group labels)
 pcoa_df <- data.frame(PCoA1 = pcoa_result[, 1], PCoA2 = pcoa_result[, 2], Group = group_labels)
-
-# View the combined data
-head(pcoa_df)
-
-# Create a data frame for top contributors to both axes
-top_contributors_df <- data.frame(
-  Variable = rownames(variable_contributions),
-  Axis1_Contribution = abs(variable_contributions[, 1]),
-  Axis2_Contribution = abs(variable_contributions[, 2])
-)
-
-# Sort by contributions to each axis and select the top 10 contributors for both
-top_contributors_df <- top_contributors_df |>
-  arrange(desc(Axis1_Contribution)) |>
-  mutate(Rank_Axis1 = row_number()) |>
-  arrange(desc(Axis2_Contribution)) |>
-  mutate(Rank_Axis2 = row_number())
-
-# Filter top 10 for each axis (combined unique variables for visibility)
-top_contributors_combined <- top_contributors_df |>
-  filter(Rank_Axis1 <= 10 | Rank_Axis2 <= 10)
-
-# View the result
-top_contributors_combined
 
 ```
 
