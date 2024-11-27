@@ -11,6 +11,7 @@ editor: visual
 #library(readr)
 library(tidyverse)
 library(broom)
+library("table1")
 ```
 
 ```{r}
@@ -25,9 +26,8 @@ dataset |>
 ```
 
 ```{r}
-library("table1")
 dataset |> 
-  table1(x = formula(~ BMI_class  + hdl_to_ldl_ratio + `gad-antibodies`+ cholesterol + creatinine| glucose_tollerance),
+  table1::table1(x = formula(~ BMI_class  + hdl_to_ldl_ratio + `gad-antibodies`+ cholesterol + creatinine| glucose_tollerance),
          data = _)
 ```
 
@@ -41,7 +41,7 @@ not_much_data <- dataset |>
   filter(level > 0) |> 
   group_by(backteria) |> 
   summarise(n = n()) |> 
-  filter(n < 10) |> 
+  filter(n < 5) |> 
   pull(backteria)
   
  not_much_data 
@@ -100,6 +100,7 @@ dataset |>
 
 ```{r}
 dataset_dia <- dataset |> 
+  select(-all_of(not_much_data)) |> 
   mutate(diabetes = case_when(glucose_tollerance == "normal" ~ 0,
                               glucose_tollerance == "impaired" ~ 1,
                               glucose_tollerance == "t2d" ~ 1) )
@@ -191,5 +192,5 @@ dataset_dia_estimates |>
   theme(plot.title = element_text(hjust = 1)) +
   labs(x = "Estimates (95%CIs)",
        y = "Bacterial species",
-       title = "Bacteria associated with TC2 and impaired glucose tolerance ")
+       title = "Bacteria associated with T2D and impaired glucose tolerance ")
 ```
