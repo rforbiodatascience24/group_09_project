@@ -134,7 +134,7 @@ Fitting models
 dataset_dia_long_nested <- dataset_dia_long_nested |> 
   group_by(backteria) |> 
   mutate(model_object = map(.x = data,
-                            .f = ~lm(level ~ diabetes,
+                            .f = ~lm(formula = level ~ diabetes,
                                      data = .x))) |> 
   mutate(model_object_tidy = map(.x = model_object,
                                  .f = ~tidy(x = .x,
@@ -156,18 +156,19 @@ dataset_dia_estimates
 ```
 
 ```{r}
-dataset_dia_estimates <- dataset_dia_estimates |> 
+dataset_dia_estimates1 <- dataset_dia_estimates |> 
+  filter(term == "diabetes") |> 
   select(backteria,p.value,estimate,conf.low,conf.high,p.value) |> 
   ungroup() |> 
   mutate(q.value = p.adjust(p.value),
          is_significant = case_when(q.value <= 0.05 ~ "yes",
                                     q.value > 0.05 ~ "no"))
-dataset_dia_estimates |> 
+dataset_dia_estimates1 |> 
   filter(is_significant == "yes")
 ```
 
 ```{r}
-dataset_dia_estimates |> 
+dataset_dia_estimates1 |> 
   filter(is_significant == "yes") |> 
   ggplot(aes(x = estimate,
              y = fct_reorder(backteria, estimate),
