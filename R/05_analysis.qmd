@@ -135,27 +135,15 @@ dataset_dia_long_nested <- dataset_dia_long_nested |>
   group_by(backteria) |> 
   mutate(model_object = map(.x = data,
                             .f = ~lm(level ~ diabetes,
-                                     data = .x)))
-```
-
-```{r}
-#How to get the model
-dataset_dia_long_nested |> 
-  filter(backteria == "s_Bifidobacterium_bifidum") |> 
-  pull(model_object)
-```
-
-```{r}
-dataset_dia_long_nested <- dataset_dia_long_nested |> 
+                                     data = .x))) |> 
   mutate(model_object_tidy = map(.x = model_object,
                                  .f = ~tidy(x = .x,
                                             conf.int = TRUE,
                                             conf.level = 0.95)))
-  
 ```
 
 ```{r}
-#Eksampel how to get values
+#How to get the model
 dataset_dia_long_nested |> 
   filter(backteria == "s_Bifidobacterium_bifidum") |> 
   pull(model_object_tidy)
