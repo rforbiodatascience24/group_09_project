@@ -11,64 +11,57 @@ format: html
 editor: visual
 ---
 
-In this file we check if the dataset is already present, if it is not we collect it programmatically from kaggle and save it in the \_raw folder.
-
 ```{r}
-suppressMessages({
-  library('tidyverse')
-  library('httr')
-  library('jsonlite')
-})
+library('tidyverse')
+library('httr')
+library('jsonlite')
 ```
 
-```{r}
-wanted_file <- "abundance.csv"
-target_dir <- "../_raw/"
+Setup the \_raw folder by checking if it already exists and eventually creating if it does not.
 
-# Create the data folder if it does not exist
-if (!file.exists(target_dir)) {
-  # Create the folder if it doesn't exist
-  dir.create(target_dir, recursive = TRUE)
-  }
+```{r}
+data_file <- "abundance.csv"
+target_dir <- "../_raw/"
 
 # Create the _raw folder if it does not exist 
 if (!file.exists(target_dir)) {
   dir.create(target_dir, recursive = TRUE)
 }
-  
-# check if the file is already present 
-already_present <- file.exists(str_c(target_dir, wanted_file))
+```
 
-if (already_present) {
+Check if the dataset file is already present, if it is not we collect it programmatically from kaggle.
+
+```{r}
+# check if the file is already present 
+already_present <- file.exists(str_c(target_dir, data_file))
+
+if (already_present) 
+  {
   message(str_c("The dataset file is already present. Check ", target_dir))
-} else {
+  } else {
   # Define the Kaggle dataset path and download location
   dataset_slug <- "antaresnyc/human-metagenomics"
   output_file <- "../_raw/human_metagenomics.zip"
   
-  # Authenticate and download the file
+  # Download the file
   response <- GET(
     url = str_c("https://www.kaggle.com/api/v1/datasets/download/", dataset_slug),
     write_disk(output_file, overwrite = TRUE)
   )
-  
-  # Unzip the downloaded file
   unzip(output_file, exdir = target_dir)
   
-  # List the files in the extracted folder to find the files you want to delete
+  # Get list of all the files in _raw
   extracted_files <- list.files(target_dir, recursive = TRUE)
-  message("Extracted files: ", paste(extracted_files, collapse = ", "))
   
-  # Delete files that you don't care about
-  files_to_delete <- setdiff(extracted_files, wanted_file)
+  # Select and delete the unwanted files (kaggle does not allow download of single files)
+  files_to_delete <- setdiff(extracted_files, data_file)
   
-  # Delete the unwanted files
-  for (file in files_to_delete) {
-    file_path <- file.path(target_dir, file)
-    if (file.exists(file_path)) {
-      file.remove(file_path)
-      message(paste("Deleted:", file_path))
-    }
+  walk(files_to_delete,
+       ~ {file_path <- file.path(target_dir,
+                                 .x)
+       if (file.exists(file_path)) 
+         {
+         file.remove(file_path)
+         }})
   }
-}
 ```
