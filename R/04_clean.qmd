@@ -70,6 +70,7 @@ Even if we are not going to follow this path we still provide an example of what
 We also filter out the column having 0 non-NAs values.
 
 ```{r}
+#Filter if less than 70% of the values in the column are valid
 dataset_specific_columns <- valid_counts |> 
   filter(valid_count < nrow(metadata)*0.70) |> 
   pull(column_name)
