@@ -1,0 +1,167 @@
+---
+title: "plots"
+author: "Rebecca"
+format: html
+editor: visual
+---
+
+```{r}
+library("tidyverse")
+```
+
+```{r}
+data_path <- here("data/06_dat_augmented.csv")
+dataset <- read_csv(data_path, show_col_types = FALSE)
+```
+
+Countes
+
+BMI class
+
+```{r}
+dataset |>
+  count(BMI_class) |>
+  mutate(percentage = n / sum(n) * 100) |>
+  ggplot(aes(x = BMI_class,
+             y = percentage,
+             fill = BMI_class,
+             label = str_c(round(percentage,digits = 2),"%"))) +
+  geom_col(colour = "black",
+           alpha = 0.4) +
+  theme_minimal(base_size = 15) +
+  theme(axis.text.x = element_text(
+    angle = 45,
+    hjust = 1)) +
+  labs(x = "",
+       y = "Percent") +
+  geom_hline(yintercept = 0) +
+  geom_text(vjust = -0.5, size = 5)+
+  ylim(0,45)+
+  theme(legend.position = "none" )
+```
+
+glucose tollerance
+
+```{r}
+dataset |>
+  count(glucose_tollerance) |>
+  mutate(percentage = n / sum(n) * 100) |>
+  ggplot(aes(x = glucose_tollerance,
+             y = percentage,
+             fill = glucose_tollerance,
+             label = str_c(round(percentage,digits = 2),"%"))) +
+  geom_col(colour = "black",
+           alpha = 0.4) +
+  theme_minimal(base_size = 15) +
+  theme(axis.text.x = element_text(
+    angle = 45,
+    hjust = 1)) +
+  labs(x = "",
+       y = "Percent") +
+  geom_hline(yintercept = 0) +
+  geom_text(vjust = -0.5, size = 5)+
+  ylim(0,45)+
+  theme(legend.position = "none" )
+```
+
+```{r}
+dataset |> 
+  mutate(fasting_insulin_group = cut(
+    x = fasting_insulin,
+    breaks = seq(from = 0,
+                 to = 70,
+                 by = 5))) |> 
+  count(glucose_tollerance, fasting_insulin_group) |> 
+  ggplot(aes(x = fasting_insulin_group,
+             y = n,
+             fill = glucose_tollerance)) +
+  geom_col(position = position_dodge(
+    preserve = "single"),
+    colour = "black",
+    alpha = 0.4) +
+  geom_hline(yintercept = 0) +
+  theme_minimal(base_size = 10) +
+  labs(x = "Fasting insulin",
+       y = "Count",
+       title = "Fasting insulin count group by glucose tollerance",
+       fill = "Glucose tollerance: ")+
+  theme(legend.position = "bottom",
+        panel.grid.major.x = element_blank(),
+        axis.text.x = element_text(vjust = 5))
+```
+
+```{r}
+dataset|>
+  filter(BMI_class != "Underweight") |> 
+  ggplot(aes(x = BMI_class,
+             y = `c-peptide`,
+             fill = glucose_tollerance)) +
+  geom_boxplot(position = position_dodge(
+    preserve = "single"), 
+    alpha = 0.4) +
+  theme_minimal(base_size = 15) +
+  theme(legend.position = "bottom",
+        axis.text.x = element_text(angle = 45,
+                                   hjust = 1,
+                                   vjust = 1))+
+    labs(x = "BMI class",
+       y = "c-peptide [ng/mL]",
+       title = "c-peptide consentration",
+       fill = "Glucose tollerance: ")
+```
+
+```{r}
+dataset|>
+  filter(BMI_class != "Underweight") |> 
+  filter(`gad-antibodies` < 20) |> 
+  ggplot(aes(x = BMI_class,
+             y = `gad-antibodies`,
+             fill = glucose_tollerance)) +
+  geom_boxplot(position = position_dodge(
+    preserve = "single"), 
+    alpha = 0.4) +
+  theme_minimal(base_size = 15) +
+  theme(legend.position = "bottom",
+        axis.text.x = element_text(angle = 45,
+                                   hjust = 1,
+                                   vjust = 1))+
+    labs(x = "BMI class",
+       y = "gad-antibodies [ng/mL]",
+       title = "gad-antibodies consentration",
+       fill = "Glucose tollerance: ")
+```
+
+```{r}
+dataset |> 
+  ggplot(mapping = aes(x = triglycerides,
+                      y = cholesterol,
+                      colour = glucose_tollerance,
+                      shape = BMI_class)) +
+    geom_point()
+```
+
+```{r}
+dataset |> 
+  mutate(fasting_insulin_group = cut(
+    x = fasting_insulin,
+    breaks = seq(from = 0,
+                 to = 70,
+                 by = 5))) |> 
+  count(glucose_tollerance, fasting_insulin_group) |> 
+  ggplot(aes(x = fasting_insulin_group,
+             y = n,
+             fill = glucose_tollerance)) +
+  geom_col(position = position_dodge(
+    preserve = "single"),
+    colour = "black",
+    alpha = 0.4) +
+  geom_hline(yintercept = 0) +
+  theme_minimal(base_size = 10) +
+  labs(x = "Fasting insulin",
+       y = "Count",
+       title = "Fasting insulin count group by glucose tollerance",
+       fill = "Glucose tollerance: ")+
+  theme(legend.position = "bottom",
+        panel.grid.major.x = element_blank(),
+        axis.text.x = element_text(vjust = 5))
+```
