@@ -1,0 +1,184 @@
+---
+title: "04_analysis"
+author: "Andreis Marco"
+format: html
+editor: visual
+---
+
+# Load the dataset
+
+```{r}
+#library(readr)
+library(tidyverse)
+library(broom)
+library("table1")
+```
+
+```{r}
+# verify that the dataset can be loaded successfully
+data_path <- "../data/06_dat_augmented.csv"
+dataset <- read_csv(data_path, show_col_types = FALSE)
+```
+
+```{r}
+dataset |> 
+  View()
+```
+
+```{r}
+dataset |> 
+  table1::table1(x = formula(~ BMI_class  + hdl_to_ldl_ratio + `gad-antibodies`+ cholesterol + creatinine| glucose_tollerance),
+         data = _)
+```
+
+```{r}
+#Get a list of the bacteria that have less than 10 samples where the value is different from 0 maby we move this ???
+not_much_data <- dataset |>  
+  select(starts_with("s_")) |> 
+  pivot_longer(cols = starts_with("s_"),
+               names_to = "backteria",
+               values_to = "level") |> 
+  filter(level > 0) |> 
+  group_by(backteria) |> 
+  summarise(n = n()) |> 
+  filter(n < 5) |> 
+  pull(backteria)
+  
+ not_much_data 
+```
+
+```{r}
+
+dataset |>  
+  filter(s_Acidaminococcus_fermentans > 0) |> 
+  ggplot(mapping = aes(x = `gad-antibodies`,y = s_Acidaminococcus_fermentans)) +
+  geom_point() +
+  #geom_smooth(method = "lm") +
+  facet_wrap(~ glucose_tollerance)# +
+  #theme(legend.position = "none")
+  
+```
+
+```{r}
+
+dataset |> 
+  filter(`gad-antibodies` < 20) |> 
+  select(`gad-antibodies`,glucose_tollerance) |> 
+  ggplot(mapping = aes(x = glucose_tollerance,y = `gad-antibodies`, fill =  glucose_tollerance ))+
+  geom_violin()+
+  geom_point() +
+  theme_minimal(base_size = 10) +
+  theme(plot.title = element_text(hjust = 1)) +
+  labs(x = "glucose tollerance",
+       y = "gad-antibodies")
+  
+```
+
+```{r}
+dataset |> 
+  select(cholesterol,glucose_tollerance) |> 
+  ggplot(mapping = aes(x = glucose_tollerance,y = cholesterol, fill =  glucose_tollerance ))+
+  geom_violin()+
+  geom_point() +
+  theme_minimal(base_size = 10) +
+  theme(plot.title = element_text(hjust = 1)) +
+  labs(x = "glucose tollerance",
+       y = "cholesterol")
+```
+
+```{r}
+dataset |> 
+  select(creatinine,glucose_tollerance) |> 
+  ggplot(mapping = aes(x = glucose_tollerance,y = creatinine, fill =  glucose_tollerance ))+
+  geom_violin()+
+  geom_point() +
+  theme_minimal(base_size = 10) +
+  theme(plot.title = element_text(hjust = 1)) +
+  labs(x = "glucose tollerance",
+       y = "creatinine")
+```
+
+```{r}
+dataset_dia <- dataset |> 
+  select(-all_of(not_much_data)) |> 
+  mutate(diabetes = case_when(glucose_tollerance == "normal" ~ 0,
+                              glucose_tollerance == "impaired" ~ 1,
+                              glucose_tollerance == "t2d" ~ 1) )
+```
+
+```{r}
+dataset_dia_long <- dataset_dia |> 
+  pivot_longer(cols = starts_with("s_"),
+               names_to = "backteria",
+               values_to = "level")
+```
+
+```{r}
+dataset_dia_long_nested <- dataset_dia_long|> 
+  group_by(backteria) |> 
+  nest() |> 
+  ungroup()
+dataset_dia_long_nested
+```
+
+```{r}
+#How to get the data
+dataset_dia_long_nested |> 
+  filter(backteria == "s_Bifidobacterium_bifidum") |> 
+  pull(data)
+```
+
+Fitting models
+
+```{r}
+dataset_dia_long_nested <- dataset_dia_long_nested |> 
+  group_by(backteria) |> 
+  mutate(model_object = map(.x = data,
+                            .f = ~lm(level ~ diabetes,
+                                     data = .x))) |> 
+  mutate(model_object_tidy = map(.x = model_object,
+                                 .f = ~tidy(x = .x,
+                                            conf.int = TRUE,
+                                            conf.level = 0.95)))
+```
+
+```{r}
+#How to get the model
+dataset_dia_long_nested |> 
+  filter(backteria == "s_Bifidobacterium_bifidum") |> 
+  pull(model_object_tidy)
+```
+
+```{r}
+dataset_dia_estimates <- dataset_dia_long_nested |> 
+  unnest(model_object_tidy)
+dataset_dia_estimates
+```
+
+```{r}
+dataset_dia_estimates <- dataset_dia_estimates |> 
+  select(backteria,p.value,estimate,conf.low,conf.high,p.value) |> 
+  ungroup() |> 
+  mutate(q.value = p.adjust(p.value),
+         is_significant = case_when(q.value <= 0.05 ~ "yes",
+                                    q.value > 0.05 ~ "no"))
+dataset_dia_estimates |> 
+  filter(is_significant == "yes")
+```
+
+```{r}
+dataset_dia_estimates |> 
+  filter(is_significant == "yes") |> 
+  ggplot(aes(x = estimate,
+             y = fct_reorder(backteria, estimate),
+             xmin = conf.low,
+             xmax = conf.high)) +
+  geom_vline(xintercept = 0) +
+  geom_errorbarh() +
+  geom_point() +
+  theme_minimal(base_size = 10) +
+  theme(plot.title = element_text(hjust = 1)) +
+  labs(x = "Estimates (95%CIs)",
+       y = "Bacterial species",
+       title = "Bacteria associated with T2D and impaired glucose tolerance ")
+```
