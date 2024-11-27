@@ -84,4 +84,7 @@ print(adonis_result)
 
 ## Interpretation of the results
 
-From the PCoA plot we can see that there aren't clusters for each BMI category and some samples overlapp with samples from different categories such as undefinedu
+From the PCoA plot we can see that there aren't clusters for each BMI category and some samples overlap with samples from different categories such as points from normal weight overlap with obese and overweight.
+The P.value from  PERMANOVA is 0.2 whcich indicates that the differences in microbial composition is not significant.Also R2=0.0238 which means that bmi contributes to only 2.38% of the difference in diversity of microbial community across the bmi classes. 
+
+
