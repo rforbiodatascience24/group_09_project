@@ -8,14 +8,14 @@ editor: visual
 ### Load the dataset
 
 ```{r}
-suppressMessages(library("tidyverse"))
+library("tidyverse")
 library("here")
 ```
 
 ```{r}
-# verify that the dataset can be loaded successfully
 data_path <- here("data/04_dat_clean.csv")
-dataset <- read_csv(data_path, na = c("nd", "-", "na"), show_col_types = FALSE)
+dataset <- read_csv(data_path,
+                    show_col_types = FALSE)
 ```
 
 ### Tidying
