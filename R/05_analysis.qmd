@@ -8,7 +8,6 @@ editor: visual
 # Load the dataset and required packages
 
 ```{r}
-
 library(tidyverse)
 library(vegan)
 
