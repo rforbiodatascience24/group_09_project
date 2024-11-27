@@ -142,13 +142,14 @@ dataset |>
 
 ```{r}
 dataset |> 
-  mutate(fasting_insulin_group = cut(
-    x = fasting_insulin,
-    breaks = seq(from = 0,
-                 to = 70,
-                 by = 5))) |> 
-  count(glucose_tollerance, fasting_insulin_group) |> 
-  ggplot(aes(x = fasting_insulin_group,
+  mutate(s_Faecalibacterium_prausnitzii_group = cut(
+    x = s_Faecalibacterium_prausnitzii,
+    breaks = seq(from = 0.000,
+                 to = 30,
+                 by = 5),
+    include.lowest = TRUE)) |> 
+  count(glucose_tollerance, s_Faecalibacterium_prausnitzii_group) |> 
+  ggplot(aes(x = s_Faecalibacterium_prausnitzii_group,
              y = n,
              fill = glucose_tollerance)) +
   geom_col(position = position_dodge(
@@ -164,4 +165,30 @@ dataset |>
   theme(legend.position = "bottom",
         panel.grid.major.x = element_blank(),
         axis.text.x = element_text(vjust = 5))
+```
+
+```{r}
+dataset |> 
+  ggplot(mapping = aes(x = s_Faecalibacterium_prausnitzii,
+                      y = s_Coprococcus_catus,
+                      colour = glucose_tollerance)) +
+    geom_point()+
+  fac
+```
+
+```{r}
+library("ggridges")
+dataset |> 
+  filter(BMI_class != "Underweight") |> 
+  ggplot(mapping = aes(x = s_Faecalibacterium_prausnitzii,
+                             y = BMI_class,
+                             fill = glucose_tollerance)) +
+    geom_density_ridges(alpha = 0.5) +
+    scale_fill_viridis_d() +
+    labs(x = "xx",
+         y = "xx",
+         title = "xxx") +
+    theme_minimal(base_family = "Avenir",
+                  base_size = 12) +
+    theme(legend.position = "bottom")
 ```
