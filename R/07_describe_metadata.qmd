@@ -100,7 +100,6 @@ We can see that the number of obese and overweight people increases in glucose i
 ```{r}
 #split on BMI
 dataset |> 
-  pivot_longer(cols = c(insulin, statins), names_to = "variable", values_to = "category") |> 
   pivot_longer(cols = c(insulin, statins),
                names_to = "variable", 
                values_to = "category") |> 
