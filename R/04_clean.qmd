@@ -71,6 +71,7 @@ We decided to go for the second option as it allows to better show our competenc
 Even if we are not going to follow this path we still provide an example of how the cleaning of this larger dataset could be done.
 
 ```{r}
+#Filter if less than 70% of the values in the column are valid
 dataset_specific_columns <- valid_counts |> 
   filter(valid_count < nrow(metadata)*0.50) |> 
   pull(column_name)
