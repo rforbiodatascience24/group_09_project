@@ -16,7 +16,6 @@ library(vegan)
 data_path <- "../data/06_dat_augmented.csv"
 dataset <- read_csv(data_path,
                     show_col_types = FALSE)
-# random comment
 ```
 
 Null hypothesis : There is no difference in microbial community across composition across the BMI classes Alternative hypothesis: There is a difference in microbial community composition across BMI classes.
