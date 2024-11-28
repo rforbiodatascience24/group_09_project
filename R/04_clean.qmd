@@ -8,14 +8,24 @@ editor: visual
 ### Load the dataset
 
 ```{r}
+<<<<<<< HEAD
 suppressMessages(library("tidyverse"))
+=======
+library("tidyverse")
+>>>>>>> 4d738e43b3aca70a894ae7d7ee9496308a8fa8e6
 library("here")
 ```
 
 ```{r}
 # verify that the dataset can be loaded successfully
 data_path <- here("data/03_dat_selected.csv")
+<<<<<<< HEAD
 dataset <- read_csv(data_path, na = c("nd", "-", "na"), show_col_types = FALSE)
+=======
+dataset <- read_csv(data_path,
+                    na = c("nd", "-", "na"),
+                    show_col_types = FALSE)
+>>>>>>> 4d738e43b3aca70a894ae7d7ee9496308a8fa8e6
 ```
 
 The dataset is divided in metadata columns and microorganism relative abundances. We divide the two dataset to facilitate cleaning:
@@ -33,8 +43,16 @@ The wide variety of studies from which the data comes from results in a large nu
 
 ```{r}
 valid_counts <- metadata |> 
+<<<<<<< HEAD
 summarise(across(everything(), ~sum(!is.na(.)))) |> 
 pivot_longer(everything(), names_to = "column_name", values_to = "valid_count")
+=======
+summarise(across(everything(),
+                 ~sum(!is.na(.)))) |> 
+pivot_longer(everything(),
+             names_to = "column_name",
+             values_to = "valid_count")
+>>>>>>> 4d738e43b3aca70a894ae7d7ee9496308a8fa8e6
 ```
 
 We can see that there is a large amount of columns having many NAs.
@@ -75,13 +93,25 @@ dataset_specific_columns <- valid_counts |>
   pull(column_name)
 
 metadata_1 <- metadata |> 
+<<<<<<< HEAD
   select(-dataset_specific_columns)
+=======
+  select(-all_of(dataset_specific_columns))
+>>>>>>> 4d738e43b3aca70a894ae7d7ee9496308a8fa8e6
 ```
 
 ```{r}
 valid_counts <- metadata_1 |> 
+<<<<<<< HEAD
 summarise(across(everything(), ~sum(!is.na(.)))) |> 
 pivot_longer(everything(), names_to = "column_name", values_to = "valid_count")
+=======
+summarise(across(everything(),
+                 ~sum(!is.na(.)))) |> 
+pivot_longer(everything(),
+             names_to = "column_name",
+             values_to = "valid_count")
+>>>>>>> 4d738e43b3aca70a894ae7d7ee9496308a8fa8e6
 
 valid_counts |> 
   filter(valid_count != nrow(metadata_1))
@@ -110,7 +140,12 @@ For `gender` we see that the samples not having a value belong to the WT2D or to
 
 ```{r}
 metadata_1 <- metadata_1 |> 
+<<<<<<< HEAD
   mutate(gender = ifelse(dataset_name == "WT2D", "female", gender))
+=======
+  mutate(gender = ifelse(dataset_name == "WT2D",
+                         "female", gender))
+>>>>>>> 4d738e43b3aca70a894ae7d7ee9496308a8fa8e6
 ```
 
 Moving on to the country column
@@ -126,8 +161,15 @@ One last check allow us to see that the metadata column are now greatly reduced 
 
 ```{r}
 valid_counts <- metadata_1 |> 
+<<<<<<< HEAD
 summarise(across(everything(), ~sum(!is.na(.)))) |> 
 pivot_longer(everything(), names_to = "column_name", values_to = "valid_count")
+=======
+summarise(across(everything(),
+                 ~sum(!is.na(.)))) |> 
+pivot_longer(everything(), names_to = "column_name",
+             values_to = "valid_count")
+>>>>>>> 4d738e43b3aca70a894ae7d7ee9496308a8fa8e6
 
 valid_counts |> 
   filter(valid_count != nrow(metadata_1))
@@ -137,8 +179,14 @@ The last cleaning we do is simply to remove data not useful for future analysis
 
 ```{r}
 metadata_1 <- metadata_1 |> 
+<<<<<<< HEAD
   select(-sequencing_technology, -pubmedid, -`#SampleID`)
 metadata_1
+=======
+  select(-sequencing_technology,
+         -pubmedid,
+         -`#SampleID`)
+>>>>>>> 4d738e43b3aca70a894ae7d7ee9496308a8fa8e6
 ```
 
 ### Approach 2

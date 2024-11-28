@@ -7,8 +7,157 @@ editor: visual
 # Microbial distribution across BMI classes
 
 ```{r}
+<<<<<<< HEAD
 library(tidyverse)
 library(vegan)
+=======
+library("tidyverse")
+library("broom")
+library("table1")
+```
+
+```{r}
+# verify that the dataset can be loaded successfully
+data_path <- "../data/06_dat_augmented.csv"
+dataset <- read_csv(data_path,
+                    show_col_types = FALSE)
+```
+
+```{r}
+dataset |> 
+  table1::table1(x = formula(~ BMI_class  + hdl_to_ldl_ratio + `gad-antibodies`+ cholesterol + creatinine| glucose_tolerance),
+         data = _)
+```
+
+```{r}
+dataset |> 
+  filter(`gad-antibodies` < 20) |> 
+  select(`gad-antibodies`,glucose_tolerance) |> 
+  ggplot(mapping = aes(x = glucose_tolerance,y = `gad-antibodies`, fill =  glucose_tolerance ))+
+  geom_violin()+
+  geom_point() +
+  theme_minimal(base_size = 10) +
+  theme(plot.title = element_text(hjust = 1)) +
+  labs(x = "glucose tollerance",
+       y = "gad-antibodies")
+```
+
+```{r}
+dataset |> 
+  select(cholesterol,glucose_tolerance) |> 
+  ggplot(mapping = aes(x = glucose_tolerance,
+                       y = cholesterol,
+                       fill =  glucose_tolerance ))+
+  geom_violin()+
+  geom_point() +
+  theme_minimal(base_size = 10) +
+  theme(plot.title = element_text(hjust = 1)) +
+  labs(x = "glucose tollerance",
+       y = "cholesterol")
+```
+
+```{r}
+#Get a list of the bacteria that have less than n samples where the value is different from 0
+n <- 50
+sparse_columns <- dataset |>  
+  select(starts_with("s_")) |> 
+  pivot_longer(cols = starts_with("s_"),
+               names_to = "backteria",
+               values_to = "abundance") |> 
+  filter(abundance > 0) |> 
+  group_by(backteria) |> 
+  summarise(non_zero_samples = n()) |> 
+  filter(non_zero_samples < n) |> 
+  pull(backteria)
+```
+
+```{r}
+dataset |> 
+  select(creatinine,glucose_tolerance) |> 
+  ggplot(mapping = aes(x = glucose_tolerance,y = creatinine, fill =  glucose_tolerance ))+
+  geom_violin()+
+  geom_point() +
+  theme_minimal(base_size = 10) +
+  theme(plot.title = element_text(hjust = 1)) +
+  labs(x = "glucose tollerance",
+       y = "creatinine")
+```
+
+```{r}
+dataset_long <- dataset |> 
+  pivot_longer(cols = starts_with("s_"),
+               names_to = "backteria",
+               values_to = "abundance")
+```
+
+```{r}
+dataset_long_nested <- dataset_long|> 
+  group_by(backteria) |> 
+  nest() |> 
+  ungroup()
+```
+
+```{r}
+#How to get the data
+dataset_long_nested |> 
+  filter(backteria == "s_Bifidobacterium_bifidum") |> 
+  pull(data)
+```
+
+Fitting models
+
+```{r}
+dataset_long_nested <- dataset_long_nested |> 
+  group_by(backteria) |> 
+  mutate(model_object = map(.x = data,
+                            .f = ~lm(formula = abundance ~ is_diseased,
+                                     data = .x))) |> 
+  mutate(model_object_tidy = map(.x = model_object,
+                                 .f = ~tidy(x = .x,
+                                            conf.int = TRUE,
+                                            conf.abundance = 0.95)))
+```
+
+```{r}
+#How to get the model
+dataset_long_nested |> 
+  filter(backteria == "s_Bifidobacterium_bifidum") |> 
+  pull(model_object_tidy)
+```
+
+```{r}
+dataset_estimates <- dataset_long_nested |> 
+  unnest(model_object_tidy)
+```
+
+```{r}
+dataset_estimates1 <- dataset_estimates |> 
+  filter(term == "is_diseased") |> 
+  select(backteria,p.value,estimate,conf.low,conf.high,p.value) |> 
+  ungroup() |> 
+  mutate(q.value = p.adjust(p.value),
+         is_significant = case_when(q.value <= 0.05 ~ "yes",
+                                    q.value > 0.05 ~ "no"))
+dataset_estimates1 |> 
+  filter(is_significant == "yes")
+```
+
+```{r}
+dataset_estimates1 |> 
+  filter(is_significant == "yes") |> 
+  ggplot(aes(x = estimate,
+             y = fct_reorder(backteria, estimate),
+             xmin = conf.low,
+             xmax = conf.high)) +
+  geom_vline(xintercept = 0) +
+  geom_errorbarh() +
+  geom_point() +
+  theme_minimal(base_size = 10) +
+  theme(plot.title = element_text(hjust = 1)) +
+  labs(x = "Estimates (95%CIs)",
+       y = "Bacterial species",
+       title = "Bacteria associated with T2D and impaired glucose tolerance ")
+>>>>>>> 4d738e43b3aca70a894ae7d7ee9496308a8fa8e6
 ```
 
 Null hypothesis : There is no difference in microbial community across composition across the BMI classes Alternative hypothesis: There is a difference in microbial community composition across BMI classes.
