@@ -17,15 +17,15 @@ dataset
 
 ```{r}
 dataset <- dataset |> 
-  filter(!glucose_tollerance == "impaired") |> 
-  mutate( glucose_tollerance_p= case_when(glucose_tollerance == "normal" ~ 0,
-                       glucose_tollerance == "t2d" ~ 1))
+  filter(glucose_tolerance != "impaired") |> 
+  mutate(glucose_tollerance_p= case_when(glucose_tolerance == "normal" ~ 0,
+                       glucose_tolerance == "t2d" ~ 1))
 ```
 
 ```{r}
 dataset_subsection_long <- dataset |> 
   select(-all_of(starts_with("s_"))) |> 
-  select(-sampleID,-statins,-insulin,-country,-BMI_class) |>
+  select(-sampleID,-statins,-insulin,-country,-BMI_class,-is_diseased) |>
   pivot_longer(cols = !starts_with("gl"),
                names_to = "data_point",
                values_to = "value")
@@ -37,6 +37,8 @@ dataset_subsection_long_nested <- dataset_subsection_long |>
   group_by(data_point) |> 
   nest() |> 
   ungroup()
+
+dataset_subsection_long_nested
 ```
 
 ```{r}
