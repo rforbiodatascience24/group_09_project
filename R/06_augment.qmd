@@ -7,19 +7,32 @@ editor: visual
 ### Load the dataset
 
 ```{r}
-suppressMessages(library("tidyverse"))
+library("tidyverse")
 library("here")
 ```
 
 ```{r}
 # verify that the dataset can be loaded successfully
 data_path <- here("data/05_dat_tidy.csv")
-dataset <- read_csv(data_path, show_col_types = FALSE)
+dataset <- read_csv(data_path,
+                    show_col_types = FALSE)
 ```
 
 ### Augment
 
 Here we will create a couple of new variables that will come in handy during visualization and analysis.
+
+Create a variable which groups together samples from patients having type 2 diabetes or being in the pre-diabetes state.
+
+```{r}
+dataset <- dataset |> 
+  mutate(is_diseased = ifelse(glucose_tolerance == "t2d" |
+                                glucose_tolerance == "impaired",
+                              "yes", "no")
+  ) |>
+  relocate(is_diseased,
+           .after = glucose_tolerance)
+```
 
 Create a categorical classification based on the BMI.
 
@@ -29,30 +42,26 @@ dataset <- dataset |>
     bmi < 18.5 ~ "Underweight",
     bmi >= 18.5 & bmi < 25 ~ "Normal weight",
     bmi >= 25 & bmi < 30 ~ "Overweight",
-    bmi >= 30 ~ "Obese",
-  )) |> 
-  relocate(BMI_class, .after = bmi)
+    bmi >= 30 ~ "Obese"
+  ) |> 
+  factor(levels = c("Underweight", "Normal weight", "Overweight", "Obese"))) |>
+  relocate(BMI_class,
+           .after = bmi)
 ```
 
-Create a variable to hold the ratio between high-density and low-density lipoproteins. This ratio is studied and used as a predictor for the insurgence of many cardiovascular diseases.
+Create a variable to hold the ratio between high-density and low-density lipoproteins. This ratio is studied and used as a predictor for the insurgence of many cardiovascular diseases, the desired ratio is \>1 as hdl are the good fats while ldl are the bad ones.
 
 ```{r}
 dataset <- dataset |> 
   mutate(hdl_to_ldl_ratio = hdl / ldl) |> 
-  relocate(hdl_to_ldl_ratio, .after = ldl)
+  relocate(hdl_to_ldl_ratio,
+           .after = ldl)
 ```
 
 ### Save dataset
 
 ```{r}
 target_dir <- "../data"
-
-# Create the data folder if it does not exist
-if (!file.exists(target_dir)) {
-  # Create the folder if it doesn't exist
-  dir.create(target_dir, recursive = TRUE)
-  }
-
-# save the dataset in the data fodler
-write_csv(dataset, str_c(target_dir, "/06_dat_augmented.csv"))
+write_csv(dataset, str_c(target_dir,
+                         "/06_dat_augmented.csv"))
 ```
