@@ -1,10 +1,15 @@
-------------------------------------------------------------------------
+---
+title: "05_analysis"
+format: html
+editor: visual
+---
 
-------------------------------------------------------------------------
+# Microbial distribution across BMI classes
 
-\
-
-# Microbial distribution across BMI classes 
+```{r}
+library(tidyverse)
+library(vegan)
+```
 
 Null hypothesis : There is no difference in microbial community across composition across the BMI classes Alternative hypothesis: There is a difference in microbial community composition across BMI classes.
 
@@ -15,16 +20,6 @@ We categorize BMI into 4 groups : Normal weight,overweight,underweight and Obese
 # verify that the dataset can be loaded successfully
 data_path <- "../data/06_dat_augmented.csv"
 dataset <- read_csv(data_path, show_col_types = FALSE)
-
-```
-
-```{r}
-#Loading needed libraries
-library(tidyverse)
-library(dplyr)
-library(stringr)
-library(vegan)
-library(ggplot2)
 ```
 
 ```{r}
@@ -48,17 +43,18 @@ bc_dist <- vegdist(data, method = "bray")
 # I use cmdscale for this, which computes a 2D representation of the Bray-Curtis distances.
 
 pcoa_result <- cmdscale(bc_dist, k = 2)  
+```
 
-#Combine the PCoA results with the metadata (BMI class) so I can label the samples by BMI_class.
-
+```{r}
+# Step 4: Combine the PCoA results with the metadata (BMI class) so I can label the samples by BMI_class.
 pcoa_df <- data.frame(PCoA1 = pcoa_result[, 1],  # First PCoA dimension
                       PCoA2 = pcoa_result[, 2],  # Second PCoA dimension
                       Group = metadata$BMI_class)  # Add BMI class as a grouping variable.
+```
 
+```{r}
 # Step 5: Visualize the PCoA results using a scatter plot.
 # This helps us see how BMI groups (e.g., underweight, normal, obese) cluster based on microbial composition.
-
-
 
 ggplot(pcoa_df, aes(x = PCoA1, y = PCoA2, color = Group)) +  # Color by BMI class
   geom_point(size = 3, alpha = 0.8) +  # Points with some transparency
@@ -67,24 +63,16 @@ ggplot(pcoa_df, aes(x = PCoA1, y = PCoA2, color = Group)) +  # Color by BMI clas
        x = "PCoA1 (Dimension 1)",  # Label x-axis
        y = "PCoA2 (Dimension 2)",  # Label y-axis
        color = "BMI Category")  # Add legend for BMI classes
-
-
-
 ```
 
 ```{r}
  #Step 6: Run PERMANOVA to test for Statisticalsignificant differences between BMI groups.
 # This statistical test checks if microbial composition is significantly different between BMI categories.
-
 adonis_result <- adonis2(bc_dist ~ BMI_class, data = metadata)
-
 
 print(adonis_result)
 ```
 
 ## Interpretation of the results
 
-From the PCoA plot we can see that there aren't clusters for each BMI category and some samples overlap with samples from different categories such as points from normal weight overlap with obese and overweight.
-The P.value from  PERMANOVA is 0.2 whcich indicates that the differences in microbial composition is not significant.Also R2=0.0238 which means that bmi contributes to only 2.38% of the difference in diversity of microbial community across the bmi classes. 
-
-
+From the PCoA plot we can see that there aren't clusters for each BMI category and some samples overlap with samples from different categories such as points from normal weight overlap with obese and overweight. The P.value from PERMANOVA is 0.2 whcich indicates that the differences in microbial composition is not significant.Also R2=0.0238 which means that bmi contributes to only 2.38% of the difference in diversity of microbial community across the bmi classes.
