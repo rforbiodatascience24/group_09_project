@@ -172,8 +172,7 @@ dataset |>
   ggplot(mapping = aes(x = s_Faecalibacterium_prausnitzii,
                       y = s_Coprococcus_catus,
                       colour = glucose_tollerance)) +
-    geom_point()+
-  fac
+    geom_point()
 ```
 
 ```{r}
