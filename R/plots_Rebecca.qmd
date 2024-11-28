@@ -179,9 +179,8 @@ dataset |>
 library("ggridges")
 dataset |> 
   filter(BMI_class != "Underweight") |> 
-  ggplot(mapping = aes(x = s_Faecalibacterium_prausnitzii,
-                             y = BMI_class,
-                             fill = glucose_tollerance)) +
+  ggplot(mapping = aes(x = wc,
+                             y = glucose_tollerance)) +
     geom_density_ridges(alpha = 0.5) +
     scale_fill_viridis_d() +
     labs(x = "xx",
@@ -190,4 +189,76 @@ dataset |>
     theme_minimal(base_family = "Avenir",
                   base_size = 12) +
     theme(legend.position = "bottom")
+```
+
+```{r}
+dataset |> 
+  ggplot(mapping = aes(x = wc, y = fasting_insulin, colour = glucose_tollerance )) +
+  geom_point()
+```
+
+```{r}
+
+dataset |>
+  ggplot(aes(x = wc,
+             y = fasting_insulin,
+             colour = glucose_tollerance)) +
+  geom_point(size = 2,
+             alpha = 0.4) +
+  geom_smooth(method = "lm",
+              se = FALSE) +
+  #scale_colour_manual(
+    #values = c("salmon", "cornflowerblue")) +
+  labs(x = "WC",
+       y = "fasting insulin",
+       title = "WC vs fasting insulin groupt by glucose tollerance",
+       colour = "Glucose tollerance: ")
+  theme_minimal(base_size = 10)
+```
+
+```{r}
+dataset |>
+  ggplot(aes(x = wc,
+             y = hba1c,
+             colour = glucose_tollerance)) +
+  geom_point(size = 2,
+             alpha = 0.4) +
+  geom_smooth(method = "lm",
+              se = FALSE) +
+  labs(x = "WC",
+       y = "hba1c",
+       title = "WC vs hba1c groupt by glucose tollerance",
+       colour = "Glucose tollerance: ")+
+  theme_minimal(base_size = 12)
+```
+
+```{r}
+library("ggridges")
+dataset |> 
+  #filter(BMI_class != "Underweight") |> 
+  ggplot(mapping = aes(x = hba1c,
+                       y = glucose_tollerance,
+                       fill = glucose_tollerance )) +
+    geom_density_ridges(alpha = 0.5) +
+    labs(x = "hba1c",
+         y = "glucose tollerance",
+         title = "hba1c and glucose tollerance") +
+    theme_minimal(base_family = "Avenir",
+                  base_size = 12) +
+    theme(legend.position = "none")
+```
+
+```{r}
+dataset |> 
+  #filter(BMI_class != "Underweight") |> 
+  ggplot(mapping = aes(x = `c-peptide`,
+                       y = glucose_tollerance,
+                       fill = glucose_tollerance )) +
+    geom_density_ridges(alpha = 0.5) +
+    labs(x = "c-peptide",
+         y = "glucose tollerance",
+         title = "c-peptide and glucose tollerance") +
+    theme_minimal(base_family = "Avenir",
+                  base_size = 12) +
+    theme(legend.position = "none")
 ```
