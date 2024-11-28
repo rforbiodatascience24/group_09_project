@@ -23,19 +23,19 @@ species_dataset <- dataset |>
 
 ```{r}
 mean_species_abundances <- dataset |> 
-  select(glucose_tollerance) |> 
+  select(glucose_tolerance) |> 
   bind_cols(species_dataset) |> 
-  group_by(glucose_tollerance) |> 
+  group_by(glucose_tolerance) |> 
   summarise(across(everything(),
                    \(x) mean(x,
                              na.rm = TRUE))) |>
   pivot_longer(
-    cols = -glucose_tollerance,
+    cols = -glucose_tolerance,
     names_to = "species", 
     values_to = "mean_abundance"
   ) |> 
   pivot_wider(
-    names_from = glucose_tollerance,
+    names_from = glucose_tolerance,
     values_from = mean_abundance
   ) |> 
   arrange(desc(normal)) |> 
