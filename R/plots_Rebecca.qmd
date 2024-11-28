@@ -6,6 +6,7 @@ editor: visual
 ---
 
 ### Load the dataset
+
 ```{r}
 library("tidyverse")
 ```
@@ -16,6 +17,7 @@ dataset <- read_csv(data_path, show_col_types = FALSE)
 ```
 
 ### Vitulazation of the perammeteres
+
 First, we want to see the distribution of BMI classes. In the plot below, we observe that there are slightly more overweight people in the dataset.
 
 ```{r}
