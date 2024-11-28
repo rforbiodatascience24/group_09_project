@@ -19,7 +19,8 @@ We categorize BMI into 4 groups : Normal weight,overweight,underweight and Obese
 #Loading the dataset
 # verify that the dataset can be loaded successfully
 data_path <- "../data/06_dat_augmented.csv"
-dataset <- read_csv(data_path, show_col_types = FALSE)
+dataset <- read_csv(data_path,
+                    show_col_types = FALSE)
 ```
 
 ```{r}
@@ -35,41 +36,46 @@ data <- dataset |>
 ```{r}
 # Step 2: Calculate Bray-Curtis distances.
 # This distance measures how similar (or different) the microbial communities are.
-bc_dist <- vegdist(data, method = "bray")
+bc_dist <- vegdist(data,
+                   method = "bray")
 ```
 
 ```{r}
 # Step 3: Perform Principal Coordinate Analysis (PCoA).
 # I use cmdscale for this, which computes a 2D representation of the Bray-Curtis distances.
-
 pcoa_result <- cmdscale(bc_dist, k = 2)  
 ```
 
 ```{r}
 # Step 4: Combine the PCoA results with the metadata (BMI class) so I can label the samples by BMI_class.
-pcoa_df <- data.frame(PCoA1 = pcoa_result[, 1],  # First PCoA dimension
-                      PCoA2 = pcoa_result[, 2],  # Second PCoA dimension
-                      Group = metadata$BMI_class)  # Add BMI class as a grouping variable.
+pcoa_df <- data.frame(pcoa_result,
+                      Group = metadata$BMI_class) |> 
+  rename(PCoA1 = X1,
+         PCoA2 = X2)
 ```
 
 ```{r}
 # Step 5: Visualize the PCoA results using a scatter plot.
 # This helps us see how BMI groups (e.g., underweight, normal, obese) cluster based on microbial composition.
 
-ggplot(pcoa_df, aes(x = PCoA1, y = PCoA2, color = Group)) +  # Color by BMI class
-  geom_point(size = 3, alpha = 0.8) +  # Points with some transparency
-  theme_minimal() +  # Clean and simple theme
-  labs(title = "PCoA Plot of Beta Diversity (Bray-Curtis)",  # Add title
-       x = "PCoA1 (Dimension 1)",  # Label x-axis
-       y = "PCoA2 (Dimension 2)",  # Label y-axis
-       color = "BMI Category")  # Add legend for BMI classes
+ggplot(pcoa_df,
+       aes(x = PCoA1,
+           y = PCoA2,
+           color = Group)) +
+  geom_point(size = 3,
+             alpha = 0.8) +  
+  theme_minimal() +  
+  labs(title = "PCoA Plot of Beta Diversity (Bray-Curtis)", 
+       x = "PCoA1", 
+       y = "PCoA2",
+       color = "BMI Category")
 ```
 
 ```{r}
  #Step 6: Run PERMANOVA to test for Statisticalsignificant differences between BMI groups.
 # This statistical test checks if microbial composition is significantly different between BMI categories.
-adonis_result <- adonis2(bc_dist ~ BMI_class, data = metadata)
-
+adonis_result <- adonis2(bc_dist ~ BMI_class,
+                         data = metadata)
 print(adonis_result)
 ```
 
