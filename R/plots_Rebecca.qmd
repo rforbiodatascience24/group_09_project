@@ -178,17 +178,16 @@ dataset |>
 ```{r}
 library("ggridges")
 dataset |> 
-  filter(BMI_class != "Underweight") |> 
   ggplot(mapping = aes(x = wc,
-                             y = glucose_tollerance)) +
+                      y = glucose_tollerance,
+                      fill = glucose_tollerance )) +
     geom_density_ridges(alpha = 0.5) +
-    scale_fill_viridis_d() +
-    labs(x = "xx",
-         y = "xx",
-         title = "xxx") +
+    labs(x = "wc",
+         y = "glucose_tollerance",
+         title = "wc on glucose tollerance ") +
     theme_minimal(base_family = "Avenir",
                   base_size = 12) +
-    theme(legend.position = "bottom")
+    theme(legend.position = "none")
 ```
 
 ```{r}
@@ -261,4 +260,28 @@ dataset |>
     theme_minimal(base_family = "Avenir",
                   base_size = 12) +
     theme(legend.position = "none")
+```
+
+```{r}
+dataset |>
+  ggplot(aes(x = whr,
+             y = hba1c,
+             colour = glucose_tollerance)) +
+  geom_point(size = 2,
+             alpha = 0.4) +
+  geom_smooth(method = "lm") +
+  labs(x = "whr",
+       y = "hba1c",
+       title = "whr vs hba1c groupt by glucose tollerance",
+       colour = "Glucose tollerance: ")+
+  theme_minimal(base_size = 12)
+```
+
+```{r}
+dataset |> 
+  ggplot(aes(x = cholesterol,
+              y = `c-peptide`,
+             colour = glucose_tollerance)) +
+    geom_point() +
+    theme_minimal(base_size = 12)
 ```
