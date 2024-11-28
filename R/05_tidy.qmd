@@ -41,13 +41,8 @@ dataset <- dataset |>
     glucose_tollerance == "impaired_glucose_tolerance" ~ "impaired",
     glucose_tollerance == "n" ~ "normal",
     TRUE ~ glucose_tollerance
-  ))
-
-dataset <- dataset |> 
-  mutate(glucose_tollerance = factor(glucose_tollerance,
-                                     levels = c("normal",
-                                                "impaired",
-                                                "t2d")))
+  ) |> 
+  factor(levels = c("normal", "impaired", "t2d")))
 ```
 
 The other change we can make is regarding the abundances... as for now the structure of the abundance columns is that descending from kingdom to species and has an entry for each taxonomy level. While this can be useful to perform analysis at different levels, it also increases drastically the number of rows and also causes many values to be repeated if, for example, a single species is present for the whole kingdom.
