@@ -36,13 +36,14 @@ But we can still make some adjustments to prepare the dataset... first let's ren
 
 ```{r}
 dataset <- dataset |> 
-  rename(glucose_tollerance = disease) |>
-  mutate(glucose_tollerance = case_when(
-    glucose_tollerance == "impaired_glucose_tolerance" ~ "impaired",
-    glucose_tollerance == "n" ~ "normal",
-    TRUE ~ glucose_tollerance
+  rename(glucose_tolerance = disease) |>
+  mutate(glucose_tolerance = case_when(
+    glucose_tolerance == "impaired_glucose_tolerance" ~ "impaired",
+    glucose_tolerance == "n" ~ "normal",
+    TRUE ~ glucose_tolerance
   ) |> 
-  factor(levels = c("normal", "impaired", "t2d")))
+  factor(levels = c("normal", "impaired", "t2d"))) |> 
+  arrange(glucose_tolerance)
 ```
 
 The other change we can make is regarding the abundances... as for now the structure of the abundance columns is that descending from kingdom to species and has an entry for each taxonomy level. While this can be useful to perform analysis at different levels, it also increases drastically the number of rows and also causes many values to be repeated if, for example, a single species is present for the whole kingdom.
