@@ -124,40 +124,40 @@ Let's analyze the diversity between class variables (T2d, healthy and glucose im
 We do this by calculating a distance matrix based on the microbial abundance data, which then can be used to visualize the differences in composition in a reduced dimensionality.
 
 ```{r}
-# Pull the class labels as a vector 
+# Pull the class labels
 group_labels <- dataset |> 
   pull(glucose_tollerance)
 
-# Select abundance data from data set to calculate distsances 
-abundance_data <- dataset |>
+# Select abundance data from data set to calculate distances
+abundance_data <- dataset |> 
   select(matches("^s_"))
 
 # Calculate Beta diversity based on Bray-Curtis distance
-bc_dist <- vegdist((abundance_data),
-                   method = "bray")
+bc_dist <- vegdist(abundance_data, method = "bray")
 
-# Perform PCoA (Principal Coordinates Analysis)
-pcoa_result <- cmdscale(as.dist(bc_dist),
-                        k = 2)
+# Perform PCoA
+pcoa_result <- cmdscale(as.dist(bc_dist), k = 2, eig = TRUE)
 
-# Combine PCoA results with metadata (group labels)
-pcoa_df <- data.frame(pcoa_result,
-                      Group = group_labels) |> 
-  rename(PCoA1 = X1,
-         PCoA2 = X2)
+# Extract eigenvalues and calculate proportion of variance explained
+eigenvalues <- pcoa_result |>  pluck("eig")
+variance_explained <- eigenvalues / sum(eigenvalues)
+
+# Combine PCoA results with group labels 
+pcoa_df <- pcoa_result |> 
+  pluck("points") |> 
+  as.data.frame() |>  
+  rename(PCoA1 = V1, PCoA2 = V2) |> 
+  mutate(Group = group_labels)
 ```
 
 ```{r}
 # PCoA plot
-ggplot(pcoa_df,
-       aes(x = PCoA1,
-           y = PCoA2,
-           color = Group)) +
+ggplot(pcoa_df, aes(x = PCoA1, y = PCoA2, color = Group)) +
   geom_point(size = 4) +
   theme_minimal() +
   labs(title = "PCoA of Bray-Curtis Dissimilarity",
-       x = "PCoA1", 
-       y = "PCoA2") +
+       x = paste0("PCoA1 (", round(variance_explained |>  first() * 100, 2), "%)"),
+       y = paste0("PCoA2 (", round(variance_explained |>  nth(2) * 100, 2), "%)")) +
   scale_color_manual(values = c("red", "blue", "green"))
 ```
 
