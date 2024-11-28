@@ -72,7 +72,7 @@ ggplot(pcoa_df,
 ```
 
 ```{r}
- #Step 6: Run PERMANOVA to test for Statisticalsignificant differences between BMI groups.
+ #Step 6: Run PERMANOVA to test for statistically significant differences between BMI groups.
 # This statistical test checks if microbial composition is significantly different between BMI categories.
 adonis_result <- adonis2(bc_dist ~ BMI_class,
                          data = metadata)
