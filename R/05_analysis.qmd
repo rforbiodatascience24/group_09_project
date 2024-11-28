@@ -18,40 +18,18 @@ library("table1")
 data_path <- "../data/06_dat_augmented.csv"
 dataset <- read_csv(data_path,
                     show_col_types = FALSE)
+
+
+dataset <- dataset |> 
+  filter(glucose_tolerance != "impaired") |> 
+  select(-is_diseased) |> 
+  mutate(is_diseased = case_when(glucose_tolerance == "normal" ~ 0,
+                       glucose_tolerance == "t2d" ~ 1))
 ```
 
-```{r}
-dataset |> 
-  table1::table1(x = formula(~ BMI_class  + hdl_to_ldl_ratio + `gad-antibodies`+ cholesterol + creatinine| glucose_tolerance),
-         data = _)
-```
+# P-value analysis for bacterial species
 
-```{r}
-dataset |> 
-  filter(`gad-antibodies` < 20) |> 
-  select(`gad-antibodies`,glucose_tolerance) |> 
-  ggplot(mapping = aes(x = glucose_tolerance,y = `gad-antibodies`, fill =  glucose_tolerance ))+
-  geom_violin()+
-  geom_point() +
-  theme_minimal(base_size = 10) +
-  theme(plot.title = element_text(hjust = 1)) +
-  labs(x = "glucose tollerance",
-       y = "gad-antibodies")
-```
-
-```{r}
-dataset |> 
-  select(cholesterol,glucose_tolerance) |> 
-  ggplot(mapping = aes(x = glucose_tolerance,
-                       y = cholesterol,
-                       fill =  glucose_tolerance ))+
-  geom_violin()+
-  geom_point() +
-  theme_minimal(base_size = 10) +
-  theme(plot.title = element_text(hjust = 1)) +
-  labs(x = "glucose tollerance",
-       y = "cholesterol")
-```
+Before we can study how the bacterial species may be related to type 2 diabetes, we need to find which bacteria have more than 50 values that are not 0. Even though 0 is a meaningful value in the dataset, we need some data points to vary in order to see if there is a meaning full relationship.
 
 ```{r}
 #Get a list of the bacteria that have less than n samples where the value is different from 0
@@ -68,40 +46,38 @@ sparse_columns <- dataset |>
   pull(backteria)
 ```
 
-```{r}
-dataset |> 
-  select(creatinine,glucose_tolerance) |> 
-  ggplot(mapping = aes(x = glucose_tolerance,y = creatinine, fill =  glucose_tolerance ))+
-  geom_violin()+
-  geom_point() +
-  theme_minimal(base_size = 10) +
-  theme(plot.title = element_text(hjust = 1)) +
-  labs(x = "glucose tollerance",
-       y = "creatinine")
-```
+We will perform the p-value analysis where we compare the bacterial samples from normal and T2D (type 2 diabetes) patients. Therefore, we will remove the impaired samples and sparse data. Next, we will transform the columns and convert the data from wide format to long format to conduct the p-value analysis.
 
 ```{r}
 dataset_long <- dataset |> 
+  filter(glucose_tolerance != "impaired" ) |> 
+  select(-all_of(sparse_columns)) |> 
   pivot_longer(cols = starts_with("s_"),
                names_to = "backteria",
                values_to = "abundance")
 ```
+
+Then we group the data by bacteria and nest it. After that, we ungroup it. By doing so, we obtain another tibble, which is a table for each bacterium.
 
 ```{r}
 dataset_long_nested <- dataset_long|> 
   group_by(backteria) |> 
   nest() |> 
   ungroup()
+
+dataset_long_nested
 ```
+
+Here we see how the data can be pulled out for each bacterium.
 
 ```{r}
 #How to get the data
 dataset_long_nested |> 
-  filter(backteria == "s_Bifidobacterium_bifidum") |> 
+  filter(backteria == "s_Bacteroides_caccae") |> 
   pull(data)
 ```
 
-Fitting models
+Then we fit a linear fitting model to each bacterium.
 
 ```{r}
 dataset_long_nested <- dataset_long_nested |> 
@@ -112,20 +88,27 @@ dataset_long_nested <- dataset_long_nested |>
   mutate(model_object_tidy = map(.x = model_object,
                                  .f = ~tidy(x = .x,
                                             conf.int = TRUE,
-                                            conf.abundance = 0.95)))
+                                            conf.level = 0.95)))
 ```
+
+Then we show how a linear model for a random bacterium would look.
 
 ```{r}
 #How to get the model
 dataset_long_nested |> 
-  filter(backteria == "s_Bifidobacterium_bifidum") |> 
+  filter(backteria == "s_Bacteroides_caccae") |> 
   pull(model_object_tidy)
 ```
+
+We unnest the model object so we can access the data and values inside the model.
 
 ```{r}
 dataset_estimates <- dataset_long_nested |> 
   unnest(model_object_tidy)
+dataset_estimates
 ```
+
+Then we check if there are any bacteria that are significant at the alpha = 0.05 level. We filter for those, and we find that none of the bacteria are significant at that level.
 
 ```{r}
 dataset_estimates1 <- dataset_estimates |> 
@@ -139,19 +122,99 @@ dataset_estimates1 |>
   filter(is_significant == "yes")
 ```
 
+# P-value analysis meta_data
+
+Now we are interested in doing a p-value test to study which of the parameters of the metadata are relevant to describing T2D. As before, we compare between the normal and type 2 diabetes group.
+
+We transform our data from wide to long format. We do not test on non-continuous variables.
+
 ```{r}
-dataset_estimates1 |> 
+dataset_subsection_long <- dataset |> 
+  select(-all_of(starts_with("s_"))) |> 
+  select(-sampleID,-statins,-insulin,-country,-BMI_class,-glucose_tolerance) |>
+  pivot_longer(cols = !starts_with("is_diseased"),
+               names_to = "data_point",
+               values_to = "value")
+dataset_subsection_long  
+```
+
+We group the data according to the type of data point, and each data point gets its own table by nesting. Then, the data is ungrouped again.
+
+```{r}
+dataset_subsection_long_nested <- dataset_subsection_long |>
+  group_by(data_point) |> 
+  nest() |> 
+  ungroup()
+
+dataset_subsection_long_nested
+```
+
+Now we set up a linear model for each metadata variable.
+
+```{r}
+dataset_subsection_aug_long_nested <- dataset_subsection_long_nested |> 
+  group_by(data_point) |> 
+  mutate(model_object = map(.x = data,
+                   .f = ~lm(formula = value ~ is_diseased,
+                            data = .x))) |> 
+  mutate(model_object_tidy = map(.x = model_object,
+                                 .f = ~tidy(x = .x,
+                                            conf.int = TRUE,
+                                            conf.level = 0.95)))
+  
+dataset_subsection_aug_long_nested
+```
+
+Then we try to pull out the model where the parameter variable BMI is used to describe T2D
+
+```{r}
+dataset_subsection_aug_long_nested |> 
+  filter(data_point == "bmi") |> 
+  pull(model_object_tidy)
+```
+
+We then unnest the model so that we can access the information about the model.
+
+```{r}
+dataset_subsection_estimates <- dataset_subsection_aug_long_nested |> 
+  unnest(model_object_tidy)
+dataset_subsection_estimates
+```
+
+```{r}
+dataset_subsection_estimates <- dataset_subsection_estimates |> 
+  filter(term == "is_diseased") |> 
+  select(data_point, p.value, estimate, conf.low, conf.high) |> 
+  ungroup()
+dataset_subsection_estimates
+```
+
+We then create two new parameters, q.value and is_significant, which help us test if the data point is statistically significant at an alpha = 0.05 level. We find that the values for HDL, WHR, WC, cholesterol, fasting insulin, HbA1c, and C-peptide are significant at the alpha = 0.05 level.
+
+```{r}
+dataset_subsection_estimates <- dataset_subsection_estimates |>
+  mutate(q.value = p.adjust(p.value),
+         is_significant = case_when(q.value <= 0.05 ~ "yes",
+                                    q.value > 0.05 ~ "no"))
+dataset_subsection_estimates |> 
+  filter(is_significant == "yes")
+```
+
+Then we create a plot of the significant parameter values, where on the x-axis we have Estimates (95% CIs), and on the y-axis we have the significant parameters.
+
+```{r}
+dataset_subsection_estimates |> 
   filter(is_significant == "yes") |> 
   ggplot(aes(x = estimate,
-             y = fct_reorder(backteria, estimate),
+             y = fct_reorder(data_point, estimate),
              xmin = conf.low,
              xmax = conf.high)) +
   geom_vline(xintercept = 0) +
   geom_errorbarh() +
   geom_point() +
-  theme_minimal(base_size = 10) +
+  theme_minimal(base_size = 12) +
   theme(plot.title = element_text(hjust = 1)) +
   labs(x = "Estimates (95%CIs)",
-       y = "Bacterial species",
-       title = "Bacteria associated with T2D and impaired glucose tolerance ")
+       y = "data type",
+       title = "perammeteres Associated with t2d")
 ```
