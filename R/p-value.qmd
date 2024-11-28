@@ -17,9 +17,9 @@ dataset
 
 ```{r}
 dataset <- dataset |> 
+  filter(!glucose_tollerance == "impaired") |> 
   mutate( glucose_tollerance_p= case_when(glucose_tollerance == "normal" ~ 0,
-                       glucose_tollerance == "t2d" ~ 1,
-                       glucose_tollerance == "impaired" ~ 1))
+                       glucose_tollerance == "t2d" ~ 1))
 ```
 
 ```{r}
@@ -96,5 +96,5 @@ dataset_subsection_estimates |>
   theme(plot.title = element_text(hjust = 1)) +
   labs(x = "Estimates (95%CIs)",
        y = "",
-       title = "perammeteres Associated with glucose tollerance")
+       title = "perammeteres Associated with t2d")
 ```
