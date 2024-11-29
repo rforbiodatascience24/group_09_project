@@ -58,6 +58,25 @@ dataset <- dataset |>
            .after = ldl)
 ```
 
+The HOMA-IR score (HOMA-IR (Homeostatic model assessment for insulin resistance) is a measure insulin resistance / sensitivity.
+
+```{r}
+dataset <- dataset |>
+  mutate(`HOMA-IR` = fasting_glucose * fasting_insulin / 22.5,
+         HOMA_category = case_when(
+           `HOMA-IR` < 1.5 ~ "Healthy",
+           `HOMA-IR` >= 1.5 & `HOMA-IR` < 2.5 ~ "At risk",
+           `HOMA-IR` >= 2.5 & `HOMA-IR` < 5.0 ~ "Insulin Resistant",
+           `HOMA-IR` >= 5.0 ~ "Severely Insulin Resistant"
+         )) |>
+  mutate(HOMA_category = factor(HOMA_category,
+                                levels = c("Healthy", "At risk", "Insulin Resistant", "Severely Insulin Resistant"))) |> 
+  relocate(`HOMA-IR`,
+           .after = fasting_insulin) |> 
+  relocate(HOMA_category,
+           .after = `HOMA-IR`)
+```
+
 ### Save dataset
 
 ```{r}
