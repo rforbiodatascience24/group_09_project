@@ -20,6 +20,17 @@ dataset <- read_csv(data_path,
                     show_col_types = FALSE)
 ```
 
+The first thing we do is unify the original datasets that were splitted.
+
+```{r}
+dataset <- dataset |> 
+  mutate(dataset_name = case_when(
+    dataset_name == "t2dmeta_long" ~  "t2d",
+    dataset_name == "t2dmeta_short" ~ "t2d",
+    dataset_name == "hmpii" ~ "hmp",
+    TRUE ~ dataset_name))
+```
+
 The dataset is divided in metadata columns and microorganism relative abundances. We divide the two dataset to facilitate cleaning:
 
 ### Cleaning the metadata
@@ -36,10 +47,95 @@ The wide variety of studies from which the data comes from results in a large nu
 ```{r}
 valid_counts <- metadata |> 
 summarise(across(everything(),
-                 ~sum(!is.na(.)))) |> 
+                 ~sum(!is.na(.))),
+          ) |> 
 pivot_longer(everything(),
              names_to = "column_name",
              values_to = "valid_count")
+valid_counts |> 
+  ggplot(aes(x=valid_count)) +
+  geom_histogram(binwidth = 30)
+```
+
+We can see that there are many columns with a lot / or even only missing values.
+
+Many of these columns are dataset-specific, we can show that by plotting the columns group by the number of valid data and looking which dataset contain those valid datapoints.
+
+```{r}
+# Calculate the percentage of valid datapoint that each dataset has in each column
+valid_percentage_by_dataset <- metadata |> 
+  group_by(dataset_name) |> 
+  summarise(across(everything(),
+                   ~ sum(!is.na(.)) / n() * 100,  # Original calculation
+                   .names = "{col}"))
+
+# Reshape the data for better visualization
+valid_percentage_long <- valid_percentage_by_dataset |> 
+  pivot_longer(cols = -dataset_name,
+               names_to = "column",
+               values_to = "valid_percent")
+
+# for each column select the most represented dataset (% > 90%, otherwise) if there is none the the column is considered mixed
+most_represented_dataset <- valid_percentage_long |> 
+  group_by(column) |> 
+  arrange(desc(valid_percent))  |>  
+  slice(1) |>   
+  ungroup() |> 
+  mutate(most_represented_dataset = dataset_name) |> 
+  select(-dataset_name)
+
+# For each column get the TOTAL number of non-NAs values
+valid_values_count <- metadata |> 
+  select(-dataset_name) |>  # we obviusly don't care about the data_set name column
+  summarise(across(everything(),
+                   ~ sum(!is.na(.)))) |> 
+  pivot_longer(cols = everything(),
+               names_to = "column",
+               values_to = "valid_count") 
+
+# Assign to each column its the most represented dataset 
+columns_with_valid_counts_and_best_dataset <- valid_values_count |> 
+  left_join(most_represented_dataset, 
+            by = "column")
+
+# Divide the columns based on the amount of NAs they contain 
+valid_count_distribution <- columns_with_valid_counts_and_best_dataset |> 
+  group_by(valid_count,
+           most_represented_dataset) |> 
+  summarise(count = n(),
+            .groups = "drop")
+
+#FINALLY!!! We can plot the column distribution 
+valid_count_distribution |>
+  filter(valid_count != 0) |>
+ggplot(aes(x = as.factor(valid_count), y = count, fill = most_represented_dataset)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  labs(
+    title = "Columns divided by amount of valid entries",
+    x = "Number of valid values",
+    y = "Number of columns",
+    fill = "Most represented dataset",
+    caption = "Columns having no valid values (125) are excluded for visualization purposes",
+  ) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(face = "bold", size = 14, hjust = 0.5),
+    axis.text.x = element_text(size = 10),
+    axis.text.y = element_text(size = 10),
+    axis.title.x = element_text(face = "bold", size = 12),
+    axis.title.y = element_text(face = "bold", size = 12),
+    plot.caption = element_text(face = "italic", size = 10),
+    panel.grid.minor.x = element_blank()) +
+  coord_flip()
+
+ggsave(
+  filename = "columns_by_non_NA.jpeg",  
+  device = "jpg",                     
+  path = "../results",              
+  width = 8,                          
+  height = 6,                         
+  dpi = 300                           
+)
 ```
 
 We can see that there is a large amount of columns having many NAs.
@@ -60,6 +156,29 @@ The columns having only 344 non-NAs values, are columns specific of the "hmp" da
 
 These columns are can be really important for analysis of single datasets, so we have to decide what to do them.
 
+```{r}
+valid_counts |>
+  filter(valid_count != 0) |> 
+  ggplot(aes(x = as.factor(valid_count), y = ..count..)) +
+  geom_bar(fill = "grey", color = "black", width = 0.8) + # Add colors and border
+  coord_flip() +
+  labs(
+    title = "Columns by number of non-NA values",
+    x = "Number of non-NA values",
+    y = "Number of columns",
+    caption = "The columns with only missing values (125) were omitted for visualization purposes"
+  ) +
+  theme_minimal(base_size = 14) + # Use a clean minimal theme
+  theme(
+    plot.title = element_text(face = "bold", size = 14, hjust = 0.5),
+    axis.text.x = element_text(size = 10),
+    axis.text.y = element_text(size = 10),
+    axis.title.x = element_text(face = "bold", size = 12),
+    axis.title.y = element_text(face = "bold", size = 12),
+    plot.caption = element_text(face = "italic", size = 10),
+    panel.grid.minor.x = element_blank()) 
+```
+
 ### Decision point
 
 Because of what was said before there are two possible approaches:
@@ -71,8 +190,6 @@ Because of what was said before there are two possible approaches:
 ### Approach 1 - We keep all datasets
 
 Even if we are not going to follow this path we still provide an example of what the cleaning of this messier dataset could be done.
-
-We also filter out the column having 0 non-NAs values.
 
 ```{r}
 dataset_specific_columns <- valid_counts |> 
@@ -173,11 +290,11 @@ pivot_longer(everything(), names_to = "column_name", values_to = "valid_count")
 
 ```{r}
 to_remove <- valid_counts |> 
-  filter(valid_count != nrow(metadata)) |> 
+  filter(valid_count < 140) |> 
   pull(column_name)
 
 metadata <- metadata |> 
-  select(-to_remove)
+  select(-all_of(to_remove))
 ```
 
 We remove columns having all the same value for all rows as they do not provide any information
@@ -225,7 +342,7 @@ The only cleaning we can do on the abundances is that of removing columns that d
 
 ```{r}
 abundance_data <- abundance_data |> 
-  select(where(~ sum(.x, na.rm = TRUE) != 0))###
+  select(where(~ sum(.x, na.rm = TRUE) != 0))
 ```
 
 ### Saving the dataset
