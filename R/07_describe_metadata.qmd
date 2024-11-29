@@ -24,7 +24,7 @@ First, we want to get an overview of the metadata present in the dataset, before
 
 ```{r}
 dataset |> 
-  table1::table1(x = formula(~ BMI_class  +  hdl + cholesterol + creatinine + hdl + wc + whr + statins + insulin  | glucose_tolerance),
+  table1::table1(x = formula(~ BMI_class  +  hdl + cholesterol + creatinine + hdl + wc + whr + statins + insulin + bmi  | glucose_tolerance),
          data = _)
 ```
 
@@ -243,9 +243,53 @@ dataset |>
                       y = glucose_tolerance,
                       fill = glucose_tolerance )) +
     geom_density_ridges(alpha = 0.5) +
-    labs(x = "wc",
-         y = "fasting insulin",
-         title = "fasting_insulin on glucose tolerance ") +
+    labs(x = "fasting insulin",
+         y = "glucose tolerance",
+         title = "fasting insulin and glucose tolerance ") +
+    theme_minimal(base_family = "Avenir",
+                  base_size = 12) +
+    theme(legend.position = "none")
+```
+
+In the literature, it is stated that BMI can be used as an indicator of type 2 diabetes. Despite this, in our analysis using alpha = 0.05, we did not find the relationship to be statistically significant. Even though BMI was not a statistically significant parameter, we observed that the BMI for those with normal and impaired glucose tolerance is slightly more left-skewed.
+
+```{r}
+dataset |> 
+  mutate(bmi_group = cut(
+    x = bmi,
+    breaks = seq(from = 18,
+                 to = 45,
+                 by = 3))) |> 
+  count(glucose_tolerance, bmi_group) |> 
+  ggplot(aes(x = bmi_group,
+             y = n,
+             fill = glucose_tolerance)) +
+  geom_col(position = position_dodge(
+    preserve = "single"),
+    colour = "black",
+    alpha = 0.4) +
+  geom_hline(yintercept = 0) +
+  theme_minimal(base_size = 10) +
+  labs(x = "Fasting insulin",
+       y = "Count",
+       title = "bmi count by glucose tollerance",
+       fill = "Glucose tollerance: ")+
+  theme(legend.position = "bottom",
+        panel.grid.major.x = element_blank(),
+        axis.text.x = element_text(vjust = 5))
+```
+
+We investigate how the HDL distribution differs between the glucose tolerance groups, where we see that for the type 2 diabetic group, the distribution is slightly left-skewed.
+
+```{r}
+dataset |> 
+  ggplot(mapping = aes(x = hdl,
+                      y = glucose_tolerance,
+                      fill = glucose_tolerance )) +
+    geom_density_ridges(alpha = 0.5) +
+    labs(x = "hdl",
+         y = "glucose tolerance",
+         title = "hdl and glucose tolerance ") +
     theme_minimal(base_family = "Avenir",
                   base_size = 12) +
     theme(legend.position = "none")
@@ -265,6 +309,22 @@ dataset |>
   labs(x = "WC",
        y = "hba1c",
        title = "WC vs hba1c groupt by glucose tolerance",
+       colour = "Glucose tolerance: ")+
+  theme_minimal(base_size = 12)
+```
+
+In the figure below, we see a point plot of HDL on the x-axis and Hemoglobin A1C on the y-axis, filtered by glucose tolerance. We observe that Hemoglobin A1C is a better discriminatory factor.
+
+```{r}
+dataset |>
+  ggplot(aes(x = hdl,
+             y = hba1c,
+             colour = glucose_tolerance)) +
+  geom_point(size = 2,
+             alpha = 0.5) +
+  labs(x = "hdl",
+       y = "Hemoglobin A1C",
+       title = "hdl vs Hemoglobin A1C groupt by glucose tolerance",
        colour = "Glucose tolerance: ")+
   theme_minimal(base_size = 12)
 ```
