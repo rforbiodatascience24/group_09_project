@@ -8,7 +8,7 @@ editor: visual
 ### Load the dataset
 
 ```{r}
-suppressMessages(library("tidyverse"))
+library("tidyverse")
 library("here")
 ```
 
@@ -41,9 +41,13 @@ dataset <- dataset |>
     glucose_tolerance == "impaired_glucose_tolerance" ~ "impaired",
     glucose_tolerance == "n" ~ "normal",
     TRUE ~ glucose_tolerance
-  ) |> 
-  factor(levels = c("normal", "impaired", "t2d"))) |> 
-  arrange(glucose_tolerance)
+  ))
+
+dataset <- dataset |> 
+  mutate(glucose_tolerance = factor(glucose_tolerance,
+                                     levels = c("normal",
+                                                "impaired",
+                                                "t2d")))
 ```
 
 The other change we can make is regarding the abundances... as for now the structure of the abundance columns is that descending from kingdom to species and has an entry for each taxonomy level. While this can be useful to perform analysis at different levels, it also increases drastically the number of rows and also causes many values to be repeated if, for example, a single species is present for the whole kingdom.
@@ -72,12 +76,6 @@ dataset <- metadata |>
 
 ```{r}
 target_dir <- "../data"
-
-# Create the data folder if it does not exist
-if (!file.exists(target_dir)) {
-  # Create the folder if it doesn't exist
-  dir.create(target_dir, recursive = TRUE)
-  }
 
 # save the dataset in the data folder
 write_csv(dataset, str_c(target_dir, "/05_dat_tidy.csv"))

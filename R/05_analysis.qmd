@@ -1,56 +1,234 @@
 ---
-title: "04_analysis"
+title: "05_analysis"
 author: "Andreis Marco"
 format: html
 editor: visual
 ---
 
-# Load the dataset
-
 ```{r}
 library("tidyverse")
-library("broom")
-library("table1")
+library("vegan")
+library("here")
 ```
 
 ```{r}
 # verify that the dataset can be loaded successfully
-data_path <- "../data/06_dat_augmented.csv"
+data_path <- here("data/06_dat_augmented.csv")
 dataset <- read_csv(data_path,
+                    na = c("nd", "-", "na"),
                     show_col_types = FALSE)
 ```
 
+### Metadata analysis
+
+What does impaired glucose tolerance mean? It means that blood sugar levels are elevated but not enough to warrant a diagnosis of diabetes
+
 ```{r}
+# Let's look at the proportions of our catagorical values
+# Our data is well proportionally split between the three distincs groups of "disease"
 dataset |> 
-  table1::table1(x = formula(~ BMI_class  + hdl_to_ldl_ratio + `gad-antibodies`+ cholesterol + creatinine| glucose_tolerance),
-         data = _)
+  count(glucose_tolerance,
+        name = "Count") |> 
+  arrange(desc(Count))
+```
+
+### Correlation analysis
+
+Calculating the correlation matrix on a subset of our data will tell us about linear relationships between data variables.
+
+Lets start with a subset of our data, containing metadata and a few high-level markers (e.g. LDL and HDL)
+
+```{r}
+# Filter for diabetics and impaired
+filtered_data <- dataset |> 
+  filter(glucose_tolerance %in% c("t2d", "impaired"))
+
+# Choose the abundance data from the filtered data
+df_selected <- filtered_data |> 
+  select(starts_with("s_"))
+
+# Calculate the mean of each column
+mean_values <- df_selected |> 
+  summarise(across(everything(),
+                   mean))
+
+# Convert to long format and get the top 5 columns with the highest mean values
+# top_5_species <- mean_values |> 
+#   pivot_longer(everything(),
+#                names_to = "species",
+#                values_to = "mean_value") |> 
+#   arrange(desc(mean_value)) |> 
+#   slice_head(n = 5) |> 
+#   pull(species)
+# 
+# top_5_species <- dataset |> 
+#   select(all_of(top_5_species))
 ```
 
 ```{r}
-dataset |> 
-  filter(`gad-antibodies` < 20) |> 
-  select(`gad-antibodies`,glucose_tolerance) |> 
-  ggplot(mapping = aes(x = glucose_tolerance,y = `gad-antibodies`, fill =  glucose_tolerance ))+
-  geom_violin()+
-  geom_point() +
-  theme_minimal(base_size = 10) +
-  theme(plot.title = element_text(hjust = 1)) +
-  labs(x = "glucose tollerance",
-       y = "gad-antibodies")
+corr_data <- dataset |> 
+  select(-starts_with("s_")) |> 
+  select(where(~is.numeric(.x))) 
+
+# Normalize  columns
+corr_normalized <- corr_data |> 
+  mutate(across(everything(),
+                ~ (. - mean(.)) / sd(.)))
+
+# Compute the covariance matrix
+cov_matrix <- (t(as.matrix(corr_normalized)) %*% as.matrix(corr_normalized)) / 
+  (nrow(corr_normalized) - 1)
+
+# Convert the covariance matrix to a correlation matrix
+cor_matrix <- cov2cor(cov_matrix)
+
+# Pivot the correlation matrix to long format
+melted_cor_matrix <- as.data.frame(cor_matrix) |> 
+  rownames_to_column(var = "Var1") |> 
+  pivot_longer(-Var1, names_to = "Var2"
+               , values_to = "value")
+
+# Plot values in colour squares to visualize correlation
+ggplot(data = melted_cor_matrix,
+       aes(x = Var1,
+           y = Var2,
+           fill = value)) +
+  geom_tile() +
+  geom_text(aes(label = round(value
+                              , 2)),
+            color = "black",
+            size = 2) + 
+  scale_fill_gradient2(low = "blue",
+                       high = "red",
+                       mid = "white", 
+                       midpoint = 0,
+                       limit = c(-1, 1),
+                       space = "Lab", 
+                       name = "Correlation") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle =90,
+                                   vjust = 1, 
+                                   size = 10,
+                                   hjust = 1),
+  axis.title.x = element_blank(),
+  axis.title.y = element_blank())+
+  coord_fixed()
+```
+
+We see a slight inverse relationship between HDL levels and BMI. This might not come as the biggest surprise. \[doi: 10.1586/erc.11.182\]
+
+## Assessing relationships between species abundance and metadata features
+
+Let's analyze the diversity between class variables (T2d, healthy and glucose impaired)
+
+We do this by calculating a distance matrix based on the microbial abundance data, which then can be used to visualize the differences in composition in a reduced dimensionality.
+
+```{r}
+# Pull the class labels
+group_labels <- dataset |> 
+  pull(glucose_tolerance)
+
+# Select abundance data from data set to calculate distances
+abundance_data <- dataset |> 
+  select(matches("^s_"))
+
+# Calculate Beta diversity based on Bray-Curtis distance
+bc_dist <- vegdist(abundance_data, method = "bray")
+
+# Perform PCoA
+pcoa_result <- cmdscale(as.dist(bc_dist), k = 2, eig = TRUE)
+
+# Extract eigenvalues and calculate proportion of variance explained
+eigenvalues <- pcoa_result |>  pluck("eig")
+variance_explained <- eigenvalues / sum(eigenvalues)
+
+# Combine PCoA results with group labels 
+pcoa_df <- pcoa_result |> 
+  pluck("points") |> 
+  as.data.frame() |>  
+  rename(PCoA1 = V1, PCoA2 = V2) |> 
+  mutate(Group = group_labels)
 ```
 
 ```{r}
-dataset |> 
-  select(cholesterol,glucose_tolerance) |> 
-  ggplot(mapping = aes(x = glucose_tolerance,
-                       y = cholesterol,
-                       fill =  glucose_tolerance ))+
-  geom_violin()+
-  geom_point() +
-  theme_minimal(base_size = 10) +
-  theme(plot.title = element_text(hjust = 1)) +
-  labs(x = "glucose tollerance",
-       y = "cholesterol")
+# PCoA plot
+ggplot(pcoa_df, aes(x = PCoA1, y = PCoA2, color = Group)) +
+  geom_point(size = 4) +
+  theme_minimal() +
+  labs(title = "PCoA of Bray-Curtis Dissimilarity",
+       x = paste0("PCoA1 (", round(variance_explained |>  first() * 100, 2), "%)"),
+       y = paste0("PCoA2 (", round(variance_explained |>  nth(2) * 100, 2), "%)")) +
+  scale_color_manual(values = c("red", "blue", "green"))
+```
+
+The plot does not show any indication of separation between groups.
+
+# Microbial distribution across BMI classes
+
+We want to investigate if there is a significant difference in term of microbial communities in the different BMI groups. To do so we first visualise with PCoA if the microbial composition form clusters when plotted. Secondly we perform a PERMANOVA test to quantify the difference between the BMI groups, testing the following:
+
+Null hypothesis : There is no difference in microbial community across composition across the BMI classes
+
+Alternative hypothesis: There is a difference in microbial community composition across BMI classes.
+
+```{r}
+metadata <- dataset |> 
+  select(-starts_with("s_")) 
+
+bacteria_data <- dataset |> 
+  select(starts_with("s_")) 
+```
+
+```{r}
+#  Calculate the Bray-Curtis distances
+bc_distance <- vegdist(bacteria_data,
+                   method = "bray")
+```
+
+```{r}
+# applying (PCoA) to visualize clusters of bacteria.
+pcoa_result <- cmdscale(bc_distance, k = 2)  
+```
+
+# PCoA with BMI to visualize clusters across BMI
+
+```{r}
+ ggplot(pcoa_df,
+       aes(x = PCoA1,
+           y = PCoA2,
+           color = Group)) +
+    geom_point(size = 3,
+             alpha = 0.5) +  
+    theme_minimal() +  
+    labs(title = "PCoA Plot of Beta Diversity", 
+       x = "PCoA1", 
+       y = "PCoA2",
+       color = "BMI Category")
+```
+
+```{r}
+# PERMANOVA to  see whether the diversity of microbial communities differ across bmi
+anova_result <- adonis2(bc_distance ~ BMI_class,
+                         data = metadata)
+print(anova_result)
+```
+
+## Interpretation of the results
+
+From the PCoA plot we can see that there aren't clusters for each BMI category and some samples overlap with samples from different categories such as points from normal weight overlap with obese and overweight.
+
+The results of the PERMANOVA agree with what is seen in the PCoA as the P.value is 0.219, which indicates that the differences in microbial composition across BMI classes is not significant. Also R2=0.0238 means that bmi contributes to only 2.38% of the variance in the diversity of microbial community across the bmi classes.
+
+# P-value analysis for bacterial species
+
+Before we can study how the bacterial species may be related to type 2 diabetes, we need to find which bacteria have more than 50 values that are not 0. Even though 0 is a meaningful value in the dataset, we need some data points to vary in order to see if there is a meaning full relationship.
+
+```{r}
+dataset <- dataset |> 
+  filter(glucose_tolerance != "impaired") |> 
+  select(-is_diseased) |> 
+  mutate(is_diseased = case_when(glucose_tolerance == "normal" ~ 0,
+                       glucose_tolerance == "t2d" ~ 1))
 ```
 
 ```{r}
@@ -69,39 +247,43 @@ sparse_columns <- dataset |>
 ```
 
 ```{r}
-dataset |> 
-  select(creatinine,glucose_tolerance) |> 
-  ggplot(mapping = aes(x = glucose_tolerance,y = creatinine, fill =  glucose_tolerance ))+
-  geom_violin()+
-  geom_point() +
-  theme_minimal(base_size = 10) +
-  theme(plot.title = element_text(hjust = 1)) +
-  labs(x = "glucose tollerance",
-       y = "creatinine")
+#splitting dataset into metadata and bacteria data 
+metadata <- dataset |> 
+  select(-starts_with("s_")) 
 ```
+
+We will perform the p-value analysis where we compare the bacterial samples from normal and T2D (type 2 diabetes) patients. Therefore, we will remove the impaired samples and sparse data. Next, we will transform the columns and convert the data from wide format to long format to conduct the p-value analysis.
 
 ```{r}
 dataset_long <- dataset |> 
+  filter(glucose_tolerance != "impaired" ) |> 
+  select(-all_of(sparse_columns)) |> 
   pivot_longer(cols = starts_with("s_"),
                names_to = "backteria",
                values_to = "abundance")
 ```
+
+Then we group the data by bacteria and nest it. After that, we ungroup it. By doing so, we obtain another tibble, which is a table for each bacterium.
 
 ```{r}
 dataset_long_nested <- dataset_long|> 
   group_by(backteria) |> 
   nest() |> 
   ungroup()
+
+dataset_long_nested
 ```
+
+Here we see how the data can be pulled out for a choosen bacterium.
 
 ```{r}
 #How to get the data
 dataset_long_nested |> 
-  filter(backteria == "s_Bifidobacterium_bifidum") |> 
+  filter(backteria == "s_Bacteroides_caccae") |> 
   pull(data)
 ```
 
-Fitting models
+Then we fit a linear fitting model to each bacterium.
 
 ```{r}
 dataset_long_nested <- dataset_long_nested |> 
@@ -112,20 +294,27 @@ dataset_long_nested <- dataset_long_nested |>
   mutate(model_object_tidy = map(.x = model_object,
                                  .f = ~tidy(x = .x,
                                             conf.int = TRUE,
-                                            conf.abundance = 0.95)))
+                                            conf.level = 0.95)))
 ```
+
+Then we show how a linear model for a random bacterium would look.
 
 ```{r}
 #How to get the model
 dataset_long_nested |> 
-  filter(backteria == "s_Bifidobacterium_bifidum") |> 
+  filter(backteria == "s_Bacteroides_caccae") |> 
   pull(model_object_tidy)
 ```
+
+We unnest the model object so we can access the data and values inside the model.
 
 ```{r}
 dataset_estimates <- dataset_long_nested |> 
   unnest(model_object_tidy)
+dataset_estimates
 ```
+
+Then we check if there are any bacteria that are significant at the alpha = 0.05 level. We filter for those, and we find that none of the bacteria are significant at that level.
 
 ```{r}
 dataset_estimates1 <- dataset_estimates |> 
@@ -139,19 +328,99 @@ dataset_estimates1 |>
   filter(is_significant == "yes")
 ```
 
+# P-value analysis meta_data
+
+Now we are interested in doing a p-value test to study which of the parameters of the metadata are relevant to describing T2D. As before, we compare between the normal and type 2 diabetes group.
+
+We transform our data from wide to long format. We do not test on non-continuous variables.
+
 ```{r}
-dataset_estimates1 |> 
+dataset_subsection_long <- dataset |> 
+  select(-all_of(starts_with("s_"))) |> 
+  select(-sampleID,-statins,-insulin,-country,-BMI_class,-glucose_tolerance) |>
+  pivot_longer(cols = !starts_with("is_diseased"),
+               names_to = "data_point",
+               values_to = "value")
+dataset_subsection_long  
+```
+
+We group the data according to the type of data point, and each data point gets its own table by nesting. Then, the data is ungrouped again.
+
+```{r}
+dataset_subsection_long_nested <- dataset_subsection_long |>
+  group_by(data_point) |> 
+  nest() |> 
+  ungroup()
+
+dataset_subsection_long_nested
+```
+
+Now we set up a linear model for each metadata variable.
+
+```{r}
+dataset_subsection_aug_long_nested <- dataset_subsection_long_nested |> 
+  group_by(data_point) |> 
+  mutate(model_object = map(.x = data,
+                   .f = ~lm(formula = value ~ is_diseased,
+                            data = .x))) |> 
+  mutate(model_object_tidy = map(.x = model_object,
+                                 .f = ~tidy(x = .x,
+                                            conf.int = TRUE,
+                                            conf.level = 0.95)))
+  
+dataset_subsection_aug_long_nested
+```
+
+Then we try to pull out the model where the parameter variable BMI is used to describe T2D
+
+```{r}
+dataset_subsection_aug_long_nested |> 
+  filter(data_point == "bmi") |> 
+  pull(model_object_tidy)
+```
+
+We then unnest the model so that we can access the information about the model.
+
+```{r}
+dataset_subsection_estimates <- dataset_subsection_aug_long_nested |> 
+  unnest(model_object_tidy)
+dataset_subsection_estimates
+```
+
+```{r}
+dataset_subsection_estimates <- dataset_subsection_estimates |> 
+  filter(term == "is_diseased") |> 
+  select(data_point, p.value, estimate, conf.low, conf.high) |> 
+  ungroup()
+dataset_subsection_estimates
+```
+
+We then create two new parameters, q.value and is_significant, which help us test if the data point is statistically significant at an alpha = 0.05 level. We find that the values for HDL, WHR, WC, cholesterol, fasting insulin, HbA1c, and C-peptide are significant at the alpha = 0.05 level.
+
+```{r}
+dataset_subsection_estimates <- dataset_subsection_estimates |>
+  mutate(q.value = p.adjust(p.value),
+         is_significant = case_when(q.value <= 0.05 ~ "yes",
+                                    q.value > 0.05 ~ "no"))
+dataset_subsection_estimates |> 
+  filter(is_significant == "yes")
+```
+
+Then we create a plot of the significant parameter values, where on the x-axis we have Estimates (95% CIs) of the difference, and on the y-axis we have the significant parameters.
+
+```{r}
+dataset_subsection_estimates |> 
   filter(is_significant == "yes") |> 
   ggplot(aes(x = estimate,
-             y = fct_reorder(backteria, estimate),
+             y = fct_reorder(data_point, estimate),
              xmin = conf.low,
              xmax = conf.high)) +
   geom_vline(xintercept = 0) +
   geom_errorbarh() +
   geom_point() +
-  theme_minimal(base_size = 10) +
+  theme_minimal(base_size = 12) +
   theme(plot.title = element_text(hjust = 1)) +
   labs(x = "Estimates (95%CIs)",
-       y = "Bacterial species",
-       title = "Bacteria associated with T2D and impaired glucose tolerance ")
+       y = "data type",
+       title = "perammeteres Associated with t2d")
 ```
