@@ -46,11 +46,11 @@ Then we want to see the distribution of glucose tolerance in the dataset. In the
 
 ```{r}
 dataset |>
-  count(glucose_tollerance) |>
+  count(glucose_tolerance) |>
   mutate(percentage = n / sum(n) * 100) |>
-  ggplot(aes(x = glucose_tollerance,
+  ggplot(aes(x = glucose_tolerance,
              y = percentage,
-             fill = glucose_tollerance,
+             fill = glucose_tolerance,
              label = str_c(round(percentage,digits = 2),"%"))) +
   geom_col(colour = "black",
            alpha = 0.4) +
@@ -73,10 +73,10 @@ dataset |>
     breaks = seq(from = 0,
                  to = 70,
                  by = 5))) |> 
-  count(glucose_tollerance, fasting_insulin_group) |> 
+  count(glucose_tolerance, fasting_insulin_group) |> 
   ggplot(aes(x = fasting_insulin_group,
              y = n,
-             fill = glucose_tollerance)) +
+             fill = glucose_tolerance)) +
   geom_col(position = position_dodge(
     preserve = "single"),
     colour = "black",
@@ -97,7 +97,7 @@ dataset|>
   filter(BMI_class != "Underweight") |> 
   ggplot(aes(x = BMI_class,
              y = `c-peptide`,
-             fill = glucose_tollerance)) +
+             fill = glucose_tolerance)) +
   geom_boxplot(position = position_dodge(
     preserve = "single"), 
     alpha = 0.4) +
@@ -118,7 +118,7 @@ dataset|>
   filter(`gad-antibodies` < 20) |> 
   ggplot(aes(x = BMI_class,
              y = `gad-antibodies`,
-             fill = glucose_tollerance)) +
+             fill = glucose_tolerance)) +
   geom_boxplot(position = position_dodge(
     preserve = "single"), 
     alpha = 0.4) +
@@ -141,19 +141,19 @@ dataset |>
                  to = 30,
                  by = 5),
     include.lowest = TRUE)) |> 
-  count(glucose_tollerance, s_Faecalibacterium_prausnitzii_group) |> 
+  count(glucose_tolerance, s_Faecalibacterium_prausnitzii_group) |> 
   ggplot(aes(x = s_Faecalibacterium_prausnitzii_group,
              y = n,
-             fill = glucose_tollerance)) +
+             fill = glucose_tolerance)) +
   geom_col(position = position_dodge(
     preserve = "single"),
     colour = "black",
     alpha = 0.4) +
   geom_hline(yintercept = 0) +
   theme_minimal(base_size = 10) +
-  labs(x = "Fasting insulin",
+  labs(x = "s_Faecalibacterium_prausnitzii",
        y = "Count",
-       title = "Fasting insulin count group by glucose tollerance",
+       title = "s_Faecalibacterium_prausnitzii count group by glucose tolerance",
        fill = "Glucose tollerance: ")+
   theme(legend.position = "bottom",
         panel.grid.major.x = element_blank(),
@@ -164,7 +164,7 @@ dataset |>
 dataset |> 
   ggplot(mapping = aes(x = s_Faecalibacterium_prausnitzii,
                       y = s_Coprococcus_catus,
-                      colour = glucose_tollerance)) +
+                      colour = glucose_tolerance)) +
     geom_point()
 ```
 
@@ -172,11 +172,11 @@ dataset |>
 library("ggridges")
 dataset |> 
   ggplot(mapping = aes(x = wc,
-                      y = glucose_tollerance,
-                      fill = glucose_tollerance )) +
+                      y = glucose_tolerance,
+                      fill = glucose_tolerance )) +
     geom_density_ridges(alpha = 0.5) +
     labs(x = "wc",
-         y = "glucose_tollerance",
+         y = "glucose_tolerance",
          title = "wc on glucose tollerance ") +
     theme_minimal(base_family = "Avenir",
                   base_size = 12) +
@@ -185,7 +185,7 @@ dataset |>
 
 ```{r}
 dataset |> 
-  ggplot(mapping = aes(x = wc, y = fasting_insulin, colour = glucose_tollerance )) +
+  ggplot(mapping = aes(x = wc, y = fasting_insulin, colour = glucose_tolerance )) +
   geom_point()
 ```
 
@@ -194,7 +194,7 @@ dataset |>
 dataset |>
   ggplot(aes(x = wc,
              y = fasting_insulin,
-             colour = glucose_tollerance)) +
+             colour = glucose_tolerance)) +
   geom_point(size = 2,
              alpha = 0.4) +
   geom_smooth(method = "lm",
@@ -212,7 +212,7 @@ dataset |>
 dataset |>
   ggplot(aes(x = wc,
              y = hba1c,
-             colour = glucose_tollerance)) +
+             colour = glucose_tolerance)) +
   geom_point(size = 2,
              alpha = 0.4) +
   geom_smooth(method = "lm",
@@ -229,8 +229,8 @@ library("ggridges")
 dataset |> 
   #filter(BMI_class != "Underweight") |> 
   ggplot(mapping = aes(x = hba1c,
-                       y = glucose_tollerance,
-                       fill = glucose_tollerance )) +
+                       y = glucose_tolerance,
+                       fill = glucose_tolerance )) +
     geom_density_ridges(alpha = 0.5) +
     labs(x = "hba1c",
          y = "glucose tollerance",
@@ -244,8 +244,8 @@ dataset |>
 dataset |> 
   #filter(BMI_class != "Underweight") |> 
   ggplot(mapping = aes(x = `c-peptide`,
-                       y = glucose_tollerance,
-                       fill = glucose_tollerance )) +
+                       y = glucose_tolerance,
+                       fill = glucose_tolerance )) +
     geom_density_ridges(alpha = 0.5) +
     labs(x = "c-peptide",
          y = "glucose tollerance",
@@ -259,7 +259,7 @@ dataset |>
 dataset |>
   ggplot(aes(x = whr,
              y = hba1c,
-             colour = glucose_tollerance)) +
+             colour = glucose_tolerance)) +
   geom_point(size = 2,
              alpha = 0.4) +
   geom_smooth(method = "lm") +
@@ -274,7 +274,7 @@ dataset |>
 dataset |> 
   ggplot(aes(x = cholesterol,
               y = `c-peptide`,
-             colour = glucose_tollerance)) +
+             colour = glucose_tolerance)) +
     geom_point() +
     theme_minimal(base_size = 12)
 ```
