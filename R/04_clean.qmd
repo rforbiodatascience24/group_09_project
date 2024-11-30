@@ -64,7 +64,7 @@ These columns are can be really important for analysis of single datasets, so we
 
 Because of what was said before there are two possible approaches:
 
-1.  keep all the datasets and only mantain the columns which are significant for most of them. This makes it difficult to perform significant analysis on the metadata as not many informations are left. On the other hand we have much more data to study in terms of microbiota.
+1.  keep all the datasets and only maintain the columns which are significant for most of them. This makes it difficult to perform significant analysis on the metadata as not many information are left. On the other hand we have much more data to study in terms of microbiota.
 
 2.  choose only a single dataset and focus the analysis on that one. This allows us to perform more significant analysis on the metadata and also makes the abundance data smaller, thus making it easier to work with it.
 
@@ -178,7 +178,7 @@ to_remove <- valid_counts |>
   pull(column_name)
 
 metadata <- metadata |> 
-  select(-to_remove)
+  select(-all_of(to_remove))
 ```
 
 We remove columns having all the same value for all rows as they do not provide any information
@@ -202,8 +202,8 @@ metadata <- metadata |>
 
 We see that the `classification` column is just another way of classifying the `disease` column with:
 
--   n (no disease) = ngt (normal glucose tollerance)
--   impaired_glucose_tollerance = igt
+-   n (no disease) = ngt (normal glucose tolerance)
+-   impaired_glucose_tolerance = igt
 -   t2d = t2d (type 2 diabetes)
 
 ```{r}
@@ -231,7 +231,7 @@ abundance_data <- abundance_data |>
 
 ### Saving the dataset
 
-Lastly we merge the metadata with the abundance data. We can do it without checking the row corrispondance, as we did not remove any row or alter their order during the cleaning.
+Lastly we merge the metadata with the abundance data. We can do it without checking the row correspondence, as we did not remove any row or alter their order during the cleaning.
 
 ```{r}
 dataset <- metadata |> 
@@ -240,12 +240,6 @@ dataset <- metadata |>
 
 ```{r}
 target_dir <- "../data"
-
-# Create the data folder if it does not exist
-if (!file.exists(target_dir)) {
-  # Create the folder if it doesn't exist
-  dir.create(target_dir, recursive = TRUE)
-  }
 
 # save the dataset in the data fodler
 write_csv(dataset, str_c(target_dir, "/04_dat_clean.csv"))

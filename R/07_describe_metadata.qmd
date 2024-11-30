@@ -11,7 +11,7 @@ editor: visual
 suppressMessages(library("tidyverse"))
 library("here")
 library("ggridges")
-library(patchwork)
+library("patchwork")
 ```
 
 ```{r}
@@ -20,7 +20,7 @@ data_path <- here("data/06_dat_augmented.csv")
 dataset <- read_csv(data_path, show_col_types = FALSE)
 ```
 
-First, we want to get an overview of the metadata present in the dataset, before we analyz it. In the table below, we find parameter values distributed based on glucose tolerance. We see here that there is only one underweight person; therefore, when we look at how values are distributed according to BMI class, we choose not to include it as it does not provide enof data information.
+First, we want to get an overview of the metadata present in the dataset, before we analyze it. In the table below, we find parameter values distributed based on glucose tolerance. We see here that there is only one underweight person; therefore, when we look at how values are distributed according to BMI class, we choose not to include it as it does not provide enough data information.
 
 ```{r}
 dataset |> 
@@ -42,7 +42,7 @@ We have access to many information regarding markers that correlate to the insur
 dataset |> 
   ggplot(aes(x = fct_infreq(country))) + 
   geom_bar(fill = "skyblue", color = "black") + 
-  geom_text(stat = "count", aes(label = ..count..), vjust = -0.5, size = 3) +
+  geom_text(stat = "count", aes(label = after_stat(count)), vjust = -0.5, size = 3) +
   labs(
     title = "Distribution of samples by country",
     x = "Country",

@@ -6,14 +6,16 @@ editor: visual
 ---
 
 ```{r}
-library(tidyverse)
-library(vegan)
+library("tidyverse")
+library("vegan")
+library("here")
 ```
 
 ```{r}
 # verify that the dataset can be loaded successfully
-data_path <- "../data/06_dat_augmented.csv"
+data_path <- here("data/06_dat_augmented.csv")
 dataset <- read_csv(data_path,
+                    na = c("nd", "-", "na"),
                     show_col_types = FALSE)
 ```
 
@@ -404,7 +406,7 @@ dataset_subsection_estimates |>
   filter(is_significant == "yes")
 ```
 
-Then we create a plot of the significant parameter values, where on the x-axis we have Estimates (95% CIs), and on the y-axis we have the significant parameters.
+Then we create a plot of the significant parameter values, where on the x-axis we have Estimates (95% CIs) of the difference, and on the y-axis we have the significant parameters.
 
 ```{r}
 dataset_subsection_estimates |> 
