@@ -24,5 +24,24 @@ quarto_render("01_download.qmd", execute = TRUE, output_file = NULL)
 # Load and create a copy of the dataset in the data folder
 quarto_render("02_load.qmd", execute = TRUE, output_file = NULL)
 
+# Explore and select the data to work with
+quarto_render("03_data_selection.qmd", execute = TRUE, output_file = NULL)
+
+# Clean the selected dataset
+quarto_render("04_clean.qmd", execute = TRUE, output_file = NULL)
+
+# Confirm that the dataset is tidy and fix minor issues to improve readability
+quarto_render("05_tidy.qmd", execute = TRUE, output_file = NULL)
+
+# Create useful additional variables for analysis
+quarto_render("06_augment.qmd", execute = TRUE, output_file = NULL)
+
+# Visualize the main aspects of the metadata
+quarto_render("07_describe_metadata.qmd", execute = TRUE, output_file = NULL)
+
+# Visualize the main aspects of the abundace data
+quarto_render("08_describe_abundance.qmd", execute = TRUE, output_file = NULL)
+
+# removed unwanted folder created as byproduct of running all the documents
 unlink("*_files", recursive = TRUE)
 ```
