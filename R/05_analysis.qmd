@@ -68,7 +68,7 @@ dataset_long_nested <- dataset_long|>
 dataset_long_nested
 ```
 
-Here we see how the data can be pulled out for each bacterium.
+Here we see how the data can be pulled out for a choosen bacterium.
 
 ```{r}
 #How to get the data
