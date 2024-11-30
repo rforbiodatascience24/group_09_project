@@ -421,7 +421,11 @@ dataset |>
 
 ```{r}
 dataset <- dataset |> 
+<<<<<<< HEAD
+  mutate(glucose_tollerance = factor(glucose_tollerance,
+=======
   mutate(glucose_tolerance = factor(glucose_tolerance,
+>>>>>>> 4d738e43b3aca70a894ae7d7ee9496308a8fa8e6
                                      levels = c("normal",
                                                 "impaired",
                                                 "t2d"))) |> 
@@ -432,7 +436,11 @@ dataset <- dataset |>
                                        "Obese"))) 
 
 dataset |> 
+<<<<<<< HEAD
+  ggplot(aes(x = BMI_class, fill = glucose_tollerance)) + 
+=======
   ggplot(aes(x = BMI_class, fill = glucose_tolerance)) + 
+>>>>>>> 4d738e43b3aca70a894ae7d7ee9496308a8fa8e6
   geom_bar(color = "black") + 
   labs(
     x = "BMI",
@@ -447,11 +455,16 @@ dataset |>
 We can see that the number of obese and overweight people increases in glucose impaired and diabetic categories.
 
 ```{r}
+<<<<<<< HEAD
+dataset |> 
+  pivot_longer(cols = c(insulin, statins), names_to = "variable", values_to = "category") |> 
+=======
 #split on BMI
 dataset |> 
   pivot_longer(cols = c(insulin, statins),
                names_to = "variable", 
                values_to = "category") |> 
+>>>>>>> 4d738e43b3aca70a894ae7d7ee9496308a8fa8e6
   ggplot(aes(x = category, y = cholesterol, fill = category)) + 
   geom_boxplot(color = "black") + 
   facet_wrap(~variable) + 
@@ -460,7 +473,10 @@ dataset |>
     y = "Cholesterol",
     title = "Cholesterol levels vs assuming insuling or statins"
   ) +
+<<<<<<< HEAD
+=======
   facet_wrap(~BMI_class)+
+>>>>>>> 4d738e43b3aca70a894ae7d7ee9496308a8fa8e6
   theme_minimal() +
   theme(
     plot.title = element_text(size = 16, hjust = 0.5)
@@ -471,9 +487,15 @@ We can see that both the treatment with statins and with insulin have the effect
 
 ```{r}
 dataset |> 
+<<<<<<< HEAD
+  ggplot(aes(x = glucose_tollerance,
+             y = hdl,
+             fill = glucose_tollerance)) + 
+=======
   ggplot(aes(x = glucose_tolerance,
              y = hdl,
              fill = glucose_tolerance)) + 
+>>>>>>> 4d738e43b3aca70a894ae7d7ee9496308a8fa8e6
   geom_boxplot(color = "black") + 
   labs(
     x = "Glucose tolerance",
@@ -490,9 +512,15 @@ We can see that the HDL levels lower with the glucose tolerance decreasing, this
 
 ```{r}
 dataset |> 
+<<<<<<< HEAD
+  ggplot(aes(x = glucose_tollerance,
+             y = ldl,
+             fill = glucose_tollerance)) + 
+=======
   ggplot(aes(x = glucose_tolerance,
              y = ldl,
              fill = glucose_tolerance)) + 
+>>>>>>> 4d738e43b3aca70a894ae7d7ee9496308a8fa8e6
   geom_boxplot(color = "black") + 
   labs(
     x = "Glucose tolerance",
@@ -509,9 +537,15 @@ Strangely we see that same for the LDL, which instead is expected to either lowe
 
 ```{r}
 dataset |> 
+<<<<<<< HEAD
+  ggplot(aes(x = glucose_tollerance,
+             y = hba1c,
+             fill = glucose_tollerance)) + 
+=======
   ggplot(aes(x = glucose_tolerance,
              y = hba1c,
              fill = glucose_tolerance)) + 
+>>>>>>> 4d738e43b3aca70a894ae7d7ee9496308a8fa8e6
   geom_boxplot(color = "black") + 
   labs(
     x = "Glucose tolerance",

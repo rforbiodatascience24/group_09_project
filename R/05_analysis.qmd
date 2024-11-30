@@ -1,16 +1,15 @@
 ---
-title: "04_analysis"
-author: "Andreis Marco"
+title: "05_analysis"
 format: html
 editor: visual
 ---
 
-# Load the dataset
+# Microbial distribution across BMI classes
 
 ```{r}
 library("tidyverse")
 library("broom")
-library("table1")
+library("vegan")
 ```
 
 ```{r}
@@ -18,18 +17,80 @@ library("table1")
 data_path <- "../data/06_dat_augmented.csv"
 dataset <- read_csv(data_path,
                     show_col_types = FALSE)
+```
 
+We want to investifate if there is a significant difference in term of microbial communities in the different BMI groups. To do so we first visualise with PCoA if the microbial composition form clusters when plotted. Secondly we perform a PERMANOVA test to quantify the difference between the BMI groups, testing the following:
 
+Null hypothesis : There is no difference in microbial community across composition across the BMI classes
+
+Alternative hypothesis: There is a difference in microbial community composition across BMI classes.
+
+```{r}
+metadata <- dataset |> 
+  select(-starts_with("s_")) 
+
+bacteria_data <- dataset |> 
+  select(starts_with("s_")) 
+```
+
+```{r}
+#  Calculate the Bray-Curtis distances
+bc_distance <- vegdist(bacteria_data,
+                   method = "bray")
+```
+
+```{r}
+# applying (PCoA) to visualize clusters of bacteria.
+pcoa_result <- cmdscale(bc_distance, k = 2)  
+```
+
+# PCoA with BMI to visualize clusters across BMI
+
+```{r}
+pcoa_df <- data.frame(pcoa_result,
+                      Group = metadata$BMI_class) |> 
+  rename(PCoA1 = X1,
+         PCoA2 = X2)
+```
+
+```{r}
+ ggplot(pcoa_df,
+       aes(x = PCoA1,
+           y = PCoA2,
+           color = Group)) +
+    geom_point(size = 3,
+             alpha = 0.5) +  
+    theme_minimal() +  
+    labs(title = "PCoA Plot of Beta Diversity", 
+       x = "PCoA1", 
+       y = "PCoA2",
+       color = "BMI Category")
+```
+
+```{r}
+# PERMANOVA to  see whether the diversity of microbial communities differ across bmi
+anova_result <- adonis2(bc_distance ~ BMI_class,
+                         data = metadata)
+print(anova_result)
+```
+
+## Interpretation of the results
+
+From the PCoA plot we can see that there aren't clusters for each BMI category and some samples overlap with samples from different categories such as points from normal weight overlap with obese and overweight.
+
+The results of the PERMANOVA agree with what is seen in the PCoA as the P.value is 0.219, which indicates that the differences in microbial composition across BMI classes is not significant. Also R2=0.0238 means that bmi contributes to only 2.38% of the variance in the diversity of microbial community across the bmi classes.
+
+# P-value analysis for bacterial species
+
+Before we can study how the bacterial species may be related to type 2 diabetes, we need to find which bacteria have more than 50 values that are not 0. Even though 0 is a meaningful value in the dataset, we need some data points to vary in order to see if there is a meaning full relationship.
+
+```{r}
 dataset <- dataset |> 
   filter(glucose_tolerance != "impaired") |> 
   select(-is_diseased) |> 
   mutate(is_diseased = case_when(glucose_tolerance == "normal" ~ 0,
                        glucose_tolerance == "t2d" ~ 1))
 ```
-
-# P-value analysis for bacterial species
-
-Before we can study how the bacterial species may be related to type 2 diabetes, we need to find which bacteria have more than 50 values that are not 0. Even though 0 is a meaningful value in the dataset, we need some data points to vary in order to see if there is a meaning full relationship.
 
 ```{r}
 #Get a list of the bacteria that have less than n samples where the value is different from 0
@@ -44,6 +105,12 @@ sparse_columns <- dataset |>
   summarise(non_zero_samples = n()) |> 
   filter(non_zero_samples < n) |> 
   pull(backteria)
+```
+
+```{r}
+#splitting dataset into metadata and bacteria data 
+metadata <- dataset |> 
+  select(-starts_with("s_")) 
 ```
 
 We will perform the p-value analysis where we compare the bacterial samples from normal and T2D (type 2 diabetes) patients. Therefore, we will remove the impaired samples and sparse data. Next, we will transform the columns and convert the data from wide format to long format to conduct the p-value analysis.
