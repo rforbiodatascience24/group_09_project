@@ -2,5 +2,6 @@
 .Rhistory
 .RData
 .Ruserdata
+.group_09_project.Rproj
 data
 _raw

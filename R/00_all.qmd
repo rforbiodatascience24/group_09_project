@@ -39,12 +39,9 @@ quarto_render("06_augment.qmd", execute = TRUE, output_file = NULL)
 # Visualize the main aspects of the metadata
 quarto_render("07_describe_metadata.qmd", execute = TRUE, output_file = NULL)
 
-<<<<<<< HEAD
-=======
 # Visualize the main aspects of the abundace data
 quarto_render("08_describe_abundance.qmd", execute = TRUE, output_file = NULL)
 
 # removed unwanted folder created as byproduct of running all the documents
->>>>>>> 4d738e43b3aca70a894ae7d7ee9496308a8fa8e6
 unlink("*_files", recursive = TRUE)
 ```

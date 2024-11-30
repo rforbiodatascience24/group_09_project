@@ -26,15 +26,21 @@ dataset <- read_csv(data_path, show_col_types = FALSE)
 ```
 
 ```{r}
-target_dir <- "../data"
+# show a couple of rows from the dataset
+head(dataset)
+```
+
+```{r}
+target_path <- "../data"
+
 
 # Create the data folder if it does not exist
-if (!file.exists(target_dir)) {
+if (!file.exists(target_path)) {
   # Create the folder if it doesn't exist
-  dir.create(target_dir, recursive = TRUE)
+  dir.create(target_path, recursive = TRUE)
   }
 
 # save the dataset in the data fodler
-write_csv(dataset, str_c(target_dir, "/02_dat_load.csv"))
+write_csv(dataset, str_c(target_path, "/02_dat_load.csv"))
 
 ```

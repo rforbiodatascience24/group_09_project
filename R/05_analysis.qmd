@@ -1,15 +1,13 @@
 ---
 title: "05_analysis"
+author: "Andreis Marco"
 format: html
 editor: visual
 ---
 
-# Microbial distribution across BMI classes
-
 ```{r}
-library("tidyverse")
-library("broom")
-library("vegan")
+library(tidyverse)
+library(vegan)
 ```
 
 ```{r}
@@ -19,7 +17,153 @@ dataset <- read_csv(data_path,
                     show_col_types = FALSE)
 ```
 
-We want to investifate if there is a significant difference in term of microbial communities in the different BMI groups. To do so we first visualise with PCoA if the microbial composition form clusters when plotted. Secondly we perform a PERMANOVA test to quantify the difference between the BMI groups, testing the following:
+### Metadata analysis
+
+What does impaired glucose tolerance mean? It means that blood sugar levels are elevated but not enough to warrant a diagnosis of diabetes
+
+```{r}
+# Let's look at the proportions of our catagorical values
+# Our data is well proportionally split between the three distincs groups of "disease"
+dataset |> 
+  count(glucose_tolerance,
+        name = "Count") |> 
+  arrange(desc(Count))
+```
+
+### Correlation analysis
+
+Calculating the correlation matrix on a subset of our data will tell us about linear relationships between data variables.
+
+Lets start with a subset of our data, containing metadata and a few high-level markers (e.g. LDL and HDL)
+
+```{r}
+# Filter for diabetics and impaired
+filtered_data <- dataset |> 
+  filter(glucose_tolerance %in% c("t2d", "impaired"))
+
+# Choose the abundance data from the filtered data
+df_selected <- filtered_data |> 
+  select(starts_with("s_"))
+
+# Calculate the mean of each column
+mean_values <- df_selected |> 
+  summarise(across(everything(),
+                   mean))
+
+# Convert to long format and get the top 5 columns with the highest mean values
+# top_5_species <- mean_values |> 
+#   pivot_longer(everything(),
+#                names_to = "species",
+#                values_to = "mean_value") |> 
+#   arrange(desc(mean_value)) |> 
+#   slice_head(n = 5) |> 
+#   pull(species)
+# 
+# top_5_species <- dataset |> 
+#   select(all_of(top_5_species))
+```
+
+```{r}
+corr_data <- dataset |> 
+  select(-starts_with("s_")) |> 
+  select(where(~is.numeric(.x))) 
+
+# Normalize  columns
+corr_normalized <- corr_data |> 
+  mutate(across(everything(),
+                ~ (. - mean(.)) / sd(.)))
+
+# Compute the covariance matrix
+cov_matrix <- (t(as.matrix(corr_normalized)) %*% as.matrix(corr_normalized)) / 
+  (nrow(corr_normalized) - 1)
+
+# Convert the covariance matrix to a correlation matrix
+cor_matrix <- cov2cor(cov_matrix)
+
+# Pivot the correlation matrix to long format
+melted_cor_matrix <- as.data.frame(cor_matrix) |> 
+  rownames_to_column(var = "Var1") |> 
+  pivot_longer(-Var1, names_to = "Var2"
+               , values_to = "value")
+
+# Plot values in colour squares to visualize correlation
+ggplot(data = melted_cor_matrix,
+       aes(x = Var1,
+           y = Var2,
+           fill = value)) +
+  geom_tile() +
+  geom_text(aes(label = round(value
+                              , 2)),
+            color = "black",
+            size = 2) + 
+  scale_fill_gradient2(low = "blue",
+                       high = "red",
+                       mid = "white", 
+                       midpoint = 0,
+                       limit = c(-1, 1),
+                       space = "Lab", 
+                       name = "Correlation") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle =90,
+                                   vjust = 1, 
+                                   size = 10,
+                                   hjust = 1),
+  axis.title.x = element_blank(),
+  axis.title.y = element_blank())+
+  coord_fixed()
+```
+
+We see a slight inverse relationship between HDL levels and BMI. This might not come as the biggest surprise. \[doi: 10.1586/erc.11.182\]
+
+## Assessing relationships between species abundance and metadata features
+
+Let's analyze the diversity between class variables (T2d, healthy and glucose impaired)
+
+We do this by calculating a distance matrix based on the microbial abundance data, which then can be used to visualize the differences in composition in a reduced dimensionality.
+
+```{r}
+# Pull the class labels
+group_labels <- dataset |> 
+  pull(glucose_tolerance)
+
+# Select abundance data from data set to calculate distances
+abundance_data <- dataset |> 
+  select(matches("^s_"))
+
+# Calculate Beta diversity based on Bray-Curtis distance
+bc_dist <- vegdist(abundance_data, method = "bray")
+
+# Perform PCoA
+pcoa_result <- cmdscale(as.dist(bc_dist), k = 2, eig = TRUE)
+
+# Extract eigenvalues and calculate proportion of variance explained
+eigenvalues <- pcoa_result |>  pluck("eig")
+variance_explained <- eigenvalues / sum(eigenvalues)
+
+# Combine PCoA results with group labels 
+pcoa_df <- pcoa_result |> 
+  pluck("points") |> 
+  as.data.frame() |>  
+  rename(PCoA1 = V1, PCoA2 = V2) |> 
+  mutate(Group = group_labels)
+```
+
+```{r}
+# PCoA plot
+ggplot(pcoa_df, aes(x = PCoA1, y = PCoA2, color = Group)) +
+  geom_point(size = 4) +
+  theme_minimal() +
+  labs(title = "PCoA of Bray-Curtis Dissimilarity",
+       x = paste0("PCoA1 (", round(variance_explained |>  first() * 100, 2), "%)"),
+       y = paste0("PCoA2 (", round(variance_explained |>  nth(2) * 100, 2), "%)")) +
+  scale_color_manual(values = c("red", "blue", "green"))
+```
+
+The plot does not show any indication of separation between groups.
+
+# Microbial distribution across BMI classes
+
+We want to investigate if there is a significant difference in term of microbial communities in the different BMI groups. To do so we first visualise with PCoA if the microbial composition form clusters when plotted. Secondly we perform a PERMANOVA test to quantify the difference between the BMI groups, testing the following:
 
 Null hypothesis : There is no difference in microbial community across composition across the BMI classes
 
@@ -45,13 +189,6 @@ pcoa_result <- cmdscale(bc_distance, k = 2)
 ```
 
 # PCoA with BMI to visualize clusters across BMI
-
-```{r}
-pcoa_df <- data.frame(pcoa_result,
-                      Group = metadata$BMI_class) |> 
-  rename(PCoA1 = X1,
-         PCoA2 = X2)
-```
 
 ```{r}
  ggplot(pcoa_df,
