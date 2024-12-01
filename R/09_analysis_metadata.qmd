@@ -1,0 +1,266 @@
+---
+author: 
+  - "Andreis Marco(s243116)" 
+  - "Asiya Mohamad Yusuf Muse (s243930)"
+  - "Magnus Harthimmer (s233426)"  
+  - "Anita Skovbjerg Hjort-Gregersen (s201190)"
+  - "Rebecca Hjermind Millum (s215024)"
+
+execute:
+  warning: false
+  message: false
+ 
+format: html
+output: html_document
+editor: visual
+---
+
+In this file we are going to explore a the correlation of the metadata columns, and check if there are statistically significant differences between healthy and diseased individuals.
+
+```{r}
+library("tidyverse")
+library("vegan")
+library("here")
+library("broom")
+# Import costum function
+source("99_proj_func.R")
+```
+
+```{r}
+# verify that the dataset can be loaded successfully
+data_path <- here("data/06_dat_augmented.RData")
+load(data_path)
+```
+
+### Metadata analysis
+
+What does impaired glucose tolerance mean? It means that blood sugar levels are elevated but not enough to warrant a diagnosis of diabetes.
+
+```{r}
+# Let's look at the proportions of our catagorical values
+# Our data is well proportionally split between the three distincs groups of "disease"
+dataset |> 
+  count(glucose_tolerance,
+        name = "Count") |> 
+  arrange(desc(Count))
+```
+
+### Correlation analysis
+
+Calculating the correlation matrix on a subset of our data will tell us about linear relationships between data variables.
+
+Lets start with a subset of our data, containing metadata and a few high-level markers (e.g. LDL and HDL)
+
+```{r}
+# Filter for diabetics and impaired
+filtered_data <- dataset |> 
+  filter(glucose_tolerance %in% c("t2d", "impaired"))
+
+# # Choose the abundance data from the filtered data
+# df_selected <- filtered_data |> 
+#   select(starts_with("s_"))
+# 
+# # Calculate the mean of each column
+# mean_values <- df_selected |> 
+#   summarise(across(everything(),
+#                    mean))
+
+# Convert to long format and get the top 5 columns with the highest mean values
+# top_5_species <- mean_values |> 
+#   pivot_longer(everything(),
+#                names_to = "species",
+#                values_to = "mean_value") |> 
+#   arrange(desc(mean_value)) |> 
+#   slice_head(n = 5) |> 
+#   pull(species)
+# 
+# top_5_species <- dataset |> 
+#   select(all_of(top_5_species))
+```
+
+```{r}
+# Select numeric columns after excluding ones starting with "s_"
+corr_data <- dataset |> 
+  select(-starts_with("s_")) |> 
+  select(where(~ is.numeric(.x))) 
+
+# Normalize columns, accounting for NA values
+corr_normalized <- corr_data |> 
+  mutate(across(everything(),
+                ~ ifelse(is.na(.), mean(., na.rm = TRUE), .))) |> # Impute NA with column mean
+  mutate(across(everything(),
+                ~ (. - mean(., na.rm = TRUE)) / sd(., na.rm = TRUE))) 
+
+# Compute the covariance matrix
+cov_matrix <- (t(as.matrix(corr_normalized)) %*% as.matrix(corr_normalized)) / 
+  (nrow(corr_normalized) - 1)
+
+# Convert the covariance matrix to a correlation matrix
+cor_matrix <- cov2cor(cov_matrix)
+
+# Pivot the correlation matrix to long format
+melted_cor_matrix <- as.data.frame(cor_matrix) |> 
+  rownames_to_column(var = "Var1") |> 
+  pivot_longer(-Var1, names_to = "Var2", values_to = "value")
+
+# Plot values in color squares to visualize correlation
+correlation_matrix <- ggplot(data = melted_cor_matrix,
+       aes(x = Var1, y = Var2, fill = value)) +
+  geom_tile() +
+  geom_text(aes(label = round(value, 2)),
+            color = "black",
+            size = 2) + 
+  scale_fill_gradient2(low = "blue",
+                       high = "red",
+                       mid = "white", 
+                       midpoint = 0,
+                       limit = c(-1, 1),
+                       space = "Lab", 
+                       name = "Correlation") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 90, 
+                                   size = 10,
+                                   hjust = 1,
+                                   vjust = 0.2),
+        axis.title.x = element_blank(),
+        axis.title.y = element_blank()) +
+  coord_fixed()
+
+save_plot_custom(
+  plot = correlation_matrix,
+  filename = "09_correlation_matrix.jpg"
+)
+correlation_matrix
+```
+
+Unfortunately there is not a lot we can conclude from the correlation matrix... the only significant correlation are between the waist circumference and the bmi (0.8), which make sense as lager waist usually are due to accumulated fat, or more in general, with heavier individuals. The strongest correlation is between ldl and cholesterol, but it is trivial given that the total cholesterol contains the ldl measurement. The most interesting correlation is that between fasting_insulin and c-peptide, as they are both specific markers for type II diabetes relating to the quantity of insulin produced.
+
+```{r}
+corval_lm <- dataset |>
+  summarise(PCC = cor(x = bmi,
+                      y = wc,
+                      use = "complete.obs",
+                      method = "pearson"))
+bmi_wc_correlation <- dataset |>
+  ggplot(aes(x = bmi,
+             y = bmi)) +
+  geom_point(size = 2,
+             color = "red",
+             alpha = 0.5) +
+  geom_smooth(method = "lm") +
+  labs(x = "WC",
+       y = "Bmi",
+       title = "Bmi vs wc")+
+  labs(subtitle = str_c("PCC = ", corval_lm  |>  pull(PCC) |>round(3)))+
+  theme_minimal(base_size = 12)
+
+save_plot_custom(
+  plot = bmi_wc_correlation,
+  filename = "09_bmi_wc_correlation.jpg"
+)
+bmi_wc_correlation
+```
+
+# P-value analysis meta_data
+
+Now we are interested in doing a p-value test to study which of the parameters of the metadata are relevant to describing T2D. We compare between the normal and type 2 diabetes group.
+
+We transform our data from wide to long format. We do not test on non-continuous variables.
+
+```{r}
+dataset_subsection_long <- dataset |> 
+  select(-starts_with("s_")) |>                 
+  select(where(~is.numeric(.x))) |>             
+  pivot_longer(cols = -is_diseased,             
+               names_to = "data_point",
+               values_to = "value")
+```
+
+We group the data according to the type of data point, and each data point gets its own table by nesting. Then, the data is ungrouped again.
+
+```{r}
+dataset_subsection_long_nested <- dataset_subsection_long |>
+  group_by(data_point) |> 
+  nest() |> 
+  ungroup()
+
+dataset_subsection_long_nested
+```
+
+Now we set up a linear model for each metadata variable.
+
+```{r}
+dataset_subsection_aug_long_nested <- dataset_subsection_long_nested |> 
+  group_by(data_point) |> 
+  mutate(model_object = map(.x = data,
+                   .f = ~lm(formula = value ~ is_diseased,
+                            data = .x))) |> 
+  mutate(model_object_tidy = map(.x = model_object,
+                                 .f = ~tidy(x = .x,
+                                            conf.int = TRUE,
+                                            conf.level = 0.95)))
+  
+dataset_subsection_aug_long_nested
+```
+
+Then we try to pull out the model where the parameter variable BMI is used to describe T2D
+
+```{r}
+dataset_subsection_aug_long_nested |> 
+  filter(data_point == "bmi") |> 
+  pull(model_object_tidy)
+```
+
+We then unnest the model so that we can access the information about the model.
+
+```{r}
+dataset_subsection_estimates <- dataset_subsection_aug_long_nested |> 
+  unnest(model_object_tidy)
+dataset_subsection_estimates
+```
+
+```{r}
+dataset_subsection_estimates <- dataset_subsection_estimates |> 
+  filter(term == "is_diseased") |> 
+  select(data_point, p.value, estimate, conf.low, conf.high) |> 
+  ungroup()
+dataset_subsection_estimates
+```
+
+We then create two new parameters, q.value and is_significant, which help us test if the data point is statistically significant at an alpha = 0.05 level. We find that the values for HDL, WHR, WC, cholesterol, fasting insulin, HbA1c, and C-peptide are significant at the alpha = 0.05 level.
+
+```{r}
+dataset_subsection_estimates <- dataset_subsection_estimates |>
+  mutate(q.value = p.adjust(p.value),
+         is_significant = case_when(q.value <= 0.05 ~ "yes",
+                                    q.value > 0.05 ~ "no"))
+dataset_subsection_estimates |> 
+  filter(is_significant == "yes")
+```
+
+Then we create a plot of the significant parameter values, where on the x-axis we have Estimates (95% CIs) of the difference, and on the y-axis we have the significant parameters.
+
+```{r}
+significant_different_feature <- dataset_subsection_estimates |> 
+  filter(is_significant == "yes") |> 
+  ggplot(aes(x = estimate,
+             y = fct_reorder(data_point, estimate),
+             xmin = conf.low,
+             xmax = conf.high)) +
+  geom_vline(xintercept = 0) +
+  geom_errorbarh() +
+  geom_point() +
+  theme_minimal(base_size = 12) +
+  theme(plot.title = element_text(hjust = 1)) +
+  labs(x = "Estimates (95%CIs)",
+       y = expression("Significant different features (alpha = 0.05)"),
+       title = "Parameters associated with type 2 diabetes")
+
+save_plot_custom(
+  plot = significant_different_feature,
+  filename = "09_significant_different_feature.jpg"
+)
+significant_different_feature
+```
+
+We can see that the significantly different (p.value \> 0.05) variables are many of those that where observed during previous visualization, in particular we got fasting insulin and fasting glucose, which obviuosly mean that the HOMA-IR score is also significant. We also have the hemoglobin a1c and the c-peptide, which we have already talk about as important type II diabetes markers. Lastly adinopectin is also significantly less present in diabetic people, which is in agreement as it is a hormone essential for insulin sensitivity.

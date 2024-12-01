@@ -1,21 +1,32 @@
 ---
 title: "03_data_selection"
-author: "Andreis Marco"
+author: 
+  - "Andreis Marco(s243116)" 
+  - "Asiya Mohamad Yusuf Muse (s243930)"
+  - "Magnus Harthimmer (s233426)"  
+  - "Anita Skovbjerg Hjort-Gregersen (s201190)"
+  - "Rebecca Hjermind Millum (s215024)"
+
+execute:
+  warning: false
+  message: false
+ 
 format: html
+output: html_document
 editor: visual
 ---
+
+This files aims at looking for inconsistences between the dataset and what was declared in the original paper.
 
 ### The history of the dataset
 
 To do a efficient cleaning we need to understand the format of our data and what it represents, so let's investigate the dataset origins.
 
-The original paper is interested in comparing the microbial populations of patients both healthy and affected by various diseases with the aim of discovering disease biomarkers and predicting of health conditions. To do so they collected the data, which are the results of shot-gun genome sequencing of the samples, from 8 different metagenomics studies (the only one available at the time of the study (2016)), which cover: liver cirrhosis, colorectal cancer, inflammatory bowel disease, obesity and Type 2 diabetes. Segata et. al declared a total of 2571 samples before their preprocessing and 2424 after.
+The original paper is interested in comparing the microbial populations of patients both healthy and affected by various diseases with the aim of discovering disease biomarkers and predicting of health conditions. To do so, they collected the data, which are the results of shot-gun genome sequencing of the samples, from 8 different metagenomics studies (the only one savailable at the time of the study - 2016), which cover: liver cirrhosis, colorectal cancer, inflammatory bowel disease, obesity and Type 2 diabetes and healthy patients. Segata et. al declared a total of 2571 samples before their preprocessing and 2424 after.
 
-The sequencing data was analysed with a software called MetaPhlAn2 which outputs the species-level relative abundances and presence of strain-specific markers. Based on these Segata et. al. performed machine learning studies which are outside of the scope of these analysis. As we have no functional way of opening the output of MetaPhlAn2, we cannot consult this data.
+The sequencing data was analysed with a software called MetaPhlAn2 which outputs the species-level relative abundances and presence of strain-specific markers. Based on these Segata et. al. performed machine learning studies which are outside of the scope of this project. As we have no functional way of opening the output of MetaPhlAn2, we cannot consult this data.
 
-In 2020 the output a group of people (outside the SegataLab) transposed the dataset into CSV and published it on kaggle, which is where we found it.
-
-Given the history of the dataset, it is normal and comprehensible that understanding it can be quite a challenge.
+In 2020 a group of people (outside the SegataLab) transposed the dataset into CSV and published it on kaggle, which is where we found it.
 
 ### Load the dataset
 
@@ -25,12 +36,13 @@ library("here")
 ```
 
 ```{r}
-# verify that the dataset can be loaded successfully
 data_path <- here("data/02_dat_load.csv")
 dataset <- read_csv(data_path, show_col_types = FALSE)
 ```
 
 We immediately get parsing errors due...
+
+(NOTE: this was really inconsistent and refreshing the page or restarting the R session was enough to change the behavior).
 
 ```{r}
 problems(dataset)
@@ -63,7 +75,7 @@ The following is the paragraph of the paper were the data used is described:
 
 "We initially considered a total of 2571 publicly available metagenomic samples (from eight main studies/datasets) that were reduced to 2424 after pre-processing and curation (see next sections). These are all the human-associated shotgun metagenomic studies with more than 70 samples and read length bigger than 70nt available as of January 2015. Six studies were devoted to the characterization of the human gut microbiome in presence of different diseases. Cirrhosis included 123 patients affected by liver cirrhosis and 114 healthy controls \[[33](https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1004977#pcbi.1004977.ref033)\]. Colorectal consisted of a total of 156 samples, 53 of which were affected by colorectal cancer \[[34](https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1004977#pcbi.1004977.ref034)\]. IBD represented the first available large metagenomic dataset and includes 124 individuals, 25 were affected by inflammatory bowel disease (IBD) \[[35](https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1004977#pcbi.1004977.ref035)\]. Obesity included 123 non-obese and 169 obese individuals \[[31](https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1004977#pcbi.1004977.ref031)\]. Two distinct studies were instead related to the alteration of the microbiome in subjects with type 2 diabetes (T2D). In the T2D dataset, 170 Chinese T2D patients and 174 non-diabetic controls were present \[[37](https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1004977#pcbi.1004977.ref037)\]. The WT2D focused on European women and included 53 T2D patients, 49 impaired glucose tolerance individuals and 43 normal glucose tolerance people \[[32](https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1004977#pcbi.1004977.ref032)\]. Among these six datasets, two of them comprise two independent stages. For cirrhosis, 181 and 56 samples were collected during the so defined discovery and validation phases, respectively. Similarly, for T2D, 145 and 199 samples were acquired during the first (stageI) and second (stageII) stages, respectively. Additionally, two studies focused on healthy subjects and not strictly related to the gut microbiome were also taken into account. HMP included samples collected from five major body sites (i.e., gastrointestinal tract, nasal cavity, oral cavity, skin, and urogenital tract). A subset of these samples were described in \[[1](https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1004977#pcbi.1004977.ref001)\]. Finally, skin was composed by 291 samples acquired from several different skin sites \[[36](https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1004977#pcbi.1004977.ref036)\]."
 
-We traced the mentioned datasets with those present in ours based on the name giving in Table 1 of the original paper.
+We traced the mentioned datasets with those present in ours based on the names given in Table 1 of the original paper.
 
 ```{r}
 datasets <- c("liver_cirrhosis", "colorectal_cancer", "inflamatory_bowel_disease", "obesity","T2D", "WT2D","Human Microbiome Project", "Skin")
@@ -86,7 +98,7 @@ mentioned_vs_found |>
 
 The numbers of samples that we have for each dataset is equal to those obtained after the processing or intermediate between those and the total number before processing.
 
-We do not concern ourself with replicating the processing, and will proceed with the dataset as it is, though still not considering the datasets not mentioned as the source is not clear.
+We will look better into this inconsistencies during cleaning. As for now, will proceed with the dataset as it is, though still not considering the datasets not mentioned as the source is not clear.
 
 ```{r}
 traced_datasets <- c("Quin_gut_liver_cirrhosis", "Zeller_fecal_colorectal_cancer", "metahit", "Chatelier_gut_obesity", "t2dmeta_long", "t2dmeta_short", "WT2D", "hmp", "hmpii", "segre_Human_Skin")

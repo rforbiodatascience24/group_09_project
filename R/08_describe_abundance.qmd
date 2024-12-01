@@ -1,6 +1,18 @@
 ---
 title: "08_describe_abundance"
+author: 
+  - "Andreis Marco(s243116)" 
+  - "Asiya Mohamad Yusuf Muse (s243930)"
+  - "Magnus Harthimmer (s233426)"  
+  - "Anita Skovbjerg Hjort-Gregersen (s201190)"
+  - "Rebecca Hjermind Millum (s215024)"
+
+execute:
+  warning: false
+  message: false
+ 
 format: html
+output: html_document
 editor: visual
 ---
 
@@ -9,13 +21,15 @@ editor: visual
 ```{r}
 library("tidyverse")
 library("here")
+# Import costum function
+source("99_proj_func.R")
 ```
 
 ```{r}
 # verify that the dataset can be loaded successfully
-data_path <- here("data/06_dat_augmented.csv")
+data_path <- here("data/06_dat_augmented.RData")
 
-dataset <- read_csv(data_path, show_col_types = FALSE)
+load(data_path)
 ```
 
 ### Abundances visualization
@@ -40,34 +54,7 @@ mean_species_abundances <- dataset |>
     names_from = glucose_tolerance,
     values_from = mean_abundance
   ) |> 
-  arrange(desc(normal)) |> 
-  relocate(impaired,
-           .after = normal)
-```
-
-```{r}
-mean_species_abundances |> 
-  arrange(desc(t2d)) |>
-  head(100) |> 
-  pivot_longer(cols = -species,
-               names_to = "glucose_tolerance",
-               values_to = "mean_abundance") |> 
-    ggplot(aes(x = glucose_tolerance,
-               y = species,
-               fill = mean_abundance)) +
-      geom_tile() +
-      scale_fill_gradient2(low = "blue",
-                           mid = "white",
-                           high = "red",
-                           midpoint = 2) + 
-      labs(
-        title = "Mean Abundance of Bacterial Species",
-        x = "glucose_tolerance Group",
-        y = "Bacterial Species",
-        fill = "Mean Abundance"
-      ) +
-      theme_minimal() +
-  theme(axis.text.y = element_blank())
+  arrange(desc(normal))
 ```
 
 ```{r}
@@ -91,7 +78,7 @@ custom_labels <- c(
 )
 
 # Show the top 10s
-top_species_per_glucose_tolerance |> 
+top10_species_vs_glucose_tolerance <- top_species_per_glucose_tolerance |> 
 ggplot(aes(x = reorder(species, mean_abundance),
            y = mean_abundance,
            fill = glucose_tolerance)) +
@@ -113,9 +100,48 @@ ggplot(aes(x = reorder(species, mean_abundance),
     strip.text = element_text(size = 10),
     axis.text.x = element_text(size = 9, angle = 0, hjust = 0.5) 
   )
+
+save_plot_custom(
+  plot = top10_species_vs_glucose_tolerance,
+  filename = "08_top10_species_vs_glucose_tolerance.jpg"
+)
+top10_species_vs_glucose_tolerance
 ```
 
-Given that the most represented species are the same let's investigate which differ the most between healthy and diabetics subject
+Here we see that the top present species are the same, but this could simply be because they are common gut species.
+
+```{r}
+species_heatmap <- mean_species_abundances |> 
+  arrange(desc(t2d)) |>
+  #head(100) |> 
+  pivot_longer(cols = -species,
+               names_to = "glucose_tolerance",
+               values_to = "mean_abundance") |> 
+    ggplot(aes(x = glucose_tolerance,
+               y = species,
+               fill = mean_abundance)) +
+      geom_tile() +
+      scale_fill_gradient2(low = "purple",
+                           mid = "white",
+                           high = "green",
+                           midpoint = 2) + 
+      labs(
+        title = "Mean Abundance of Bacterial Species",
+        x = "Glucose tolerance",
+        y = "Bacterial Species",
+        fill = "Mean Abundance"
+      ) +
+      theme_minimal() +
+  theme(axis.text.y = element_blank())
+
+save_plot_custom(
+  plot = species_heatmap,
+  filename = "08_species_heatmap.jpg"
+)
+species_heatmap
+```
+
+Even by looking at the whole microbiota there does not seem to be too much difference between this groups.
 
 ```{r}
 species_difference <- mean_species_abundances |> 
@@ -128,7 +154,7 @@ species_difference <- mean_species_abundances |>
 ```
 
 ```{r}
-species_difference |> 
+most_different_species <- species_difference |> 
   head(30) |> 
   ggplot(aes(x = difference,
              y = reorder(species, difference),
@@ -143,6 +169,12 @@ species_difference |>
   theme(
     plot.title = element_text(size = 12, hjust = 1)
   )
+
+save_plot_custom(
+  plot = most_different_species,
+  filename = "08_most_different_species.jpg"
+)
+most_different_species
 ```
 
 Here we can see which are the 30 species that differ the most between healthy and diabetic patients. These can be useful for future analysis or by looking at the literature.
@@ -152,7 +184,7 @@ Even though we saw in the p-value test that there were no statistical significan
 We see that for most of the groups, the value of *s_Escherichia_coli* is almost the same, but we observe a few healthy samples with higher levels.
 
 ```{r}
-dataset |> 
+ecoli_vs_glucose_tolerance <- dataset |> 
   mutate(s_Escherichia_coli_group = cut(
     x = s_Escherichia_coli,
     breaks = seq(from = 0.000,
@@ -176,12 +208,19 @@ dataset |>
   theme(legend.position = "bottom",
         panel.grid.major.x = element_blank(),
         axis.text.x = element_text(vjust = 5))
+
+save_plot_custom(
+  plot = ecoli_vs_glucose_tolerance,
+  filename = "08_ecoli_vs_glucose_tolerance.jpg"
+)
+
+ecoli_vs_glucose_tolerance
 ```
 
 Then we also want to investigate where the combination of the two most different bacteria would provide more insight, but as we see below, we cannot find a meaningful relationship.
 
 ```{r}
-dataset |>
+ecoli_vs_raminococcus_glucose_tolerance <- dataset |>
   ggplot(aes(x = s_Escherichia_coli,
              y = s_Ruminococcus_sp_5_1_39BFAA,
              colour = glucose_tolerance)) +
@@ -192,4 +231,10 @@ dataset |>
        title = "s_Escherichia_coli vs s_Ruminococcus_sp_5_1_39BFAA groupt by glucose tolerance",
        colour = "Glucose tollerance: ")+
   theme_minimal(base_size = 10)
+
+save_plot_custom(
+  plot = ecoli_vs_raminococcus_glucose_tolerance,
+  filename = "08_ecoli_vs_raminococcus_glucose_tolerance.jpg"
+)
+ecoli_vs_raminococcus_glucose_tolerance
 ```
