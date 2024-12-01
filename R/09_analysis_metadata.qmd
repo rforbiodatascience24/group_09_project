@@ -148,7 +148,7 @@ bmi_wc_correlation <- dataset |>
              color = "red",
              alpha = 0.5) +
   geom_smooth(method = "lm") +
-  labs(x = "WC",
+  labs(x = "WC [cm]",
        y = "Bmi",
        title = "Bmi vs wc")+
   labs(subtitle = str_c("PCC = ", corval_lm  |>  pull(PCC) |>round(3)))+
