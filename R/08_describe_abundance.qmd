@@ -1,34 +1,21 @@
 ---
-title: "08_describe_abundance"
-author: 
-  - "Andreis Marco(s243116)" 
-  - "Asiya Mohamad Yusuf Muse (s243930)"
-  - "Magnus Harthimmer (s233426)"  
-  - "Anita Skovbjerg Hjort-Gregersen (s201190)"
-  - "Rebecca Hjermind Millum (s215024)"
-
-execute:
-  warning: false
-  message: false
- 
-format: html
-output: html_document
-editor: visual
+format: 
+  html:
+    self-contained: true
 ---
-
-### Load the dataset
+# Exploration of the abundances
 
 ```{r}
 library("tidyverse")
 library("here")
-# Import costum function
+library("ggridges")
+library("patchwork")
 source("99_proj_func.R")
 ```
 
-```{r}
-# verify that the dataset can be loaded successfully
-data_path <- here("data/06_dat_augmented.RData")
 
+```{r}
+data_path <- here("data/06_dat_augmented.RData")
 load(data_path)
 ```
 
