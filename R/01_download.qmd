@@ -1,43 +1,22 @@
 ---
-title: "01_download"
-author: 
-  - "Andreis Marco(s243116)" 
-  - "Asiya Mohamad Yusuf Muse (s243930)"
-  - "Magnus Harthimmer (s233426)"  
-  - "Anita Skovbjerg Hjort-Gregersen (s201190)"
-  - "Rebecca Hjermind Millum (s215024)"
-
-execute:
-  warning: false
-  message: false
- 
-format: html
-output: html_document
-editor: visual
+format: 
+  html:
+    self-contained: true
 ---
-
-In this file we check if the dataset is already present, if it is not we collect it programmatically from kaggle and save it in the \_raw folder.
+# Retrieve original data
 
 ```{r}
-library('tidyverse')
+library("tidyverse")
 library('httr')
 library('jsonlite')
 ```
 
+
+This first thing to do is acquire the dataset which is available on [kaggle](https://www.kaggle.com/api/v1/datasets/download/antaresnyc/human-metagenomics). We check if the dataset is already present, if it is not, we collect it programmatically from kaggle and save it in the \_raw folder.
+
 ```{r}
-wanted_file <- "abundance.csv"
 target_dir <- "../_raw/"
-
-# Create the data folder if it does not exist
-if (!file.exists(target_dir)) {
-  # Create the folder if it doesn't exist
-  dir.create(target_dir, recursive = TRUE)
-  }
-
-# Create the _raw folder if it does not exist 
-if (!file.exists(target_dir)) {
-  dir.create(target_dir, recursive = TRUE)
-}
+wanted_file <- "abundance.csv"
   
 # check if the file is already present 
 already_present <- file.exists(str_c(target_dir, wanted_file))
@@ -49,29 +28,22 @@ if (already_present) {
   dataset_slug <- "antaresnyc/human-metagenomics"
   output_file <- "../_raw/human_metagenomics.zip"
   
-  # Authenticate and download the file
+  # Dowload the dataset from kaggle
   response <- GET(
     url = str_c("https://www.kaggle.com/api/v1/datasets/download/", dataset_slug),
-    write_disk(output_file, overwrite = TRUE)
+    write_disk(output_file)
   )
   
   # Unzip the downloaded file
   unzip(output_file, exdir = target_dir)
   
-  # List the files in the extracted folder to find the files you want to delete
+  # Get list of files in the directory 
   extracted_files <- list.files(target_dir, recursive = TRUE)
-  message("Extracted files: ", paste(extracted_files, collapse = ", "))
-  
-  # Delete files that you don't care about
+
+  # Delete files we don't care about
   files_to_delete <- setdiff(extracted_files, wanted_file)
-  
-  # Delete the unwanted files
-  for (file in files_to_delete) {
-    file_path <- file.path(target_dir, file)
-    if (file.exists(file_path)) {
-      file.remove(file_path)
-      message(paste("Deleted:", file_path))
-    }
-  }
+  map(files_to_delete, ~ {
+    file_path <- file.path(target_dir, .x)
+      file.remove(file_path)})
 }
 ```

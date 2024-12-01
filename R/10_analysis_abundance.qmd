@@ -1,41 +1,29 @@
 ---
-title: "10_analysis_abundance"
-author: 
-  - "Andreis Marco(s243116)" 
-  - "Asiya Mohamad Yusuf Muse (s243930)"
-  - "Magnus Harthimmer (s233426)"  
-  - "Anita Skovbjerg Hjort-Gregersen (s201190)"
-  - "Rebecca Hjermind Millum (s215024)"
-
-execute:
-  warning: false
-  message: false
- 
-format: html
-output: html_document
-editor: visual
+format: 
+  html:
+    self-contained: true
 ---
+# Analysis of species abundances
 
 ```{r}
 library("tidyverse")
-library("vegan")
 library("here")
 library("broom")
-# Import costum function
+library("vegan")
 source("99_proj_func.R")
 ```
 
+
 ```{r}
-# verify that the dataset can be loaded successfully
 data_path <- here("data/06_dat_augmented.csv")
 dataset <- read_csv(data_path,
                     na = c("nd", "-", "na"),
                     show_col_types = FALSE)
 ```
 
-## Assessing relationships between species abundance and metadata features
+### Assessing relationships between species abundance and metadata features
 
-Let's analyze the diversity between class variables (T2d, healthy and glucose impaired)
+Let's analyze the diversity between glucose tolerances and BMI groups.
 
 We do this by calculating a distance matrix based on the microbial abundance data, which then can be used to visualize the differences in composition in a reduced dimensionality.
 
@@ -106,9 +94,8 @@ The plots show that the samples do not cluster in any significant way, either fo
 
 We perform a PERMANOVA test to quantify the difference between the BMI groups, testing the following:
 
-Null hypothesis : There is no difference in microbial community across composition across the BMI classes
-
-Alternative hypothesis: There is a difference in microbial community composition across BMI classes.
+-   Null hypothesis : There is no difference in microbial community across composition across the BMI classes
+-   Alternative hypothesis: There is a difference in microbial community composition across BMI classes.
 
 ```{r}
 # PERMANOVA to   see whether the diversity of microbial communities differ across bmi
@@ -119,7 +106,7 @@ print(anova_result_bmi)
 
 The results of the PERMANOVA agree with what is seen in the PCoA as the P.value is 0.208, which indicates that the differences in microbial composition across BMI classes is not significant. Also R2=0.0238 means that bmi contributes to only 2.38% of the variance in the diversity of microbial community across the bmi classes.
 
-# P-value analysis for bacterial species
+### Statistical analysis of samples microbiota
 
 Before we can study how the bacterial species may be related to type 2 diabetes, we need to find which bacteria have more than 50 values that are not 0. Even though 0 is a meaningful value in the dataset, we need some data points to vary in order to see if there is a meaning full relationship.
 
@@ -218,4 +205,11 @@ dataset_estimates1 <- dataset_estimates |>
                                     q.value > 0.05 ~ "no"))
 dataset_estimates1 |> 
   filter(is_significant == "yes")
+```
+
+```{r}
+# clean environment
+# rm(list = ls() |>  
+#       keep(~ !is.function(get(.))) |>  
+#       discard(~ . %in% ls()))
 ```
