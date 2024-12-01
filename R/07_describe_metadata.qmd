@@ -180,7 +180,7 @@ bmi_vs_glucose_tolerance <- dataset |>
     alpha = 0.4) +
   geom_hline(yintercept = 0) +
   theme_minimal(base_size = 10) +
-  labs(x = "Fasting insulin",
+  labs(x = "bmi",
        y = "Count",
        title = "bmi count by glucose tollerance",
        fill = "Glucose tollerance: ")+
