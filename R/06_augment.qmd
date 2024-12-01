@@ -1,8 +1,22 @@
 ---
 title: "06_augment.qmd"
+author: 
+  - "Andreis Marco(s243116)" 
+  - "Asiya Mohamad Yusuf Muse (s243930)"
+  - "Magnus Harthimmer (s233426)"  
+  - "Anita Skovbjerg Hjort-Gregersen (s201190)"
+  - "Rebecca Hjermind Millum (s215024)"
+
+execute:
+  warning: false
+  message: false
+ 
 format: html
+output: html_document
 editor: visual
 ---
+
+Here we will create a couple of new variables that will come in handy during visualization and analysis.
 
 ### Load the dataset
 
@@ -12,15 +26,11 @@ library("here")
 ```
 
 ```{r}
-# verify that the dataset can be loaded successfully
-data_path <- here("data/05_dat_tidy.csv")
-dataset <- read_csv(data_path,
-                    show_col_types = FALSE)
+data_path <- here("data/05_dat_tidy.RData")
+load(data_path)
 ```
 
 ### Augment
-
-Here we will create a couple of new variables that will come in handy during visualization and analysis.
 
 Create a variable which groups together samples from patients having type 2 diabetes or being in the pre-diabetes state.
 
@@ -28,8 +38,8 @@ Create a variable which groups together samples from patients having type 2 diab
 dataset <- dataset |> 
   mutate(is_diseased = ifelse(glucose_tolerance == "t2d" |
                                 glucose_tolerance == "impaired",
-                              "1", "0")
-  ) |>
+                              1,
+                              0)) |>
   relocate(is_diseased,
            .after = glucose_tolerance)
 ```
@@ -58,6 +68,25 @@ dataset <- dataset |>
            .after = ldl)
 ```
 
+Create a variable for the HOMA-IR score (HOMA-IR (Homeostatic model assessment for insulin resistance) and its categories, a measure insulin resistance / sensitivity.
+
+```{r}
+dataset <- dataset |>
+  mutate(`HOMA-IR` = fasting_glucose * fasting_insulin / 22.5,
+         HOMA_category = case_when(
+           `HOMA-IR` < 1.5 ~ "Healthy",
+           `HOMA-IR` >= 1.5 & `HOMA-IR` < 2.5 ~ "At risk",
+           `HOMA-IR` >= 2.5 & `HOMA-IR` < 5.0 ~ "Insulin Resistant",
+           `HOMA-IR` >= 5.0 ~ "Severely Insulin Resistant"
+         )) |>
+  mutate(HOMA_category = factor(HOMA_category,
+                                levels = c("Healthy", "At risk", "Insulin Resistant", "Severely Insulin Resistant"))) |> 
+  relocate(`HOMA-IR`,
+           .after = fasting_insulin) |> 
+  relocate(HOMA_category,
+           .after = `HOMA-IR`)
+```
+
 ### Save dataset
 
 ```{r}
@@ -65,4 +94,7 @@ target_dir <- "../data"
 
 write_csv(dataset, str_c(target_dir,
                          "/06_dat_augmented.csv"))
+
+file_path <- str_c(target_dir, "/06_dat_augmented.RData")
+save(dataset, file = file_path)
 ```

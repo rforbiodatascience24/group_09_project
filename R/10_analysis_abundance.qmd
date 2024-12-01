@@ -1,0 +1,119 @@
+---
+title: "10_analysis_abundance"
+author: 
+  - "Andreis Marco(s243116)" 
+  - "Asiya Mohamad Yusuf Muse (s243930)"
+  - "Magnus Harthimmer (s233426)"  
+  - "Anita Skovbjerg Hjort-Gregersen (s201190)"
+  - "Rebecca Hjermind Millum (s215024)"
+
+execute:
+  warning: false
+  message: false
+ 
+format: html
+output: html_document
+editor: visual
+---
+
+```{r}
+library("tidyverse")
+library("vegan")
+library("here")
+# Import costum function
+source("99_proj_func.R")
+```
+
+```{r}
+# verify that the dataset can be loaded successfully
+data_path <- here("data/06_dat_augmented.csv")
+dataset <- read_csv(data_path,
+                    na = c("nd", "-", "na"),
+                    show_col_types = FALSE)
+```
+
+## Assessing relationships between species abundance and metadata features
+
+Let's analyze the diversity between class variables (T2d, healthy and glucose impaired)
+
+We do this by calculating a distance matrix based on the microbial abundance data, which then can be used to visualize the differences in composition in a reduced dimensionality.
+
+```{r}
+# Pull the class labels for glucose tolerance
+glucose_tolerance_labels <- dataset |> 
+  pull(glucose_tolerance)
+# and BMI
+BMI_labels <- dataset |> 
+  pull(BMI_class)
+
+# Select abundance data from data set to calculate distances
+abundance_data <- dataset |> 
+  select(matches("^s_"))
+
+# Calculate Beta diversity based on Bray-Curtis distance
+bc_dist <- vegdist(abundance_data, method = "bray")
+
+# Perform PCoA
+pcoa_result <- cmdscale(as.dist(bc_dist), k = 2, eig = TRUE)
+
+# Extract eigenvalues and calculate proportion of variance explained
+eigenvalues <- pcoa_result |>  pluck("eig")
+variance_explained <- eigenvalues / sum(eigenvalues)
+
+# Combine PCoA results with group labels 
+pcoa_df <- pcoa_result |> 
+  pluck("points") |> 
+  as.data.frame() |>  
+  rename(PCoA1 = V1, PCoA2 = V2) |> 
+  mutate(glucose_tolerance = glucose_tolerance_labels) |> 
+  mutate(BMI_class = BMI_labels)
+```
+
+```{r}
+pcoa_glucose_tolerance <- ggplot(pcoa_df, aes(x = PCoA1, y = PCoA2, color = glucose_tolerance_labels)) +
+  geom_point(size = 3) +
+  theme_minimal() +
+  labs(title = "PCoA of health classes on microbiome composition",
+       x = paste0("PCoA1 (", round(variance_explained |>  first() * 100, 2), "%)"),
+       y = paste0("PCoA2 (", round(variance_explained |>  nth(2) * 100, 2), "%)"),
+       color = "Glucose tolerance")
+
+save_plot_custom(
+  plot = pcoa_glucose_tolerance,
+  filename = "10_pcoa_glucose_tolerance.jpg"
+)
+pcoa_glucose_tolerance
+```
+
+```{r}
+pcoa_bmi <- ggplot(pcoa_df, aes(x = PCoA1, y = PCoA2, color = BMI_labels)) +
+  geom_point(size = 3) +
+  theme_minimal() +
+  labs(title = "PCoA of bmi classes on microbiome composition",
+       x = paste0("PCoA1 (", round(variance_explained |>  first() * 100, 2), "%)"),
+       y = paste0("PCoA2 (", round(variance_explained |>  nth(2) * 100, 2), "%)"),
+       color = "BMI class")
+
+save_plot_custom(
+  plot = pcoa_bmi,
+  filename = "10_pcoa_bmi.jpg"
+)
+pcoa_bmi
+```
+
+The plots show that the samples do not cluster in any significant way, either for the BMI or for the glucose tolerance, this is in agreement with the observation made so far.
+
+We perform a PERMANOVA test to quantify the difference between the BMI groups, testing the following:
+
+Null hypothesis : There is no difference in microbial community across composition across the BMI classes
+
+Alternative hypothesis: There is a difference in microbial community composition across BMI classes.
+
+```{r}
+# PERMANOVA to   see whether the diversity of microbial communities differ across bmi
+anova_result_bmi <- adonis2(bc_dist ~ BMI_class,
+                         data = dataset)
+print(anova_result_bmi)
+```
+
+The results of the PERMANOVA agree with what is seen in the PCoA as the P.value is 0.208, which indicates that the differences in microbial composition across BMI classes is not significant. Also R2=0.0238 means that bmi contributes to only 2.38% of the variance in the diversity of microbial community across the bmi classes.

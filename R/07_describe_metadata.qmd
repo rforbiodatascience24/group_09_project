@@ -1,30 +1,44 @@
 ---
 title: "07_describe_metadata"
-author: "Andreis Marco"
+author: 
+  - "Andreis Marco(s243116)" 
+  - "Asiya Mohamad Yusuf Muse (s243930)"
+  - "Magnus Harthimmer (s233426)"  
+  - "Anita Skovbjerg Hjort-Gregersen (s201190)"
+  - "Rebecca Hjermind Millum (s215024)"
+
+execute:
+  warning: false
+  message: false
+ 
 format: html
+output: html_document
 editor: visual
 ---
 
 ### Load the dataset
 
 ```{r}
-suppressMessages(library("tidyverse"))
+library("tidyverse")
 library("here")
 library("ggridges")
 library("patchwork")
+# Import costum function
+source("99_proj_func.R")
 ```
 
 ```{r}
-# verify that the dataset can be loaded successfully
-data_path <- here("data/06_dat_augmented.csv")
-dataset <- read_csv(data_path, show_col_types = FALSE)
+data_path <- here("data/06_dat_augmented.RData")
+load(data_path)
 ```
 
-First, we want to get an overview of the metadata present in the dataset, before we analyze it. In the table below, we find parameter values distributed based on glucose tolerance. We see here that there is only one underweight person; therefore, when we look at how values are distributed according to BMI class, we choose not to include it as it does not provide enough data information.
+First, we want to get an overview of the metadata present in the dataset, before we analyze it.
+
+In the table below, we find parameter values distributed based on glucose tolerance. We see here that there is only one underweight person; therefore, when we look at how values are distributed according to BMI class, we choose not to include it as it does not provide enough data information.
 
 ```{r}
 dataset |> 
-  table1::table1(x = formula(~ BMI_class  +  hdl + cholesterol + creatinine + hdl + wc + whr + statins + insulin + bmi  | glucose_tolerance),
+  table1::table1(x = formula(~ BMI_class + HOMA_category + cholesterol + statins + insulin| glucose_tolerance),
          data = _)
 ```
 
@@ -32,14 +46,14 @@ dataset |>
 
 Now we will focus on the visualization of the metadata.
 
-Our dataset contains samples taken from patients having either type II diabetes, an impaired tollerance to glucose or being healthy individuals.
+Our dataset contains samples taken from patients either having type II diabetes, an impaired tolerance to glucose or being healthy individuals.
 
 We have access to many information regarding markers that correlate to the insurgence of diabetes, but let's start with the basics.
 
-### General visualization
+## General visualization
 
 ```{r}
-dataset |> 
+distribution_by_country <- dataset |> 
   ggplot(aes(x = fct_infreq(country))) + 
   geom_bar(fill = "skyblue", color = "black") + 
   geom_text(stat = "count", aes(label = after_stat(count)), vjust = -0.5, size = 3) +
@@ -48,22 +62,24 @@ dataset |>
     x = "Country",
     y = "Number of Samples"
   ) +
-  theme_minimal() +
-  theme(
-    axis.text.x = element_text(angle = 15),
-    plot.title = element_text(size = 16, hjust = 0.5)
-  )
+  theme_minimal()
+
+save_plot_custom(
+  plot = distribution_by_country,
+  filename = "07_distribution_of_sample_by_countries.jpg"
+)
+distribution_by_country
 ```
 
 ```{r}
-dataset |> 
+distribution_by_age <- dataset |> 
   ggplot(aes(x = age)) + 
   geom_histogram(fill = "skyblue", color = "black", binwidth = 0.5) + 
   geom_vline(
     aes(xintercept = mean(age, na.rm = TRUE)),
     color = "black", 
     linetype = "dashed", 
-    size = 0.5
+    linewidth = 0.5
   ) +
   labs(
     title = "Distribution of Samples by Age",
@@ -74,38 +90,22 @@ dataset |>
   theme(
     plot.title = element_text(size = 16, hjust = 0.5)
   )
+
+save_plot_custom(
+  plot = distribution_by_age,
+  filename = "07_distribution_of_sample_by_age.jpg"
+)
+distribution_by_age
 ```
 
-We can say that our samples are collected from females living in nordic countries, mainly Sweden, in the age range 69-72.
+We can say that our samples are collected from females living in central european / nordic countries, mainly Sweden, in the age range 69-72. This reflects what we expect from the paper.
 
-We want to see the distribution of BMI classes. In the plot below, we observe that there are slightly more overweight individuals in the dataset.
+### Diabetes specific visualization
 
-```{r}
-dataset |>
-  count(BMI_class) |>
-  mutate(percentage = n / sum(n) * 100) |>
-  ggplot(aes(x = BMI_class,
-             y = percentage,
-             fill = BMI_class,
-             label = str_c(round(percentage,digits = 2),"%"))) +
-  geom_col(colour = "black",
-           alpha = 0.4) +
-  theme_minimal(base_size = 15) +
-  theme(axis.text.x = element_text(
-    angle = 45,
-    hjust = 1)) +
-  labs(x = "",
-       y = "Percent") +
-  geom_hline(yintercept = 0) +
-  geom_text(vjust = -0.5, size = 5)+
-  ylim(0,45)+
-  theme(legend.position = "none" )
-```
-
-Next, we want to see the distribution of glucose tolerance in the dataset. In the plot below, we observe that the three groups are roughly equally distributed
+Now we move on to more diabetes-specific metadata.
 
 ```{r}
-dataset |>
+distribution_by_glucose_tolerance <- dataset |>
   count(glucose_tolerance) |>
   mutate(percentage = n / sum(n) * 100) |>
   ggplot(aes(x = glucose_tolerance,
@@ -113,148 +113,58 @@ dataset |>
              fill = glucose_tolerance,
              label = str_c(round(percentage,digits = 2),"%"))) +
   geom_col(colour = "black",
-           alpha = 0.4) +
+           alpha = 0.6) +
   theme_minimal(base_size = 15) +
-  theme(axis.text.x = element_text(
-    angle = 45,
-    hjust = 1)) +
   labs(x = "",
-       y = "Percent") +
+       y = "",
+       title = "Distribution of samples into glucose tolerance categories") +
   geom_hline(yintercept = 0) +
   geom_text(vjust = -0.5, size = 5)+
   ylim(0,45)+
-  theme(legend.position = "none" )
+  theme(legend.position = "none",
+        axis.text.y = element_blank())
+
+save_plot_custom(
+  plot = distribution_by_glucose_tolerance,
+  filename = "07_distribution_of_sample_by_glucose_tolerance.jpg"
+)
+distribution_by_glucose_tolerance
 ```
 
-### Diabetes specific visualization
-
-We now want to study the relationship between the metadata and glucose tolerance.
-
-In our analysis, we found a statistically significant difference in fasting insulin levels between the normal and T2D groups. Therefore, we want to investigate this relationship further and study how fasting insulin levels vary. In the plot below, we observe that the distribution of data for the healthy group is more to the left, while the type 2 diabetes group has higher values and are there form more to the right.
+Firstly, we observe how the samples are distributed across the glucose tolerance classes. They are almost equally distributed, this allows us to say that the future visualization have enough information to be significant.
 
 ```{r}
-dataset |> 
-  mutate(fasting_insulin_group = cut(
-    x = fasting_insulin,
-    breaks = seq(from = 0,
-                 to = 70,
-                 by = 5))) |> 
-  count(glucose_tolerance, fasting_insulin_group) |> 
-  ggplot(aes(x = fasting_insulin_group,
-             y = n,
-             fill = glucose_tolerance)) +
-  geom_col(position = position_dodge(
-    preserve = "single"),
-    colour = "black",
-    alpha = 0.4) +
+distribution_by_BMI <- dataset |>
+  count(BMI_class) |>
+  mutate(percentage = n / sum(n) * 100) |>
+  ggplot(aes(x = BMI_class,
+             y = percentage,
+             fill = BMI_class,
+             label = str_c(round(percentage,digits = 2),"%"))) +
+  geom_col(colour = "black",
+           alpha = 0.6) +
+  theme_minimal(base_size = 15) +
+  labs(x = "",
+       y = "",
+       title = "Distribution of samples into BMI categories") +
   geom_hline(yintercept = 0) +
-  theme_minimal(base_size = 10) +
-  labs(x = "Fasting insulin",
-       y = "Count",
-       title = "Fasting insulin count group by glucose tollerance",
-       fill = "Glucose tollerance: ")+
-  theme(legend.position = "bottom",
-        panel.grid.major.x = element_blank(),
-        axis.text.x = element_text(vjust = 5))
+  geom_text(vjust = -0.5, size = 5)+
+  ylim(0,45)+
+  theme(legend.position = "none",
+        axis.text.y = element_blank(),
+        plot.title = element_text(hjust = 0.5))
+
+save_plot_custom(
+  plot = distribution_by_BMI,
+  filename = "07_distribution_of_sample_by_BMI.jpg"
+  )
+distribution_by_BMI
 ```
 
-We saw in the analysis for the p-value that the c-peptide concentration was a statistically significant parameter for diabetes in our dataset. Even though BMI was not found to be statistically significant, we were still interested in seeing the relationship between BMI, c-peptide concentration, and glucose tolerance. We observe that across all BMI classes, the T2D group has the highest level of c-peptide.
+Then, we look at the distribution of BMI classes. We can see that the dataset is significantly enriched in overweight and obese subjects, this make sense as a higher BMI is known to increase the risk of developing diabetes.
 
 ```{r}
-dataset|>
-  filter(BMI_class != "Underweight") |> 
-  ggplot(aes(x = BMI_class,
-             y = `c-peptide`,
-             fill = glucose_tolerance)) +
-  geom_boxplot(position = position_dodge(
-    preserve = "single"), 
-    alpha = 0.4) +
-  theme_minimal(base_size = 15) +
-  theme(legend.position = "bottom",
-        axis.text.x = element_text(angle = 45,
-                                   hjust = 1,
-                                   vjust = 1))+
-    labs(x = "BMI class",
-       y = "c-peptide [ng/mL]",
-       title = "c-peptide consentration",
-       fill = "Glucose tolerance: ")
-```
-
-We know from the literature that GAD antibodies are a parameter used to differentiate between type 1 and type 2 diabetes, and that there should not be a difference between any of the glucose tolerance groups. This was also confirmed in the p-value test. In the plot below, it is evident that the value is not an indicator of type 2 diabetes, as it is the same among the groups.
-
-```{r}
-dataset|>
-  filter(BMI_class != "Underweight") |> 
-  filter(`gad-antibodies` < 20) |> 
-  ggplot(aes(x = BMI_class,
-             y = `gad-antibodies`,
-             fill = glucose_tolerance)) +
-  geom_boxplot(position = position_dodge(
-    preserve = "single"), 
-    alpha = 0.4) +
-  theme_minimal(base_size = 15) +
-  theme(legend.position = "bottom",
-        axis.text.x = element_text(angle = 45,
-                                   hjust = 1,
-                                   vjust = 1))+
-    labs(x = "BMI class",
-       y = "gad-antibodies [ng/mL]",
-       title = "gad-antibodies consentration",
-       fill = "Glucose tolerance: ")
-```
-
-We saw in the statistical analysis that HbA1c was a statistically significant parameter in type 2 diabetes. Here, we observe that the value for the normal group is roughly the same, but overall, the type 2 diabetes group has higher values.
-
-```{r}
-dataset |> 
-  ggplot(mapping = aes(x = hba1c,
-                       y = glucose_tolerance,
-                       fill = glucose_tolerance )) +
-    geom_density_ridges(alpha = 0.5) +
-    labs(x = "hba1c",
-         y = "glucose tollerance",
-         title = "hba1c and glucose tolerance") +
-    theme_minimal(base_family = "Avenir",
-                  base_size = 12) +
-    theme(legend.position = "none")
-```
-
-We saw that the WC parameter was a statistically significant parameter in predicting type 2 diabetes. In the plot below, we observe that the data from the type 2 diabetes group is skewed to the right.
-
-```{r}
-dataset |> 
-  ggplot(mapping = aes(x = wc,
-                      y = glucose_tolerance,
-                      fill = glucose_tolerance )) +
-    geom_density_ridges(alpha = 0.5) +
-    labs(x = "wc",
-         y = "glucose_tolerance",
-         title = "wc on glucose tolerance") +
-    theme_minimal(base_family = "Avenir",
-                  base_size = 12) +
-    theme(legend.position = "none")
-```
-
-We also look at how fasting insulin is distributed according to glucose tolerance, and we see that the glucose tolerance for fasting insulin is higher for the type 2 diabetes group.
-
-```{r}
-dataset |> 
-  ggplot(mapping = aes(x = fasting_insulin,
-                      y = glucose_tolerance,
-                      fill = glucose_tolerance )) +
-    geom_density_ridges(alpha = 0.5) +
-    labs(x = "fasting insulin",
-         y = "glucose tolerance",
-         title = "fasting insulin and glucose tolerance ") +
-    theme_minimal(base_family = "Avenir",
-                  base_size = 12) +
-    theme(legend.position = "none")
-```
-
-In the literature, it is stated that BMI can be used as an indicator of type 2 diabetes. Despite this, in our analysis using alpha = 0.05, we did not find the relationship to be statistically significant. Even though BMI was not a statistically significant parameter, we observed that the BMI for those with normal and impaired glucose tolerance is slightly more left-skewed.
-
-```{r}
-dataset |> 
+bmi_vs_glucose_tolerance <- dataset |> 
   mutate(bmi_group = cut(
     x = bmi,
     breaks = seq(from = 18,
@@ -277,28 +187,265 @@ dataset |>
   theme(legend.position = "bottom",
         panel.grid.major.x = element_blank(),
         axis.text.x = element_text(vjust = 5))
+
+save_plot_custom(
+  plot = bmi_vs_glucose_tolerance,
+  filename = "07_bmi_vs_glucose_tolerance.jpg"
+)
+bmi_vs_glucose_tolerance
 ```
 
-We investigate how the HDL distribution differs between the glucose tolerance groups, where we see that for the type 2 diabetic group, the distribution is slightly left-skewed.
+BMI is an estimate of the amount of fat carried by a person, it is usefull when looking at diabetic people as obesity significantly increases the risk of developing diabetes ([reference](https://doi.org/10.14423/SMJ.0000000000000214)).
 
 ```{r}
-dataset |> 
+stacked_bmi_vs_glucose_tolerance <- dataset |> 
+  ggplot(aes(x = BMI_class, fill = glucose_tolerance)) + 
+  geom_bar(color = "black") + 
+  labs(
+    x = "BMI",
+    y = "Number of Samples"
+  ) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(size = 16, hjust = 0.5)
+  )
+
+save_plot_custom(
+  plot = stacked_bmi_vs_glucose_tolerance,
+  filename = "07_stacked_bmi_vs_glucose_tolerance.jpg"
+)
+stacked_bmi_vs_glucose_tolerance
+```
+
+## Visualization of different parameters vs glucose tollerance
+
+Here we will focus just on visualizing the relationship between glucose tolerance and many other variables. The statistical significance of these results will be analysed in the analysis part of the project.
+
+#### Markers for both type I and II diabetes
+
+```{r}
+ridges_hba1c_vs_glucose_tolerance <- dataset |> 
+  ggplot(mapping = aes(x = hba1c,
+                       y = glucose_tolerance,
+                       fill = glucose_tolerance )) +
+    geom_density_ridges(alpha = 0.5) +
+    labs(x = "hba1c [mmol/mol]",
+         y = "glucose tollerance",
+         title = "hba1c and glucose tolerance") +
+    theme_minimal(base_family = "Avenir",
+                  base_size = 12) +
+    theme(legend.position = "none")
+
+save_plot_custom(
+  plot = ridges_hba1c_vs_glucose_tolerance,
+  filename = "07_hba1c_vs_glucose_tolerance.jpg"
+)
+ridges_hba1c_vs_glucose_tolerance
+```
+
+Hemoglobin A1C is hemoglobin bound to glucose, which can be used as a measure of average blood glucose level. High glucose is one of the hallmarks of diabetes. We can see the hba1c getting higher for diabetic patients ([reference](https://doi.org/10.4137/bmi.s38440)).
+
+```{r}
+hba1c_48_threshold <- dataset |>
+  group_by(glucose_tolerance) |> 
+  count(hba1c > 48) |>
+  mutate(percentage = n / sum(n) * 100) |>
+  ggplot(aes(x = glucose_tolerance,
+             y = percentage,
+             fill = glucose_tolerance,
+             label = str_c(round(percentage,
+                                 digits = 2),
+                           "%"))) +
+  geom_col(colour = "black",
+           alpha = 0.4) +
+  theme_minimal(base_size = 15) +
+  theme(axis.text.x = element_text(
+    angle = 45,
+    hjust = 1)) +
+  labs(x = "",
+       y = "Percent",
+       title = "Percentage of people with HbA1c > 48 by glucose tolerance") +
+  geom_hline(yintercept = 0) +
+  geom_text(vjust = -0.5, size = 5) +
+  ylim(0,45) +
+  theme_minimal(base_size = 12) +
+  theme(legend.position = "none" )
+
+save_plot_custom(
+  plot = hba1c_48_threshold,
+  filename = "07_hba1c_48_threshold.jpg"
+)
+hba1c_48_threshold
+```
+
+The healthy threshold for hba1c has been identify at 48 mmol/mol ([reference](https://doi.org/10.2337/dc14-0886)).
+
+```{r}
+ridges_wc_vs_glucose_tolerance <- dataset |> 
+  ggplot(mapping = aes(x = wc,
+                      y = glucose_tolerance,
+                      fill = glucose_tolerance )) +
+    geom_density_ridges(alpha = 0.5) +
+    labs(x = "Waist circumference [cm]",
+         y = "") +
+  theme_minimal(base_family = "Avenir",
+                  base_size = 12) +
+    theme(legend.position = "none")
+
+save_plot_custom(
+  plot = ridges_wc_vs_glucose_tolerance,
+  filename = "07_ridges_wc_vs_glucose_tolerance.jpg"
+)
+ridges_wc_vs_glucose_tolerance
+```
+
+We saw that the WC parameter was a statistically significant parameter in predicting type 2 diabetes. In the plot below, we observe that the data from the type 2 diabetes group is skewed to the right.
+
+```{r}
+ridges_hdl_vs_glucose_tolerance <- dataset |> 
   ggplot(mapping = aes(x = hdl,
                       y = glucose_tolerance,
                       fill = glucose_tolerance )) +
     geom_density_ridges(alpha = 0.5) +
-    labs(x = "hdl",
+    labs(x = "hdl [mmol/L]",
          y = "glucose tolerance",
          title = "hdl and glucose tolerance ") +
     theme_minimal(base_family = "Avenir",
                   base_size = 12) +
     theme(legend.position = "none")
+
+save_plot_custom(
+  plot = ridges_hdl_vs_glucose_tolerance,
+  filename = "07_ridges_hdl_vs_glucose_tolerance.jpg"
+)
+ridges_hdl_vs_glucose_tolerance
 ```
 
-We were then interested in studying the relationship between WC, HbA1c, and glucose tolerance, where we see that the data points for the type 2 diabetes group are quite different from the normal and impaired groups
+We investigate how the HDL distribution differs between the glucose tolerance groups, where we see that for the type 2 diabetic group, the distribution is slightly left-skewed ([reference](https://doi.org/10.1586/erc.11.182)).
+
+#### Markers for discriminating type I and type II
 
 ```{r}
-dataset |>
+fasting_insuling_vs_glucose_tolerance_bar <- dataset |> 
+  mutate(fasting_insulin_group = cut(
+    x = fasting_insulin,
+    breaks = seq(from = 0,
+                 to = 70,
+                 by = 5))) |> 
+  count(glucose_tolerance, fasting_insulin_group) |> 
+  ggplot(aes(x = fasting_insulin_group,
+             y = n,
+             fill = glucose_tolerance)) +
+  geom_col(position = position_dodge(
+    preserve = "single"),
+    colour = "black",
+    alpha = 0.4) +
+  geom_hline(yintercept = 0) +
+  theme_minimal(base_size = 10) +
+  labs(x = "Fasting insulin [pmol/L]",
+       y = "Count",
+       title = "Fasting insulin count group by glucose tollerance",
+       fill = "Glucose tollerance: ")+
+  theme(plot.title = element_text(hjust = 0.5),
+        legend.position = "bottom",
+        panel.grid.major.x = element_blank(),
+        axis.text.x = element_text(vjust = 5))
+
+save_plot_custom(
+  plot = fasting_insuling_vs_glucose_tolerance_bar,
+  filename = "07_fasting_insuling_vs_glucose_tolerance_bar.jpg"
+)
+fasting_insuling_vs_glucose_tolerance_bar
+```
+
+From literature we know that Insulin remains in the blood longer in type II diabetic patients, this can be seen from the graph above, where in the higher categories only diabetic subjects are present.
+
+```{r}
+fasting_insuling_vs_glucose_tolerance <- dataset |> 
+  ggplot(mapping = aes(x = fasting_insulin,
+                      y = glucose_tolerance,
+                      fill = glucose_tolerance )) +
+    geom_density_ridges(alpha = 0.5) +
+    labs(x = "fasting insulin [pmol/L]",
+         y = "glucose tolerance",
+         title = "fasting insulin and glucose tolerance ") +
+    theme_minimal(base_family = "Avenir",
+                  base_size = 12) +
+    theme(legend.position = "none")
+
+save_plot_custom(
+  plot = fasting_insuling_vs_glucose_tolerance,
+  filename = "07_fasting_insuling_vs_glucose_tolerance_ridges.jpg"
+)
+fasting_insuling_vs_glucose_tolerance
+```
+
+We also look at how fasting insulin is distributed according to glucose tolerance, and we see that the glucose tolerance for fasting insulin is higher for the type 2 diabetes group.
+
+```{r}
+c_peptide_vs_bmi_glucose_tolerance <- dataset|>
+  filter(BMI_class != "Underweight") |> 
+  ggplot(aes(x = glucose_tolerance,
+             y = `c-peptide`,
+             fill = BMI_class)) +
+  geom_boxplot(position = position_dodge(
+    preserve = "single"), 
+    alpha = 0.4) +
+  theme_minimal(base_size = 15) +
+  theme(legend.position = "bottom",
+        plot.title = element_text(hjust = 0.5)) +
+    labs(x = "BMI class",
+         y = "c-peptide [ng/mL]",
+         title = "c-peptide concentration",
+         fill = "Glucose tolerance: ")
+
+save_plot_custom(
+  plot = c_peptide_vs_bmi_glucose_tolerance,
+  filename = "07_c_peptide_vs_bmi_glucose_tolerance.jpg"
+)
+c_peptide_vs_bmi_glucose_tolerance
+```
+
+The c-peptide is a 31-aa sequence that binds the A and B chain of the proinsuline and is removed to produce insuline. Therefore its levels are used to distinguish between patients producing (type II) or non producing (type I) insulin. The insulin level is higher in type II as the body tries to maintain normal blood sugar levels ([reference](https://doi.org/10.1111/dom.14785)).
+
+```{r}
+gad_ab_vs_bmi_glucose_tolerance <- dataset|>
+  filter(BMI_class != "Underweight") |> 
+  filter(`gad-antibodies` < 20) |> 
+  ggplot(aes(x = BMI_class,
+             y = `gad-antibodies`,
+             fill = glucose_tolerance)) +
+  geom_boxplot(position = position_dodge(
+    preserve = "single"), 
+    alpha = 0.4) +
+  theme_minimal(base_size = 15) +
+  theme(legend.position = "bottom",
+        plot.title = element_text(hjust = 0.5)) +
+    labs(x = "BMI class",
+       y = "gad-antibodies [U/mL]",
+       title = "gad-antibodies concentration",
+       fill = "Glucose tolerance: ")
+
+save_plot_custom(
+  plot = gad_ab_vs_bmi_glucose_tolerance,
+  filename = "07_gad_ab_vs_bmi_glucose_tolerance.jpg"
+)
+gad_ab_vs_bmi_glucose_tolerance
+```
+
+We know from the literature that GAD antibodies are a parameter used to differentiate between type 1 and type 2 diabetes. In type 1 there is a decrease in insulin production which can be caused by production GAD antibodies that cause the immune system to attack the beta cells of the pancreas that produce insulin. Here we do not see changes in GAD antibodies as our dataset contains samples from type 2 diabetes patients ([reference](https://doi.org/10.2337/db09-0747)).
+
+```{r}
+dataset|>
+  filter(`gad-antibodies` > 20) 
+```
+
+This single example shows a concentration of gad antibodies more compatible with type I diabetes.
+
+#### Additional exploratory plots
+
+```{r}
+linear_wc_hba1c_glucose_tolerance <- dataset |>
   ggplot(aes(x = wc,
              y = hba1c,
              colour = glucose_tolerance)) +
@@ -306,35 +453,124 @@ dataset |>
              alpha = 0.4) +
   geom_smooth(method = "lm",
               se = FALSE) +
-  labs(x = "WC",
-       y = "hba1c",
+  labs(x = "WC [cm]",
+       y = "hba1c [mmol/mol]",
        title = "WC vs hba1c groupt by glucose tolerance",
        colour = "Glucose tolerance: ")+
   theme_minimal(base_size = 12)
+
+save_plot_custom(
+  plot = linear_wc_hba1c_glucose_tolerance,
+  filename = "07_linear_wc_hba1c_glucose_tolerance.jpg"
+)
+linear_wc_hba1c_glucose_tolerance
 ```
 
-In the figure below, we see a point plot of HDL on the x-axis and Hemoglobin A1C on the y-axis, filtered by glucose tolerance. We observe that Hemoglobin A1C is a better discriminatory factor.
+We were then interested in studying the relationship between WC, HbA1c, and glucose tolerance, where we see that the data points for the type 2 diabetes group are quite different from the normal and impaired groups. This is because both hba1c and wc correlate positively with diabetes.
 
 ```{r}
-dataset |>
+linear_hdl_hba1c_glucose_tolerance <- dataset |>
   ggplot(aes(x = hdl,
              y = hba1c,
              colour = glucose_tolerance)) +
   geom_point(size = 2,
              alpha = 0.5) +
-  labs(x = "hdl",
-       y = "Hemoglobin A1C",
+  labs(x = "hdl [mmol/L]",
+       y = "Hemoglobin A1C [mmol/mol]",
        title = "hdl vs Hemoglobin A1C groupt by glucose tolerance",
-       colour = "Glucose tolerance: ")+
+       colour = "Glucose tolerance: ") +
   theme_minimal(base_size = 12)
+
+save_plot_custom(
+  plot = linear_wc_hba1c_glucose_tolerance,
+  filename = "07_dlinear_wc_hba1c_glucose_tolerancee.jpg"
+)
+linear_hdl_hba1c_glucose_tolerance
 ```
 
-## The effect of treatment.
+In the figure below, we see a point plot of HDL on the x-axis and Hemoglobin A1C on the y-axis, filtered by glucose tolerance. We observe that Hemoglobin A1C is a better discriminatory factor.
+
+```{r}
+hdl_glucose_tolerance <- dataset |> 
+  ggplot(aes(x = glucose_tolerance,
+             y = hdl,
+             fill = glucose_tolerance)) + 
+  geom_boxplot(color = "black") + 
+  labs(
+    x = "Glucose tolerance",
+    y = "HDL [mmol/L]",
+    title = "HDL vs glucose tollerance"
+  ) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(size = 16, hjust = 0.5)
+  )
+
+save_plot_custom(
+  plot = hdl_glucose_tolerance,
+  filename = "07_hdl_glucose_tolerance.jpg"
+)
+hdl_glucose_tolerance
+```
+
+We can see that the HDL levels lower with the glucose tolerance decreasing, this is in agreement with the literature that tells that HDL is lowered in diabetic patients.
+
+```{r}
+ldl_glucose_tolerance <- dataset |> 
+  ggplot(aes(x = glucose_tolerance,
+             y = ldl,
+             fill = glucose_tolerance)) + 
+  geom_boxplot(color = "black") + 
+  labs(
+    x = "Glucose tolerance",
+    y = "LDL level [mmol/L]",
+    title = "LDL level vs glucose tollerance"
+  ) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(size = 16, hjust = 0.5)
+  )
+
+save_plot_custom(
+  plot = ldl_glucose_tolerance,
+  filename = "07_ldl_glucose_tolerance.jpg"
+)
+ldl_glucose_tolerance
+```
+
+Strangely we see that same for the LDL, which instead is expected to either lower or be similar across the categories.
+
+```{r}
+hb1ac_glucose_tolerance <- dataset |> 
+  ggplot(aes(x = glucose_tolerance,
+             y = hba1c,
+             fill = glucose_tolerance)) + 
+  geom_boxplot(color = "black") + 
+  labs(
+    x = "Glucose tolerance",
+    y = "Hemoglobin A1C [mmol/mol]",
+    title = " Hemoglobin A1C vs glucose tollerance"
+  ) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(size = 16, hjust = 0.5)
+  )
+
+save_plot_custom(
+  plot = hb1ac_glucose_tolerance,
+  filename = "07_hb1ac_glucose_tolerance.jpg"
+)
+hb1ac_glucose_tolerance
+```
+
+## The effect of treatment
 
 First, we are interested in investigating how many people in each glucose tolerance category are on statins. We see that there are 26 people with type 2 diabetes who are on statins. We only consider statins as the treatment, as we know from the table that less than 5% of the samples are on insulin.
 
+Statins are used as preventive treatment against cardiovascular diseases, but have been linked to an increase risk of developing diabetes ([reference](https://doi.org/10.3389/fendo.2023.1239335)).
+
 ```{r}
-p1 <- dataset |>
+count_statins_graph <- dataset |>
   group_by(glucose_tolerance) |> 
   count(statins) |>
   filter(statins =="y") |> 
@@ -345,17 +581,21 @@ p1 <- dataset |>
   geom_col(colour = "black",
            alpha = 0.4) +
   theme_minimal(base_size = 15) +
-  theme(axis.text.x = element_text(
-    angle = 45,
-    hjust = 1)) +
   labs(x = "",
-       y = "count") +
+       y = "on statins") +
   geom_hline(yintercept = 0) +
   geom_text(vjust = -0.5, size = 5)+
   ylim(0,45)+
-  theme(legend.position = "none" )
+  theme(legend.position = "none",
+        axis.text.y = element_blank())
 
-p2 <- dataset |>
+save_plot_custom(
+  plot = count_statins_graph,
+  filename = "07_statins_amuount.jpg"
+)
+count_statins_graph
+
+percentage_statins_graph <- dataset |>
   group_by(glucose_tolerance) |> 
   count(statins) |>
   mutate(percentage = n / sum(n) * 100)|>
@@ -367,24 +607,25 @@ p2 <- dataset |>
   geom_col(colour = "black",
            alpha = 0.4) +
   theme_minimal(base_size = 15) +
-  theme(axis.text.x = element_text(
-    angle = 45,
-    hjust = 1)) +
-  labs(x = "glucose tolerance",
-       y = "percentage") +
+  labs(x = "",
+       y = "on statins") +
   geom_hline(yintercept = 0) +
   geom_text(vjust = -0.5, size = 5)+
   ylim(0,45)+
-  theme(legend.position = "none" )
+  theme(legend.position = "none",
+        axis.text.y = element_blank())
 
-p1
-p2
+save_plot_custom(
+  plot = percentage_statins_graph,
+  filename = "07_percentage_statins_graph.jpg"
+)
+percentage_statins_graph
 ```
 
 Now we want to compare within the type 2 diabetes group whether fasting insulin is influenced by being on medication. In the plot below, we see that fasting insulin is not affected by the medication, but the cholesterol level is lower when on medication.
 
 ```{r}
-dataset |> 
+linear_fasting_insuline_cholesterol <- dataset |> 
   filter(glucose_tolerance == "t2d") |> 
   ggplot(aes(x = fasting_insulin,
              y = cholesterol,
@@ -393,17 +634,23 @@ dataset |>
              alpha = 0.4) +
   geom_smooth(method = "lm",
               se = FALSE) +
-  labs(x = "fasting_insulin",
-       y = "cholesterol",
+  labs(x = "fasting_insulin [pmol/L]",
+       y = "cholesterol[mmol/L]",
        title = "Fasting insulin vs hba1c groupt by statins for the type 2 diabect pationts",
-       colour = "statins: ")+
+       colour = "statins: ") +
   theme_minimal(base_size = 12)
+
+save_plot_custom(
+  plot = linear_fasting_insuline_cholesterol,
+  filename = "07_linear_fasting_insuline_cholesterol.jpg"
+)
+linear_fasting_insuline_cholesterol
 ```
 
 We also want to see if the medication has an effect on c-peptide and HDL, where we see that the difference is minor.
 
 ```{r}
-dataset |> 
+linear_c_peptide_hdl <- dataset |> 
   filter(glucose_tolerance == "t2d") |> 
   ggplot(aes(x = `c-peptide`,
              y = hdl,
@@ -412,114 +659,46 @@ dataset |>
              alpha = 0.4) +
   geom_smooth(method = "lm",
               se = FALSE) +
-  labs(x = " c-peptide",
-       y = "hdl",
+  labs(x = " c-peptide [ng/mL]",
+       y = "hdl [mmol/L]",
        title = "c-peptide vs hdl groupt by statins for the type 2 diabect pationts",
        colour = "statins: ")+
   theme_minimal(base_size = 12)
-```
 
-```{r}
-dataset <- dataset |> 
-  mutate(glucose_tolerance = factor(glucose_tolerance,
-                                     levels = c("normal",
-                                                "impaired",
-                                                "t2d"))) |> 
-  mutate(BMI_class = factor(BMI_class,
-                            levels = c("Underweight",
-                                       "Normal weight",
-                                       "Overweight",
-                                       "Obese"))) 
-
-dataset |> 
-  ggplot(aes(x = BMI_class, fill = glucose_tolerance)) + 
-  geom_bar(color = "black") + 
-  labs(
-    x = "BMI",
-    y = "Number of Samples"
-  ) +
-  theme_minimal() +
-  theme(
-    plot.title = element_text(size = 16, hjust = 0.5)
-  )
+save_plot_custom(
+  plot = linear_c_peptide_hdl,
+  filename = "07_linear_c_peptide_hdl.jpg"
+)
+linear_c_peptide_hdl
 ```
 
 We can see that the number of obese and overweight people increases in glucose impaired and diabetic categories.
 
 ```{r}
 #split on BMI
-dataset |> 
-  pivot_longer(cols = c(insulin, statins),
+statins_cholesterol <- dataset |> 
+  filter(BMI_class != "Underweight") |> 
+  pivot_longer(cols = c(statins),
                names_to = "variable", 
                values_to = "category") |> 
   ggplot(aes(x = category, y = cholesterol, fill = category)) + 
-  geom_boxplot(color = "black") + 
-  facet_wrap(~variable) + 
+  geom_boxplot(color = "black") +
+  facet_wrap(~variable) +
   labs(
     x = "",
-    y = "Cholesterol",
-    title = "Cholesterol levels vs assuming insuling or statins"
+    y = "Cholesterol [mmol/L]",
+    fill = "On statins"
   ) +
-  facet_wrap(~BMI_class)+
+  facet_wrap(~glucose_tolerance) +
   theme_minimal() +
   theme(
-    plot.title = element_text(size = 16, hjust = 0.5)
   )
+
+save_plot_custom(
+  plot = statins_cholesterol,
+  filename = "07_statins_cholesterol.jpg"
+)
+statins_cholesterol
 ```
 
 We can see that both the treatment with statins and with insulin have the effect of lowering cholesterol, which is coherent with what's expected.
-
-```{r}
-dataset |> 
-  ggplot(aes(x = glucose_tolerance,
-             y = hdl,
-             fill = glucose_tolerance)) + 
-  geom_boxplot(color = "black") + 
-  labs(
-    x = "Glucose tolerance",
-    y = "HDL level",
-    title = "HDL level vs glucose tollerance"
-  ) +
-  theme_minimal() +
-  theme(
-    plot.title = element_text(size = 16, hjust = 0.5)
-  )
-```
-
-We can see that the HDL levels lower with the glucose tolerance decreasing, this is in agreement with the literature that tells that HDL is lowered in diabetic patients.
-
-```{r}
-dataset |> 
-  ggplot(aes(x = glucose_tolerance,
-             y = ldl,
-             fill = glucose_tolerance)) + 
-  geom_boxplot(color = "black") + 
-  labs(
-    x = "Glucose tolerance",
-    y = "LDL level",
-    title = "LDL level vs glucose tollerance"
-  ) +
-  theme_minimal() +
-  theme(
-    plot.title = element_text(size = 16, hjust = 0.5)
-  )
-```
-
-Strangely we see that same for the LDL, which instead is expected to either lower or be similar across the categories.
-
-```{r}
-dataset |> 
-  ggplot(aes(x = glucose_tolerance,
-             y = hba1c,
-             fill = glucose_tolerance)) + 
-  geom_boxplot(color = "black") + 
-  labs(
-    x = "Glucose tolerance",
-    y = "Hemoglobin A1C",
-    title = " Hemoglobin A1C vs glucose tollerance"
-  ) +
-  theme_minimal() +
-  theme(
-    plot.title = element_text(size = 16, hjust = 0.5)
-  )
-```

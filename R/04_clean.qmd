@@ -1,23 +1,51 @@
 ---
 title: "04_clean"
-author: "Andreis Marco"
+author: 
+  - "Andreis Marco(s243116)" 
+  - "Asiya Mohamad Yusuf Muse (s243930)"
+  - "Magnus Harthimmer (s233426)"  
+  - "Anita Skovbjerg Hjort-Gregersen (s201190)"
+  - "Rebecca Hjermind Millum (s215024)"
+
+execute:
+  warning: false
+  message: false
+ 
 format: html
+output: html_document
 editor: visual
 ---
+
+This files builds on top of the consideration made in 03 to perform the cleaning. Here we had a major decision point about the direction the analysis will take.
 
 ### Load the dataset
 
 ```{r}
 library("tidyverse")
 library("here")
+library("viridis")
+# Import costum function
+source("99_proj_func.R")
 ```
 
+dataset \|\> filter(dataset_name == "WT2D") \|\> select(fasting_glucose)
+
 ```{r}
-# verify that the dataset can be loaded successfully
 data_path <- here("data/03_dat_selected.csv")
 dataset <- read_csv(data_path,
                     na = c("nd", "-", "na"),
                     show_col_types = FALSE)
+```
+
+The first thing we do is unify the original datasets that were splitted (t2d is splitted in t2dmeta_long / short, and the hmp is splitted in hmp/hmpii).
+
+```{r}
+dataset <- dataset |> 
+  mutate(dataset_name = case_when(
+    dataset_name == "t2dmeta_long" ~  "t2d",
+    dataset_name == "t2dmeta_short" ~ "t2d",
+    dataset_name == "hmpii" ~ "hmp",
+    TRUE ~ dataset_name))
 ```
 
 The dataset is divided in metadata columns and microorganism relative abundances. We divide the two dataset to facilitate cleaning:
@@ -31,18 +59,105 @@ metadata <- dataset |>
 dim_desc(metadata)
 ```
 
-The wide variety of studies from which the data comes from results in a large number of study-specific metadata this can be observed by plotting the amount of NA present in each of these.
+The wide variety of studies from which the data comes from results in a large number of study-specific metadata. This can be observed by plotting the amount of NA present in each of these.
 
 ```{r}
 valid_counts <- metadata |> 
 summarise(across(everything(),
-                 ~sum(!is.na(.)))) |> 
+                 ~sum(!is.na(.))),
+          ) |> 
 pivot_longer(everything(),
              names_to = "column_name",
              values_to = "valid_count")
+valid_counts |> 
+  ggplot(aes(x=valid_count)) +
+  geom_histogram(binwidth = 30)
 ```
 
-We can see that there is a large amount of columns having many NAs.
+We can see that there are many columns with a lot / or even only missing values.
+
+Many of these columns are dataset-specific, we can show that by plotting the columns group by the number of valid data and looking which dataset contain those valid datapoints.
+
+```{r}
+# For each column get the TOTAL number of non-NAs values
+valid_values_count <- metadata |> 
+  select(-dataset_name) |>  # we obviusly don't care about the data_set name column
+  summarise(across(everything(),
+                   ~ sum(!is.na(.)))) |> 
+  pivot_longer(cols = everything(),
+               names_to = "column",
+               values_to = "valid_count") 
+
+# Calculate the number of valid datapoint that each dataset has in each column
+valid_values_by_dataset <- metadata |> 
+  group_by(dataset_name) |> 
+  summarise(across(everything(),
+                   ~ sum(!is.na(.)),
+                   .names = "{col}")) |> 
+  pivot_longer(cols = -dataset_name, 
+               names_to = "column", 
+               values_to = "dataset_valid_count")
+
+# Calculate the proportion of valid datapoint that each dataset has in each column
+valid_proportions <- valid_values_by_dataset |> 
+  left_join(valid_values_count, by = "column") |> 
+  mutate(proportion = ifelse(valid_count == 0, 0, dataset_valid_count / valid_count))
+
+# for each column select the most represented dataset (% > 90%, otherwise) if there is none the the column is considered mixed
+most_represented_dataset <- valid_proportions |> 
+  group_by(column) |> 
+  arrange(desc(proportion))  |>  
+  slice(1) |>   
+  ungroup() |>
+  mutate(most_representative_dataset = ifelse(proportion > 0.9, dataset_name, "no prevalent dataset (90% threshold)")) |> 
+  mutate(proportion = ifelse(proportion > 0.9, proportion, NA))|> 
+  select(-dataset_name)
+
+# Divide the columns based on the amount of NAs they contain 
+valid_count_distribution <- most_represented_dataset |> 
+  group_by(valid_count,
+           most_representative_dataset) |> 
+  summarise(count = n(),
+            .groups = "drop") |> 
+  mutate(most_representative_dataset = factor(
+    most_representative_dataset,
+    levels = c(setdiff(unique(most_representative_dataset),
+                       "no prevalent dataset (90% threshold)"),
+               "no prevalent dataset (90% threshold)")
+  ))
+
+#FINALLY!!! We can plot the column distribution 
+valid_entries_per_column_plot <- valid_count_distribution |>
+  filter(valid_count != 0) |>
+ggplot(aes(x = as.factor(valid_count), y = count, fill = most_representative_dataset)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  labs(
+    title = "Columns divided by amount of valid entries",
+    x = "Number of valid values",
+    y = "Number of columns",
+    fill = "Most represented dataset",
+    caption = "Columns having no valid values (125) are excluded for visualization purposes",
+  ) +
+  scale_fill_viridis(discrete = TRUE, option = "H") +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(face = "bold", size = 14, hjust = 0.5),
+    axis.text.x = element_text(size = 10),
+    axis.text.y = element_text(size = 10),
+    axis.title.x = element_text(face = "bold", size = 12),
+    axis.title.y = element_text(face = "bold", size = 12),
+    plot.caption = element_text(face = "italic", size = 10, hjust = -1),
+    panel.grid.minor.x = element_blank()) +
+  coord_flip()
+
+save_plot_custom(plot = valid_entries_per_column_plot, 
+                 filename = "04_valid_entries.jpg")
+```
+
+```{r}
+# clean env
+rm(most_represented_dataset, valid_count_distribution, valid_counts, valid_values_by_dataset, valid_proportions, valid_values_count)
+```
 
 The columns having only 278 non-NAs values, are columns specific of the "obesity" dataset.
 
@@ -64,99 +179,13 @@ These columns are can be really important for analysis of single datasets, so we
 
 Because of what was said before there are two possible approaches:
 
-1.  keep all the datasets and only maintain the columns which are significant for most of them. This makes it difficult to perform significant analysis on the metadata as not many information are left. On the other hand we have much more data to study in terms of microbiota.
+1.  choose only a single dataset and focus the analysis on that one. This allows us to perform more significant analysis on the metadata and also makes the abundance data smaller, thus making it easier to work with it.
 
-2.  choose only a single dataset and focus the analysis on that one. This allows us to perform more significant analysis on the metadata and also makes the abundance data smaller, thus making it easier to work with it.
+2.  keep all the datasets and only maintain the columns which are significant for most of them. This makes it difficult to perform significant analysis on the metadata as not many information are left. On the other hand we have much more data to study in terms of microbiota.
 
-### Approach 1 - We keep all datasets
+### Approach 1
 
-Even if we are not going to follow this path we still provide an example of what the cleaning of this messier dataset could be done.
-
-We also filter out the column having 0 non-NAs values.
-
-```{r}
-dataset_specific_columns <- valid_counts |> 
-  filter(valid_count < nrow(metadata)*0.70) |> 
-  pull(column_name)
-
-metadata_1 <- metadata |> 
-  select(-all_of(dataset_specific_columns))
-```
-
-```{r}
-valid_counts <- metadata_1 |> 
-
-summarise(across(everything(),
-                 ~sum(!is.na(.)))) |> 
-pivot_longer(everything(),
-             names_to = "column_name",
-             values_to = "valid_count")
-
-valid_counts |> 
-  filter(valid_count != nrow(metadata_1))
-```
-
-Even with these approach we still some columns with a varying number of non-NAs values.
-
-```{r}
-metadata_1 |> 
-  filter(is.na(subjectID))
-
-metadata_1 <- metadata_1 |> 
-  filter(!is.na(subjectID))
-```
-
-We find that in the t2dmeta_long there are 19 samples are do not have any subjectID and are also missing a lot of metadata, this coincide with the hypothesis of these being the product of some error during the CSV production as by removing them we are able to perfectly match the number of samples expected for the t2d dataset (as found in during data selection).
-
-Now we investigate the remaining data columns having NAs.
-
-```{r}
-metadata_1 |> 
-  filter(is.na(gender))
-```
-
-For `gender` we see that the samples not having a value belong to the WT2D or to the Chatelier_gut_obesity datasets. For the former we can verify by looking at the original paper that all the samples are taken from females, unfortunately the data is not recorded for the latter.
-
-```{r}
-metadata_1 <- metadata_1 |> 
-  mutate(gender = ifelse(dataset_name == "WT2D",
-                         "female", gender))
-```
-
-Moving on to the country column
-
-```{r}
-metadata_1 |> 
-  filter(is.na(country))
-```
-
-We can see that is the hmpii dataset to not have the country registered, this can be solved as the HMP project only took into account samples from citizens of the US, as can be seen by the hmp dataset.
-
-One last check allow us to see that the metadata column are now greatly reduced and only contain the columns having the accepted missing values.
-
-```{r}
-valid_counts <- metadata_1 |> 
-summarise(across(everything(),
-                 ~sum(!is.na(.)))) |> 
-pivot_longer(everything(), names_to = "column_name",
-             values_to = "valid_count")
-
-valid_counts |> 
-  filter(valid_count != nrow(metadata_1))
-```
-
-The last cleaning we do is simply to remove data not useful for future analysis
-
-```{r}
-metadata_1 <- metadata_1 |> 
-  select(-sequencing_technology,
-         -pubmedid,
-         -`#SampleID`)
-```
-
-### Approach 2
-
-To the purpose of the project we decided that focusing our effort in the analysis of only a dataset was better. As it allows to better show what we have learned in the course. Due to the interesting metadata columns we focused on the WT2D dataset.
+To the purpose of the project we decided that focusing our effort in the analysis of only a dataset was better. As it allows to better show what we have learned in the course. From the plot above we can see that the dataset having the largest amount of metadata columns (thus giving us many opportunity to do analysis) is the WT2D dataset.
 
 ```{r}
 metadata <- dataset |> 
@@ -174,14 +203,14 @@ pivot_longer(everything(), names_to = "column_name", values_to = "valid_count")
 
 ```{r}
 to_remove <- valid_counts |> 
-  filter(valid_count != nrow(metadata)) |> 
+  filter(valid_count < 140) |> 
   pull(column_name)
 
 metadata <- metadata |> 
   select(-all_of(to_remove))
 ```
 
-We remove columns having all the same value for all rows as they do not provide any information
+We remove columns having the same value for all rows as they do not provide any information
 
 ```{r}
 metadata <- metadata |>
@@ -217,8 +246,11 @@ metadata <- metadata |>
 ### Cleaning the abundance data
 
 ```{r}
+relevent_rows <- metadata |> 
+  pull(sampleID)
+
 abundance_data <- dataset |> 
-  filter(dataset_name == "WT2D") |> 
+  filter(sampleID %in% relevent_rows) |> 
   select(starts_with("k__"))
 ```
 
@@ -226,7 +258,7 @@ The only cleaning we can do on the abundances is that of removing columns that d
 
 ```{r}
 abundance_data <- abundance_data |> 
-  select(where(~ sum(.x, na.rm = TRUE) != 0))###
+  select(where(~ sum(.x, na.rm = TRUE) != 0))
 ```
 
 ### Saving the dataset
@@ -244,3 +276,92 @@ target_dir <- "../data"
 # save the dataset in the data fodler
 write_csv(dataset, str_c(target_dir, "/04_dat_clean.csv"))
 ```
+
+### Approach 2 - We keep all datasets
+
+Even though we are not going to follow this path we still provide an example of what the cleaning of this messier dataset could be done.
+
+```{r}
+dataset <- read_csv(data_path,
+                    na = c("nd", "-", "na"),
+                    show_col_types = FALSE)
+
+metadata <- dataset |>
+  select(-starts_with("k__"))
+```
+
+```{r}
+valid_counts <- metadata |> 
+summarise(across(everything(),
+                 ~sum(!is.na(.)))) |> 
+pivot_longer(everything(),
+             names_to = "column_name",
+             values_to = "valid_count")
+
+to_remove <- valid_counts |> 
+  filter(valid_count < 0.7 * nrow(metadata)) |> 
+  pull(column_name)
+
+metadata <- metadata |> 
+  select(-all_of(to_remove))
+```
+
+Even with these approach we still some columns with a varying number of non-NAs values.
+
+```{r}
+metadata |> 
+  filter(is.na(subjectID))
+
+metadata <- metadata |> 
+  filter(!is.na(subjectID))
+```
+
+We find that in the t2dmeta_long there are 19 samples are do not have any subjectID and are also missing a lot of metadata, this coincide with the hypothesis of these being the product of some error during the CSV production as by removing them we are able to perfectly match the number of samples expected for the t2d dataset (as found in during data selection).
+
+Now we investigate the remaining data columns having NAs.
+
+```{r}
+metadata |> 
+  filter(is.na(gender))
+```
+
+For `gender` we see that the samples not having a value belong to the WT2D or to the Chatelier_gut_obesity datasets. For the former we can verify by looking at the original paper that all the samples are taken from females, unfortunately the data is not recorded for the latter.
+
+```{r}
+metadata <- metadata |> 
+  mutate(gender = ifelse(dataset_name == "WT2D",
+                         "female", gender))
+```
+
+Moving on to the country column
+
+```{r}
+metadata |> 
+  filter(is.na(country))
+```
+
+We can see that is the hmpii dataset to not have the country registered, this can be solved as the HMP project only took into account samples from citizens of the US, as can be seen by the hmp dataset.
+
+One last check allow us to see that the metadata column are now greatly reduced and only contain the columns having the accepted missing values.
+
+```{r}
+valid_counts <- metadata |> 
+summarise(across(everything(),
+                 ~sum(!is.na(.)))) |> 
+pivot_longer(everything(), names_to = "column_name",
+             values_to = "valid_count")
+
+valid_counts |> 
+  filter(valid_count != nrow(metadata))
+```
+
+The last cleaning we do is simply to remove data not useful for future analysis
+
+```{r}
+metadata <- metadata |> 
+  select(-sequencing_technology,
+         -pubmedid,
+         -`#SampleID`)
+```
+
+We can see that only a few columns are left.

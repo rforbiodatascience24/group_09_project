@@ -1,0 +1,929 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.4.555">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Andreis Marco(s243116)">
+<meta name="author" content="Asiya Mohamad Yusuf Muse (s243930)">
+<meta name="author" content="Magnus Harthimmer (s233426)">
+<meta name="author" content="Anita Skovbjerg Hjort-Gregersen (s201190)">
+<meta name="author" content="Rebecca Hjermind Millum (s215024)">
+
+<title>04_clean</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="04_clean_files/libs/clipboard/clipboard.min.js"></script>
+<script src="04_clean_files/libs/quarto-html/quarto.js"></script>
+<script src="04_clean_files/libs/quarto-html/popper.min.js"></script>
+<script src="04_clean_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="04_clean_files/libs/quarto-html/anchor.min.js"></script>
+<link href="04_clean_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="04_clean_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="04_clean_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="04_clean_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="04_clean_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+
+
+</head>
+
+<body class="fullcontent">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">04_clean</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Authors</div>
+    <div class="quarto-title-meta-contents">
+             <p>Andreis Marco(s243116) </p>
+             <p>Asiya Mohamad Yusuf Muse (s243930) </p>
+             <p>Magnus Harthimmer (s233426) </p>
+             <p>Anita Skovbjerg Hjort-Gregersen (s201190) </p>
+             <p>Rebecca Hjermind Millum (s215024) </p>
+          </div>
+  </div>
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>This files builds on top of the consideration made in 03 to perform the cleaning. Here we had a major decision point about the direction the analysis will take.</p>
+<section id="load-the-dataset" class="level3">
+<h3 class="anchored" data-anchor-id="load-the-dataset">Load the dataset</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(<span class="st">"tidyverse"</span>)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(<span class="st">"here"</span>)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(<span class="st">"viridis"</span>)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Import costum function</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu">source</span>(<span class="st">"99_proj_func.R"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>dataset |&gt; filter(dataset_name == “WT2D”) |&gt; select(fasting_glucose)</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>data_path <span class="ot">&lt;-</span> <span class="fu">here</span>(<span class="st">"data/03_dat_selected.csv"</span>)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>dataset <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(data_path,</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>                    <span class="at">na =</span> <span class="fu">c</span>(<span class="st">"nd"</span>, <span class="st">"-"</span>, <span class="st">"na"</span>),</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>                    <span class="at">show_col_types =</span> <span class="cn">FALSE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>The first thing we do is unify the original datasets that were splitted (t2d is splitted in t2dmeta_long / short, and the hmp is splitted in hmp/hmpii).</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>dataset <span class="ot">&lt;-</span> dataset <span class="sc">|&gt;</span> </span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">dataset_name =</span> <span class="fu">case_when</span>(</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    dataset_name <span class="sc">==</span> <span class="st">"t2dmeta_long"</span> <span class="sc">~</span>  <span class="st">"t2d"</span>,</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    dataset_name <span class="sc">==</span> <span class="st">"t2dmeta_short"</span> <span class="sc">~</span> <span class="st">"t2d"</span>,</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    dataset_name <span class="sc">==</span> <span class="st">"hmpii"</span> <span class="sc">~</span> <span class="st">"hmp"</span>,</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    <span class="cn">TRUE</span> <span class="sc">~</span> dataset_name))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>The dataset is divided in metadata columns and microorganism relative abundances. We divide the two dataset to facilitate cleaning:</p>
+</section>
+<section id="cleaning-the-metadata" class="level3">
+<h3 class="anchored" data-anchor-id="cleaning-the-metadata">Cleaning the metadata</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>metadata <span class="ot">&lt;-</span> dataset <span class="sc">|&gt;</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span><span class="fu">starts_with</span>(<span class="st">"k__"</span>))</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="fu">dim_desc</span>(metadata)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "[2,243 x 211]"</code></pre>
+</div>
+</div>
+<p>The wide variety of studies from which the data comes from results in a large number of study-specific metadata. This can be observed by plotting the amount of NA present in each of these.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>valid_counts <span class="ot">&lt;-</span> metadata <span class="sc">|&gt;</span> </span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summarise</span>(<span class="fu">across</span>(<span class="fu">everything</span>(),</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>                 <span class="sc">~</span><span class="fu">sum</span>(<span class="sc">!</span><span class="fu">is.na</span>(.))),</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>          ) <span class="sc">|&gt;</span> </span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="fu">pivot_longer</span>(<span class="fu">everything</span>(),</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>             <span class="at">names_to =</span> <span class="st">"column_name"</span>,</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>             <span class="at">values_to =</span> <span class="st">"valid_count"</span>)</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>valid_counts <span class="sc">|&gt;</span> </span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x=</span>valid_count)) <span class="sc">+</span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_histogram</span>(<span class="at">binwidth =</span> <span class="dv">30</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="04_clean_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>We can see that there are many columns with a lot / or even only missing values.</p>
+<p>Many of these columns are dataset-specific, we can show that by plotting the columns group by the number of valid data and looking which dataset contain those valid datapoints.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># For each column get the TOTAL number of non-NAs values</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>valid_values_count <span class="ot">&lt;-</span> metadata <span class="sc">|&gt;</span> </span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span>dataset_name) <span class="sc">|&gt;</span>  <span class="co"># we obviusly don't care about the data_set name column</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="fu">across</span>(<span class="fu">everything</span>(),</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>                   <span class="sc">~</span> <span class="fu">sum</span>(<span class="sc">!</span><span class="fu">is.na</span>(.)))) <span class="sc">|&gt;</span> </span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(<span class="at">cols =</span> <span class="fu">everything</span>(),</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>               <span class="at">names_to =</span> <span class="st">"column"</span>,</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>               <span class="at">values_to =</span> <span class="st">"valid_count"</span>) </span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Calculate the number of valid datapoint that each dataset has in each column</span></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>valid_values_by_dataset <span class="ot">&lt;-</span> metadata <span class="sc">|&gt;</span> </span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(dataset_name) <span class="sc">|&gt;</span> </span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="fu">across</span>(<span class="fu">everything</span>(),</span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>                   <span class="sc">~</span> <span class="fu">sum</span>(<span class="sc">!</span><span class="fu">is.na</span>(.)),</span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>                   <span class="at">.names =</span> <span class="st">"{col}"</span>)) <span class="sc">|&gt;</span> </span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(<span class="at">cols =</span> <span class="sc">-</span>dataset_name, </span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>               <span class="at">names_to =</span> <span class="st">"column"</span>, </span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>               <span class="at">values_to =</span> <span class="st">"dataset_valid_count"</span>)</span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a><span class="co"># Calculate the proportion of valid datapoint that each dataset has in each column</span></span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a>valid_proportions <span class="ot">&lt;-</span> valid_values_by_dataset <span class="sc">|&gt;</span> </span>
+<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(valid_values_count, <span class="at">by =</span> <span class="st">"column"</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">proportion =</span> <span class="fu">ifelse</span>(valid_count <span class="sc">==</span> <span class="dv">0</span>, <span class="dv">0</span>, dataset_valid_count <span class="sc">/</span> valid_count))</span>
+<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a><span class="co"># for each column select the most represented dataset (% &gt; 90%, otherwise) if there is none the the column is considered mixed</span></span>
+<span id="cb7-26"><a href="#cb7-26" aria-hidden="true" tabindex="-1"></a>most_represented_dataset <span class="ot">&lt;-</span> valid_proportions <span class="sc">|&gt;</span> </span>
+<span id="cb7-27"><a href="#cb7-27" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(column) <span class="sc">|&gt;</span> </span>
+<span id="cb7-28"><a href="#cb7-28" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(proportion))  <span class="sc">|&gt;</span>  </span>
+<span id="cb7-29"><a href="#cb7-29" aria-hidden="true" tabindex="-1"></a>  <span class="fu">slice</span>(<span class="dv">1</span>) <span class="sc">|&gt;</span>   </span>
+<span id="cb7-30"><a href="#cb7-30" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ungroup</span>() <span class="sc">|&gt;</span></span>
+<span id="cb7-31"><a href="#cb7-31" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">most_representative_dataset =</span> <span class="fu">ifelse</span>(proportion <span class="sc">&gt;</span> <span class="fl">0.9</span>, dataset_name, <span class="st">"no prevalent dataset (90% threshold)"</span>)) <span class="sc">|&gt;</span> </span>
+<span id="cb7-32"><a href="#cb7-32" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">proportion =</span> <span class="fu">ifelse</span>(proportion <span class="sc">&gt;</span> <span class="fl">0.9</span>, proportion, <span class="cn">NA</span>))<span class="sc">|&gt;</span> </span>
+<span id="cb7-33"><a href="#cb7-33" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span>dataset_name)</span>
+<span id="cb7-34"><a href="#cb7-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-35"><a href="#cb7-35" aria-hidden="true" tabindex="-1"></a><span class="co"># Divide the columns based on the amount of NAs they contain </span></span>
+<span id="cb7-36"><a href="#cb7-36" aria-hidden="true" tabindex="-1"></a>valid_count_distribution <span class="ot">&lt;-</span> most_represented_dataset <span class="sc">|&gt;</span> </span>
+<span id="cb7-37"><a href="#cb7-37" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(valid_count,</span>
+<span id="cb7-38"><a href="#cb7-38" aria-hidden="true" tabindex="-1"></a>           most_representative_dataset) <span class="sc">|&gt;</span> </span>
+<span id="cb7-39"><a href="#cb7-39" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">count =</span> <span class="fu">n</span>(),</span>
+<span id="cb7-40"><a href="#cb7-40" aria-hidden="true" tabindex="-1"></a>            <span class="at">.groups =</span> <span class="st">"drop"</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb7-41"><a href="#cb7-41" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">most_representative_dataset =</span> <span class="fu">factor</span>(</span>
+<span id="cb7-42"><a href="#cb7-42" aria-hidden="true" tabindex="-1"></a>    most_representative_dataset,</span>
+<span id="cb7-43"><a href="#cb7-43" aria-hidden="true" tabindex="-1"></a>    <span class="at">levels =</span> <span class="fu">c</span>(<span class="fu">setdiff</span>(<span class="fu">unique</span>(most_representative_dataset),</span>
+<span id="cb7-44"><a href="#cb7-44" aria-hidden="true" tabindex="-1"></a>                       <span class="st">"no prevalent dataset (90% threshold)"</span>),</span>
+<span id="cb7-45"><a href="#cb7-45" aria-hidden="true" tabindex="-1"></a>               <span class="st">"no prevalent dataset (90% threshold)"</span>)</span>
+<span id="cb7-46"><a href="#cb7-46" aria-hidden="true" tabindex="-1"></a>  ))</span>
+<span id="cb7-47"><a href="#cb7-47" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-48"><a href="#cb7-48" aria-hidden="true" tabindex="-1"></a><span class="co">#FINALLY!!! We can plot the column distribution </span></span>
+<span id="cb7-49"><a href="#cb7-49" aria-hidden="true" tabindex="-1"></a>valid_entries_per_column_plot <span class="ot">&lt;-</span> valid_count_distribution <span class="sc">|&gt;</span></span>
+<span id="cb7-50"><a href="#cb7-50" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(valid_count <span class="sc">!=</span> <span class="dv">0</span>) <span class="sc">|&gt;</span></span>
+<span id="cb7-51"><a href="#cb7-51" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> <span class="fu">as.factor</span>(valid_count), <span class="at">y =</span> count, <span class="at">fill =</span> most_representative_dataset)) <span class="sc">+</span></span>
+<span id="cb7-52"><a href="#cb7-52" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_bar</span>(<span class="at">stat =</span> <span class="st">"identity"</span>, <span class="at">position =</span> <span class="st">"dodge"</span>) <span class="sc">+</span></span>
+<span id="cb7-53"><a href="#cb7-53" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb7-54"><a href="#cb7-54" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"Columns divided by amount of valid entries"</span>,</span>
+<span id="cb7-55"><a href="#cb7-55" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">"Number of valid values"</span>,</span>
+<span id="cb7-56"><a href="#cb7-56" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">"Number of columns"</span>,</span>
+<span id="cb7-57"><a href="#cb7-57" aria-hidden="true" tabindex="-1"></a>    <span class="at">fill =</span> <span class="st">"Most represented dataset"</span>,</span>
+<span id="cb7-58"><a href="#cb7-58" aria-hidden="true" tabindex="-1"></a>    <span class="at">caption =</span> <span class="st">"Columns having no valid values (125) are excluded for visualization purposes"</span>,</span>
+<span id="cb7-59"><a href="#cb7-59" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb7-60"><a href="#cb7-60" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_viridis</span>(<span class="at">discrete =</span> <span class="cn">TRUE</span>, <span class="at">option =</span> <span class="st">"H"</span>) <span class="sc">+</span></span>
+<span id="cb7-61"><a href="#cb7-61" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
+<span id="cb7-62"><a href="#cb7-62" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(</span>
+<span id="cb7-63"><a href="#cb7-63" aria-hidden="true" tabindex="-1"></a>    <span class="at">plot.title =</span> <span class="fu">element_text</span>(<span class="at">face =</span> <span class="st">"bold"</span>, <span class="at">size =</span> <span class="dv">14</span>, <span class="at">hjust =</span> <span class="fl">0.5</span>),</span>
+<span id="cb7-64"><a href="#cb7-64" aria-hidden="true" tabindex="-1"></a>    <span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">10</span>),</span>
+<span id="cb7-65"><a href="#cb7-65" aria-hidden="true" tabindex="-1"></a>    <span class="at">axis.text.y =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">10</span>),</span>
+<span id="cb7-66"><a href="#cb7-66" aria-hidden="true" tabindex="-1"></a>    <span class="at">axis.title.x =</span> <span class="fu">element_text</span>(<span class="at">face =</span> <span class="st">"bold"</span>, <span class="at">size =</span> <span class="dv">12</span>),</span>
+<span id="cb7-67"><a href="#cb7-67" aria-hidden="true" tabindex="-1"></a>    <span class="at">axis.title.y =</span> <span class="fu">element_text</span>(<span class="at">face =</span> <span class="st">"bold"</span>, <span class="at">size =</span> <span class="dv">12</span>),</span>
+<span id="cb7-68"><a href="#cb7-68" aria-hidden="true" tabindex="-1"></a>    <span class="at">plot.caption =</span> <span class="fu">element_text</span>(<span class="at">face =</span> <span class="st">"italic"</span>, <span class="at">size =</span> <span class="dv">10</span>, <span class="at">hjust =</span> <span class="sc">-</span><span class="dv">1</span>),</span>
+<span id="cb7-69"><a href="#cb7-69" aria-hidden="true" tabindex="-1"></a>    <span class="at">panel.grid.minor.x =</span> <span class="fu">element_blank</span>()) <span class="sc">+</span></span>
+<span id="cb7-70"><a href="#cb7-70" aria-hidden="true" tabindex="-1"></a>  <span class="fu">coord_flip</span>()</span>
+<span id="cb7-71"><a href="#cb7-71" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-72"><a href="#cb7-72" aria-hidden="true" tabindex="-1"></a><span class="fu">save_plot_custom</span>(<span class="at">plot =</span> valid_entries_per_column_plot, </span>
+<span id="cb7-73"><a href="#cb7-73" aria-hidden="true" tabindex="-1"></a>                 <span class="at">filename =</span> <span class="st">"04_valid_entries.jpg"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># clean env</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="fu">rm</span>(most_represented_dataset, valid_count_distribution, valid_counts, valid_values_by_dataset, valid_proportions, valid_values_count)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>The columns having only 278 non-NAs values, are columns specific of the “obesity” dataset.</p>
+<p>The columns having only 232 non-NAs values, are columns specific of the “Quin_gut_liver_cirrhosis” dataset.</p>
+<p>The columns having only 363 non-NAs values, are columns specific of the “T2D” dataset.</p>
+<p>The columns having only 145 non-NAs values, are columns specific of the “WT2D” dataset.</p>
+<p>The columns having only 110 non-NAs values, are columns specific of the “metahit” dataset.</p>
+<p>The columns having only 981 non-NAs values, are columns specific of the “hmp” dataset.</p>
+<p>The columns having only 344 non-NAs values, are columns specific of the “hmp” dataset.</p>
+<p>These columns are can be really important for analysis of single datasets, so we have to decide what to do them.</p>
+</section>
+<section id="decision-point" class="level3">
+<h3 class="anchored" data-anchor-id="decision-point">Decision point</h3>
+<p>Because of what was said before there are two possible approaches:</p>
+<ol type="1">
+<li><p>choose only a single dataset and focus the analysis on that one. This allows us to perform more significant analysis on the metadata and also makes the abundance data smaller, thus making it easier to work with it.</p></li>
+<li><p>keep all the datasets and only maintain the columns which are significant for most of them. This makes it difficult to perform significant analysis on the metadata as not many information are left. On the other hand we have much more data to study in terms of microbiota.</p></li>
+</ol>
+</section>
+<section id="approach-1" class="level3">
+<h3 class="anchored" data-anchor-id="approach-1">Approach 1</h3>
+<p>To the purpose of the project we decided that focusing our effort in the analysis of only a dataset was better. As it allows to better show what we have learned in the course. From the plot above we can see that the dataset having the largest amount of metadata columns (thus giving us many opportunity to do analysis) is the WT2D dataset.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>metadata <span class="ot">&lt;-</span> dataset <span class="sc">|&gt;</span> </span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(dataset_name <span class="sc">==</span> <span class="st">"WT2D"</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span><span class="fu">starts_with</span>(<span class="st">"k__"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>As before we need to get rid of the columns containing to many missing values</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>valid_counts <span class="ot">&lt;-</span> metadata <span class="sc">|&gt;</span> </span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summarise</span>(<span class="fu">across</span>(<span class="fu">everything</span>(), <span class="sc">~</span><span class="fu">sum</span>(<span class="sc">!</span><span class="fu">is.na</span>(.)))) <span class="sc">|&gt;</span> </span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="fu">pivot_longer</span>(<span class="fu">everything</span>(), <span class="at">names_to =</span> <span class="st">"column_name"</span>, <span class="at">values_to =</span> <span class="st">"valid_count"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>to_remove <span class="ot">&lt;-</span> valid_counts <span class="sc">|&gt;</span> </span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(valid_count <span class="sc">&lt;</span> <span class="dv">140</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pull</span>(column_name)</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>metadata <span class="ot">&lt;-</span> metadata <span class="sc">|&gt;</span> </span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span><span class="fu">all_of</span>(to_remove))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>We remove columns having the same value for all rows as they do not provide any information</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>metadata <span class="ot">&lt;-</span> metadata <span class="sc">|&gt;</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="fu">where</span>(<span class="sc">~</span> <span class="fu">n_distinct</span>(.) <span class="sc">&gt;</span> <span class="dv">1</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>We see that the sampleID is just a lower case subjectID for every row, therefore we remove the subjectID.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>metadata <span class="sc">|&gt;</span> </span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">redundant =</span> sampleID <span class="sc">==</span> <span class="fu">str_to_upper</span>(subjectID)) <span class="sc">|&gt;</span> </span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(redundant) <span class="sc">|&gt;</span> </span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">unique</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 1 × 1
+  redundant
+  &lt;lgl&gt;    
+1 TRUE     </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>metadata <span class="ot">&lt;-</span> metadata <span class="sc">|&gt;</span> </span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span>subjectID)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>We see that the <code>classification</code> column is just another way of classifying the <code>disease</code> column with:</p>
+<ul>
+<li>n (no disease) = ngt (normal glucose tolerance)</li>
+<li>impaired_glucose_tolerance = igt</li>
+<li>t2d = t2d (type 2 diabetes)</li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>metadata <span class="sc">|&gt;</span> </span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(disease, classification)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 145 × 2
+   disease                    classification
+   &lt;chr&gt;                      &lt;chr&gt;         
+ 1 impaired_glucose_tolerance igt           
+ 2 n                          ngt           
+ 3 n                          ngt           
+ 4 n                          ngt           
+ 5 n                          ngt           
+ 6 impaired_glucose_tolerance igt           
+ 7 n                          ngt           
+ 8 n                          ngt           
+ 9 n                          ngt           
+10 impaired_glucose_tolerance igt           
+# ℹ 135 more rows</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>metadata <span class="ot">&lt;-</span> metadata <span class="sc">|&gt;</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span>classification)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="cleaning-the-abundance-data" class="level3">
+<h3 class="anchored" data-anchor-id="cleaning-the-abundance-data">Cleaning the abundance data</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>relevent_rows <span class="ot">&lt;-</span> metadata <span class="sc">|&gt;</span> </span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pull</span>(sampleID)</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>abundance_data <span class="ot">&lt;-</span> dataset <span class="sc">|&gt;</span> </span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(sampleID <span class="sc">%in%</span> relevent_rows) <span class="sc">|&gt;</span> </span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="fu">starts_with</span>(<span class="st">"k__"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>The only cleaning we can do on the abundances is that of removing columns that do not contain any data, i.e.&nbsp;columns the species of which is not present in any of the samples.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>abundance_data <span class="ot">&lt;-</span> abundance_data <span class="sc">|&gt;</span> </span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="fu">where</span>(<span class="sc">~</span> <span class="fu">sum</span>(.x, <span class="at">na.rm =</span> <span class="cn">TRUE</span>) <span class="sc">!=</span> <span class="dv">0</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="saving-the-dataset" class="level3">
+<h3 class="anchored" data-anchor-id="saving-the-dataset">Saving the dataset</h3>
+<p>Lastly we merge the metadata with the abundance data. We can do it without checking the row correspondence, as we did not remove any row or alter their order during the cleaning.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>dataset <span class="ot">&lt;-</span> metadata <span class="sc">|&gt;</span> </span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">bind_cols</span>(abundance_data)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>target_dir <span class="ot">&lt;-</span> <span class="st">"../data"</span></span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a><span class="co"># save the dataset in the data fodler</span></span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a><span class="fu">write_csv</span>(dataset, <span class="fu">str_c</span>(target_dir, <span class="st">"/04_dat_clean.csv"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="approach-2---we-keep-all-datasets" class="level3">
+<h3 class="anchored" data-anchor-id="approach-2---we-keep-all-datasets">Approach 2 - We keep all datasets</h3>
+<p>Even though we are not going to follow this path we still provide an example of what the cleaning of this messier dataset could be done.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>dataset <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(data_path,</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>                    <span class="at">na =</span> <span class="fu">c</span>(<span class="st">"nd"</span>, <span class="st">"-"</span>, <span class="st">"na"</span>),</span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>                    <span class="at">show_col_types =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>metadata <span class="ot">&lt;-</span> dataset <span class="sc">|&gt;</span></span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span><span class="fu">starts_with</span>(<span class="st">"k__"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>valid_counts <span class="ot">&lt;-</span> metadata <span class="sc">|&gt;</span> </span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summarise</span>(<span class="fu">across</span>(<span class="fu">everything</span>(),</span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>                 <span class="sc">~</span><span class="fu">sum</span>(<span class="sc">!</span><span class="fu">is.na</span>(.)))) <span class="sc">|&gt;</span> </span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a><span class="fu">pivot_longer</span>(<span class="fu">everything</span>(),</span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>             <span class="at">names_to =</span> <span class="st">"column_name"</span>,</span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a>             <span class="at">values_to =</span> <span class="st">"valid_count"</span>)</span>
+<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a>to_remove <span class="ot">&lt;-</span> valid_counts <span class="sc">|&gt;</span> </span>
+<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(valid_count <span class="sc">&lt;</span> <span class="fl">0.7</span> <span class="sc">*</span> <span class="fu">nrow</span>(metadata)) <span class="sc">|&gt;</span> </span>
+<span id="cb24-10"><a href="#cb24-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pull</span>(column_name)</span>
+<span id="cb24-11"><a href="#cb24-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-12"><a href="#cb24-12" aria-hidden="true" tabindex="-1"></a>metadata <span class="ot">&lt;-</span> metadata <span class="sc">|&gt;</span> </span>
+<span id="cb24-13"><a href="#cb24-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span><span class="fu">all_of</span>(to_remove))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Even with these approach we still some columns with a varying number of non-NAs values.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>metadata <span class="sc">|&gt;</span> </span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="fu">is.na</span>(subjectID))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 19 × 10
+   dataset_name sampleID subjectID bodysite disease gender country
+   &lt;chr&gt;        &lt;chr&gt;    &lt;chr&gt;     &lt;chr&gt;    &lt;chr&gt;   &lt;chr&gt;  &lt;chr&gt;  
+ 1 t2dmeta_long CON-024  &lt;NA&gt;      stool    &lt;NA&gt;    &lt;NA&gt;   &lt;NA&gt;   
+ 2 t2dmeta_long CON-025  &lt;NA&gt;      stool    &lt;NA&gt;    &lt;NA&gt;   &lt;NA&gt;   
+ 3 t2dmeta_long CON-030  &lt;NA&gt;      stool    &lt;NA&gt;    &lt;NA&gt;   &lt;NA&gt;   
+ 4 t2dmeta_long CON-094  &lt;NA&gt;      stool    &lt;NA&gt;    &lt;NA&gt;   &lt;NA&gt;   
+ 5 t2dmeta_long CON-100  &lt;NA&gt;      stool    &lt;NA&gt;    &lt;NA&gt;   &lt;NA&gt;   
+ 6 t2dmeta_long CON-102  &lt;NA&gt;      stool    &lt;NA&gt;    &lt;NA&gt;   &lt;NA&gt;   
+ 7 t2dmeta_long CON-103  &lt;NA&gt;      stool    &lt;NA&gt;    &lt;NA&gt;   &lt;NA&gt;   
+ 8 t2dmeta_long CON-108  &lt;NA&gt;      stool    &lt;NA&gt;    &lt;NA&gt;   &lt;NA&gt;   
+ 9 t2dmeta_long CON-109  &lt;NA&gt;      stool    &lt;NA&gt;    &lt;NA&gt;   &lt;NA&gt;   
+10 t2dmeta_long CON-110  &lt;NA&gt;      stool    &lt;NA&gt;    &lt;NA&gt;   &lt;NA&gt;   
+11 t2dmeta_long CON-111  &lt;NA&gt;      stool    &lt;NA&gt;    &lt;NA&gt;   &lt;NA&gt;   
+12 t2dmeta_long T2D-027  &lt;NA&gt;      stool    &lt;NA&gt;    &lt;NA&gt;   &lt;NA&gt;   
+13 t2dmeta_long T2D-032  &lt;NA&gt;      stool    &lt;NA&gt;    &lt;NA&gt;   &lt;NA&gt;   
+14 t2dmeta_long T2D-033  &lt;NA&gt;      stool    &lt;NA&gt;    &lt;NA&gt;   &lt;NA&gt;   
+15 t2dmeta_long T2D-034  &lt;NA&gt;      stool    &lt;NA&gt;    &lt;NA&gt;   &lt;NA&gt;   
+16 t2dmeta_long T2D-035  &lt;NA&gt;      stool    &lt;NA&gt;    &lt;NA&gt;   &lt;NA&gt;   
+17 t2dmeta_long T2D-037  &lt;NA&gt;      stool    &lt;NA&gt;    &lt;NA&gt;   &lt;NA&gt;   
+18 t2dmeta_long T2D-038  &lt;NA&gt;      stool    &lt;NA&gt;    &lt;NA&gt;   &lt;NA&gt;   
+19 t2dmeta_long T2D-061  &lt;NA&gt;      stool    &lt;NA&gt;    &lt;NA&gt;   &lt;NA&gt;   
+# ℹ 3 more variables: sequencing_technology &lt;chr&gt;, pubmedid &lt;dbl&gt;,
+#   `#SampleID` &lt;chr&gt;</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>metadata <span class="ot">&lt;-</span> metadata <span class="sc">|&gt;</span> </span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(subjectID))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>We find that in the t2dmeta_long there are 19 samples are do not have any subjectID and are also missing a lot of metadata, this coincide with the hypothesis of these being the product of some error during the CSV production as by removing them we are able to perfectly match the number of samples expected for the t2d dataset (as found in during data selection).</p>
+<p>Now we investigate the remaining data columns having NAs.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>metadata <span class="sc">|&gt;</span> </span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="fu">is.na</span>(gender))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 423 × 10
+   dataset_name          sampleID subjectID bodysite disease gender country
+   &lt;chr&gt;                 &lt;chr&gt;    &lt;chr&gt;     &lt;chr&gt;    &lt;chr&gt;   &lt;chr&gt;  &lt;chr&gt;  
+ 1 Chatelier_gut_obesity MH0002   mh0002    stool    n       &lt;NA&gt;   denmark
+ 2 Chatelier_gut_obesity MH0003   mh0003    stool    obesity &lt;NA&gt;   denmark
+ 3 Chatelier_gut_obesity MH0006   mh0006    stool    leaness &lt;NA&gt;   denmark
+ 4 Chatelier_gut_obesity MH0009   mh0009    stool    n       &lt;NA&gt;   denmark
+ 5 Chatelier_gut_obesity MH0011   mh0011    stool    leaness &lt;NA&gt;   denmark
+ 6 Chatelier_gut_obesity MH0012   mh0012    stool    obesity &lt;NA&gt;   denmark
+ 7 Chatelier_gut_obesity MH0014   mh0014    stool    obesity &lt;NA&gt;   denmark
+ 8 Chatelier_gut_obesity MH0016   mh0016    stool    obesity &lt;NA&gt;   denmark
+ 9 Chatelier_gut_obesity MH0020   mh0020    stool    obesity &lt;NA&gt;   denmark
+10 Chatelier_gut_obesity MH0021   mh0021    stool    n       &lt;NA&gt;   denmark
+# ℹ 413 more rows
+# ℹ 3 more variables: sequencing_technology &lt;chr&gt;, pubmedid &lt;dbl&gt;,
+#   `#SampleID` &lt;chr&gt;</code></pre>
+</div>
+</div>
+<p>For <code>gender</code> we see that the samples not having a value belong to the WT2D or to the Chatelier_gut_obesity datasets. For the former we can verify by looking at the original paper that all the samples are taken from females, unfortunately the data is not recorded for the latter.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>metadata <span class="ot">&lt;-</span> metadata <span class="sc">|&gt;</span> </span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">gender =</span> <span class="fu">ifelse</span>(dataset_name <span class="sc">==</span> <span class="st">"WT2D"</span>,</span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>                         <span class="st">"female"</span>, gender))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Moving on to the country column</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>metadata <span class="sc">|&gt;</span> </span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="fu">is.na</span>(country))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 219 × 10
+   dataset_name sampleID subjectID bodysite         disease gender country
+   &lt;chr&gt;        &lt;chr&gt;    &lt;chr&gt;     &lt;chr&gt;            &lt;chr&gt;   &lt;chr&gt;  &lt;chr&gt;  
+ 1 hmpii        G18095   160603188 stool            n       male   &lt;NA&gt;   
+ 2 hmpii        G18096   160380657 stool            n       male   &lt;NA&gt;   
+ 3 hmpii        G18097   160380657 tongue_dorsum    n       male   &lt;NA&gt;   
+ 4 hmpii        G18098   160380657 stool            n       male   &lt;NA&gt;   
+ 5 hmpii        G18099   160319967 posterior_fornix n       female &lt;NA&gt;   
+ 6 hmpii        G18100   160421117 stool            n       male   &lt;NA&gt;   
+ 7 hmpii        G18101   160421117 stool            n       male   &lt;NA&gt;   
+ 8 hmpii        G18102   160582958 stool            n       female &lt;NA&gt;   
+ 9 hmpii        G18103   160178356 stool            n       male   &lt;NA&gt;   
+10 hmpii        G18104   160947100 stool            n       male   &lt;NA&gt;   
+# ℹ 209 more rows
+# ℹ 3 more variables: sequencing_technology &lt;chr&gt;, pubmedid &lt;dbl&gt;,
+#   `#SampleID` &lt;chr&gt;</code></pre>
+</div>
+</div>
+<p>We can see that is the hmpii dataset to not have the country registered, this can be solved as the HMP project only took into account samples from citizens of the US, as can be seen by the hmp dataset.</p>
+<p>One last check allow us to see that the metadata column are now greatly reduced and only contain the columns having the accepted missing values.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>valid_counts <span class="ot">&lt;-</span> metadata <span class="sc">|&gt;</span> </span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summarise</span>(<span class="fu">across</span>(<span class="fu">everything</span>(),</span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a>                 <span class="sc">~</span><span class="fu">sum</span>(<span class="sc">!</span><span class="fu">is.na</span>(.)))) <span class="sc">|&gt;</span> </span>
+<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a><span class="fu">pivot_longer</span>(<span class="fu">everything</span>(), <span class="at">names_to =</span> <span class="st">"column_name"</span>,</span>
+<span id="cb33-5"><a href="#cb33-5" aria-hidden="true" tabindex="-1"></a>             <span class="at">values_to =</span> <span class="st">"valid_count"</span>)</span>
+<span id="cb33-6"><a href="#cb33-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-7"><a href="#cb33-7" aria-hidden="true" tabindex="-1"></a>valid_counts <span class="sc">|&gt;</span> </span>
+<span id="cb33-8"><a href="#cb33-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(valid_count <span class="sc">!=</span> <span class="fu">nrow</span>(metadata))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 2 × 2
+  column_name valid_count
+  &lt;chr&gt;             &lt;int&gt;
+1 gender             1946
+2 country            2005</code></pre>
+</div>
+</div>
+<p>The last cleaning we do is simply to remove data not useful for future analysis</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>metadata <span class="ot">&lt;-</span> metadata <span class="sc">|&gt;</span> </span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span>sequencing_technology,</span>
+<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a>         <span class="sc">-</span>pubmedid,</span>
+<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a>         <span class="sc">-</span><span class="st">`</span><span class="at">#SampleID</span><span class="st">`</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>We can see that only a few columns are left.</p>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

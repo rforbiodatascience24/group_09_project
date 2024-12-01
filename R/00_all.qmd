@@ -6,8 +6,16 @@ author:
   - "Magnus Harthimmer (s233426)"  
   - "Anita Skovbjerg Hjort-Gregersen (s201190)"
   - "Rebecca Hjermind Millum (s215024)"
-  
-format: html
+
+execute:
+  warning: false
+  message: false
+ 
+format:
+  html:
+    embed-resources: true
+    
+output: html_document
 editor: visual
 ---
 
@@ -18,29 +26,46 @@ library('quarto')
 ```
 
 ```{r}
+target_dir <- "../results/"
+# Create the data folder if it does not exist
+if (!file.exists(target_dir)) {
+  # Create the folder if it doesn't exist
+  dir.create(target_dir, recursive = TRUE)
+  }
+
 # Download the dataset
-quarto_render("01_download.qmd", execute = TRUE, output_file = NULL)
+quarto_render("01_download.qmd", execute = TRUE)
 
 # Load and create a copy of the dataset in the data folder
-quarto_render("02_load.qmd", execute = TRUE, output_file = NULL)
+quarto_render("02_load.qmd", execute = TRUE)
 
 # Explore and select the data to work with
-quarto_render("03_data_selection.qmd", execute = TRUE, output_file = NULL)
+quarto_render("03_data_selection.qmd", execute = TRUE)
 
 # Clean the selected dataset
-quarto_render("04_clean.qmd", execute = TRUE, output_file = NULL)
+quarto_render("04_clean.qmd", execute = TRUE)
 
 # Confirm that the dataset is tidy and fix minor issues to improve readability
-quarto_render("05_tidy.qmd", execute = TRUE, output_file = NULL)
+quarto_render("05_tidy.qmd", execute = TRUE)
 
 # Create useful additional variables for analysis
-quarto_render("06_augment.qmd", execute = TRUE, output_file = NULL)
+quarto_render("06_augment.qmd", execute = TRUE)
 
 # Visualize the main aspects of the metadata
-quarto_render("07_describe_metadata.qmd", execute = TRUE, output_file = NULL)
+quarto_render("07_describe_metadata.qmd", execute = TRUE)
 
 # Visualize the main aspects of the abundace data
-quarto_render("08_describe_abundance.qmd", execute = TRUE, output_file = NULL)
+quarto_render("08_describe_abundance.qmd", execute = TRUE)
+
+# Perform statistical analysis on metadata
+quarto_render("09_analysis_metadata.qmd", execute = TRUE)
+
+# Perform PCoA and statistical analysis on abundance data
+quarto_render("10_analysis_abundance.qmd", execute = TRUE)
+
+# Move generated html to the results folder
+html_files <- list.files(path = getwd(), pattern = "\\.html$", full.names = TRUE)
+file.rename(html_files, file.path(target_dir, basename(html_files)))
 
 # removed unwanted folder created as byproduct of running all the documents
 unlink("*_files", recursive = TRUE)

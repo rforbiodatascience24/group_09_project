@@ -6,19 +6,22 @@ author:
   - "Magnus Harthimmer (s233426)"  
   - "Anita Skovbjerg Hjort-Gregersen (s201190)"
   - "Rebecca Hjermind Millum (s215024)"
-  
+
+execute:
+  warning: false
+  message: false
+ 
 format: html
+output: html_document
 editor: visual
 ---
 
 In this file we check if the dataset is already present, if it is not we collect it programmatically from kaggle and save it in the \_raw folder.
 
 ```{r}
-suppressMessages({
-  library('tidyverse')
-  library('httr')
-  library('jsonlite')
-})
+library('tidyverse')
+library('httr')
+library('jsonlite')
 ```
 
 ```{r}
