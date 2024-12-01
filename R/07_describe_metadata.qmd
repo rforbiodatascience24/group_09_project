@@ -610,7 +610,7 @@ percentage_statins_graph <- dataset |>
            alpha = 0.4) +
   theme_minimal(base_size = 15) +
   labs(x = "",
-       y = "% recieved statins",
+       y = "% received statins",
        title = "% of patient groups recieve statin treatment") +
   geom_hline(yintercept = 0) +
   geom_text(vjust = -0.5, size = 5)+
