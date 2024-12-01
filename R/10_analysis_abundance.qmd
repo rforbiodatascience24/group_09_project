@@ -20,6 +20,7 @@ editor: visual
 library("tidyverse")
 library("vegan")
 library("here")
+library("broom")
 # Import costum function
 source("99_proj_func.R")
 ```
@@ -117,3 +118,104 @@ print(anova_result_bmi)
 ```
 
 The results of the PERMANOVA agree with what is seen in the PCoA as the P.value is 0.208, which indicates that the differences in microbial composition across BMI classes is not significant. Also R2=0.0238 means that bmi contributes to only 2.38% of the variance in the diversity of microbial community across the bmi classes.
+
+# P-value analysis for bacterial species
+
+Before we can study how the bacterial species may be related to type 2 diabetes, we need to find which bacteria have more than 50 values that are not 0. Even though 0 is a meaningful value in the dataset, we need some data points to vary in order to see if there is a meaning full relationship.
+
+```{r}
+#Get a list of the bacteria that have less than n samples where the value is different from 0
+n <- 50
+sparse_columns <- dataset |>  
+  select(starts_with("s_")) |> 
+  pivot_longer(cols = starts_with("s_"),
+               names_to = "backteria",
+               values_to = "abundance") |> 
+  filter(abundance > 0) |> 
+  group_by(backteria) |> 
+  summarise(non_zero_samples = n()) |> 
+  filter(non_zero_samples < n) |> 
+  pull(backteria)
+```
+
+```{r}
+#splitting dataset into metadata and bacteria data 
+metadata <- dataset |> 
+  select(-starts_with("s_")) 
+```
+
+We will perform the p-value analysis where we compare the bacterial samples from normal and T2D (type 2 diabetes) patients. Therefore, we will remove the impaired samples and sparse data. Next, we will transform the columns and convert the data from wide format to long format to conduct the p-value analysis.
+
+```{r}
+dataset_long <- dataset |> 
+  filter(glucose_tolerance != "impaired" ) |> 
+  select(-all_of(sparse_columns)) |> 
+  pivot_longer(cols = starts_with("s_"),
+               names_to = "backteria",
+               values_to = "abundance")
+```
+
+Then we group the data by bacteria and nest it. After that, we ungroup it. By doing so, we obtain another tibble, which is a table for each bacterium.
+
+```{r}
+dataset_long_nested <- dataset_long|> 
+  group_by(backteria) |> 
+  nest() |> 
+  ungroup()
+
+dataset_long_nested
+```
+
+Here we see how the data can be pulled out for a choosen bacterium.
+
+```{r}
+#How to get the data
+dataset_long_nested |> 
+  filter(backteria == "s_Bacteroides_caccae") |> 
+  pull(data)
+```
+
+Then we fit a linear fitting model to each bacterium.
+
+```{r}
+dataset_long_nested <- dataset_long_nested |> 
+  group_by(backteria) |> 
+  mutate(model_object = map(.x = data,
+                            .f = ~lm(formula = abundance ~ is_diseased,
+                                     data = .x))) |> 
+  mutate(model_object_tidy = map(.x = model_object,
+                                 .f = ~tidy(x = .x,
+                                            conf.int = TRUE,
+                                            conf.level = 0.95)))
+```
+
+Then we show how a linear model for a random bacterium would look.
+
+```{r}
+#How to get the model
+dataset_long_nested |> 
+  filter(backteria == "s_Bacteroides_caccae") |> 
+  pull(model_object_tidy)
+```
+
+We unnest the model object so we can access the data and values inside the model.
+
+```{r}
+dataset_estimates <- dataset_long_nested |> 
+  unnest(model_object_tidy)
+dataset_estimates
+```
+
+Then we check if there are any bacteria that are significant at the alpha = 0.05 level. We filter for those, and we find that none of the bacteria are significant at that level.
+
+```{r}
+dataset_estimates1 <- dataset_estimates |> 
+  filter(term == "is_diseased") |> 
+  select(backteria,p.value,estimate,conf.low,conf.high,p.value) |> 
+  ungroup() |> 
+  mutate(q.value = p.adjust(p.value),
+         is_significant = case_when(q.value <= 0.05 ~ "yes",
+                                    q.value > 0.05 ~ "no"))
+dataset_estimates1 |> 
+  filter(is_significant == "yes")
+```
