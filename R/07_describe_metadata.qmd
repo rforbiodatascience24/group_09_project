@@ -1,31 +1,21 @@
 ---
-title: "07_describe_metadata"
-author: 
-  - "Andreis Marco(s243116)" 
-  - "Asiya Mohamad Yusuf Muse (s243930)"
-  - "Magnus Harthimmer (s233426)"  
-  - "Anita Skovbjerg Hjort-Gregersen (s201190)"
-  - "Rebecca Hjermind Millum (s215024)"
-
-execute:
-  warning: false
-  message: false
- 
-format: html
-output: html_document
-editor: visual
+format: 
+  html:
+    self-contained: true
 ---
-
-### Load the dataset
+# Exploration of metadata
 
 ```{r}
 library("tidyverse")
 library("here")
 library("ggridges")
 library("patchwork")
-# Import costum function
+library("viridis")
+library("table1")
+
 source("99_proj_func.R")
 ```
+
 
 ```{r}
 data_path <- here("data/06_dat_augmented.RData")
@@ -41,10 +31,6 @@ dataset |>
   table1::table1(x = formula(~ BMI_class + HOMA_category + cholesterol + statins + insulin| glucose_tolerance),
          data = _)
 ```
-
-### Metadata visualization
-
-Now we will focus on the visualization of the metadata.
 
 Our dataset contains samples taken from patients either having type II diabetes, an impaired tolerance to glucose or being healthy individuals.
 
@@ -181,10 +167,10 @@ bmi_vs_glucose_tolerance <- dataset |>
     alpha = 0.4) +
   geom_hline(yintercept = 0) +
   theme_minimal(base_size = 10) +
-  labs(x = "Fasting insulin",
+  labs(x = "BMI",
        y = "Count",
        title = "BMI count by glucose tolerance",
-       fill = "Glucose tolerance: ")+
+       fill = "Glucose tolerance: ") +
   theme(legend.position = "bottom",
         panel.grid.major.x = element_blank(),
         axis.text.x = element_text(vjust = 5))
@@ -706,4 +692,11 @@ save_plot_custom(
 statins_cholesterol
 ```
 
-We can see that both the treatment with statins and with insulin have the effect of lowering cholesterol, which is coherent with what's expected.
+We can see that the treatment with statins have the effect of lowering cholesterol, which is coherent with what's expected.
+
+```{r}
+# # clean environment
+# rm(list = ls() |>  
+#       keep(~ !is.function(get(.))) |>  
+#       discard(~ . %in% ls()))
+```

@@ -1,34 +1,19 @@
 ---
-title: "04_clean"
-author: 
-  - "Andreis Marco(s243116)" 
-  - "Asiya Mohamad Yusuf Muse (s243930)"
-  - "Magnus Harthimmer (s233426)"  
-  - "Anita Skovbjerg Hjort-Gregersen (s201190)"
-  - "Rebecca Hjermind Millum (s215024)"
-
-execute:
-  warning: false
-  message: false
- 
-format: html
-output: html_document
-editor: visual
+format: 
+  html:
+    self-contained: true
 ---
-
-This files builds on top of the consideration made in 03 to perform the cleaning. Here we had a major decision point about the direction the analysis will take.
-
-### Load the dataset
+# Cleaning the dataset
 
 ```{r}
 library("tidyverse")
 library("here")
 library("viridis")
-# Import costum function
 source("99_proj_func.R")
 ```
 
-dataset \|\> filter(dataset_name == "WT2D") \|\> select(fasting_glucose)
+
+Building on top of the consideration made, we perform the cleaning. Here we had a major decision point about the direction the analysis will take.
 
 ```{r}
 data_path <- here("data/03_dat_selected.csv")
@@ -37,7 +22,7 @@ dataset <- read_csv(data_path,
                     show_col_types = FALSE)
 ```
 
-The first thing we do is unify the original datasets that were splitted (t2d is splitted in t2dmeta_long / short, and the hmp is splitted in hmp/hmpii).
+The first thing we do is unify the original datasets that are splitted (t2d is splitted in t2dmeta_long / short, and the hmp is splitted in hmp/hmpii).
 
 ```{r}
 dataset <- dataset |> 
@@ -48,9 +33,7 @@ dataset <- dataset |>
     TRUE ~ dataset_name))
 ```
 
-The dataset is divided in metadata columns and microorganism relative abundances. We divide the two dataset to facilitate cleaning:
-
-### Cleaning the metadata
+The dataset is divided in metadata and microorganism relative abundances. We divide the two dataset to facilitate cleaning:
 
 ```{r}
 metadata <- dataset |>
@@ -152,11 +135,7 @@ ggplot(aes(x = as.factor(valid_count), y = count, fill = most_representative_dat
 
 save_plot_custom(plot = valid_entries_per_column_plot, 
                  filename = "04_valid_entries.jpg")
-```
-
-```{r}
-# clean env
-rm(most_represented_dataset, valid_count_distribution, valid_counts, valid_values_by_dataset, valid_proportions, valid_values_count)
+valid_entries_per_column_plot
 ```
 
 The columns having only 278 non-NAs values, are columns specific of the "obesity" dataset.
@@ -183,9 +162,9 @@ Because of what was said before there are two possible approaches:
 
 2.  keep all the datasets and only maintain the columns which are significant for most of them. This makes it difficult to perform significant analysis on the metadata as not many information are left. On the other hand we have much more data to study in terms of microbiota.
 
-### Approach 1
+### Approach 1 - Focusing on WT2D
 
-To the purpose of the project we decided that focusing our effort in the analysis of only a dataset was better. As it allows to better show what we have learned in the course. From the plot above we can see that the dataset having the largest amount of metadata columns (thus giving us many opportunity to do analysis) is the WT2D dataset.
+To the purpose of the project we decided that focusing our effort in the analysis of only a dataset was better. As it allows to better show what we have learned in the course. From the plot above we can see that the dataset having the largest amount of metadata columns (thus giving us many opportunity to do analysis) is the WT2D dataset ([original paper](https://doi.org/10.1038/nature12198)).
 
 ```{r}
 metadata <- dataset |> 
@@ -193,7 +172,7 @@ metadata <- dataset |>
   select(-starts_with("k__"))
 ```
 
-As before we need to get rid of the columns containing to many missing values
+We need to get rid of the columns containing to many missing values.
 
 ```{r}
 valid_counts <- metadata |> 
@@ -210,7 +189,7 @@ metadata <- metadata |>
   select(-all_of(to_remove))
 ```
 
-We remove columns having the same value for all rows as they do not provide any information
+We remove columns having the same value for all rows as they do not provide any information.
 
 ```{r}
 metadata <- metadata |>
@@ -243,8 +222,6 @@ metadata <- metadata |>
   select(-classification)
 ```
 
-### Cleaning the abundance data
-
 ```{r}
 relevent_rows <- metadata |> 
   pull(sampleID)
@@ -260,8 +237,6 @@ The only cleaning we can do on the abundances is that of removing columns that d
 abundance_data <- abundance_data |> 
   select(where(~ sum(.x, na.rm = TRUE) != 0))
 ```
-
-### Saving the dataset
 
 Lastly we merge the metadata with the abundance data. We can do it without checking the row correspondence, as we did not remove any row or alter their order during the cleaning.
 
@@ -365,3 +340,9 @@ metadata <- metadata |>
 ```
 
 We can see that only a few columns are left.
+
+```{r}
+# rm(list = ls() |>  
+#       keep(~ !is.function(get(.))) |>  
+#       discard(~ . %in% ls()))
+```
