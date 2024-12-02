@@ -1,0 +1,41 @@
+/*-- scss:defaults --*/
+/* Define variables for customization */
+$title-font-size: 48px; /* Main title font size */
+$subtitle-font-size: 32px; /* Subtitle font size */
+$author-font-size: 18px; /* Author names font size */
+$body-bg: #ffffff; /* Background color */
+$body-color: #191919; /* Text color */
+$link-color: #42affa; /* Link color */
+
+/*-- scss:rules --*/
+
+/* Title customization */
+.reveal .title {
+    font-size: 100px;
+    font-weight: bold;
+    margin-bottom: 150px;
+}
+
+/* Author names customization */
+.reveal .quarto-title-authors {
+    font-size: 22px;
+    text-align: center;
+    margin-top: 10px;
+    margin-left: auto;
+    margin-right: auto;
+    width: 90%;
+    list-style-type: none;
+    padding: 0;
+}
+
+/* Author names customization */
+.reveal .date {
+    margin-top: 20px;
+    font-size: 28px;
+    text-align: center;
+}
+
+.reveal h2 {
+    margin-bottom: 40px;
+    font-size: var(--r-heading2-size);
+}
