@@ -1,5 +1,5 @@
 # Contributors
-- Anita Skovbjerg Hjort-Gregersen (s201190)
+- Anita Skovbjerg Hjort-Gregersen (s201190 / anitaskovbjerg)
 - Asiya Mohamad Yusuf Muse (s243930)
 - Magnus Harthimmer (s233426)
 - Marco Andreis (s243116)
