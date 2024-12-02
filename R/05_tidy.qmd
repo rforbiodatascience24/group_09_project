@@ -29,8 +29,6 @@ library("here")
 data_path <- here("data/04_dat_clean.csv")
 dataset <- read_csv(data_path,
                     show_col_types = FALSE)
-
-dataset |> select(fasting_glucose)
 ```
 
 ### Tidying
@@ -66,7 +64,7 @@ dataset <- dataset |>
 
 The other change we can make is regarding the abundances... as for now the structure of the abundance columns is that of descending from kingdom to species and has an entry for each taxonomy level. While this can be useful to perform analysis at different levels, it also increases drastically the number of rows and also causes many values to be repeated if, for example, a single species is present for the whole kingdom.
 
-Because of this we decided to focus on species abundance (we also remove the unclassified abundances).
+Because of this we decided to focus on species abundance
 
 ```{r}
 metadata <- dataset |> 
@@ -74,14 +72,16 @@ metadata <- dataset |>
 
 abundance <- dataset |> 
   select(which(str_count(names(dataset),
-                         "\\|") == 6) & starts_with("k__")) |> 
-  select(-ends_with("unclassified"))
+                         "\\|") == 6) & starts_with("k__"))
 
-colnames(abundance) <- sub(".*s__", "s_",
+colnames(abundance) <- sub(".*s__",
+                           "s_",
                            colnames(abundance))
 ```
 
 Now each column represent the abundance of a specific species.
+
+A key processing step is that of transforming the composite that in a way that can be compared across different samples.
 
 ```{r}
 dataset <- metadata |> 
