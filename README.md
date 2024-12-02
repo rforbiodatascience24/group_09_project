@@ -8,3 +8,6 @@
 # Data collection
 The dataset used is a kaggle dataset available [here](https://www.kaggle.com/datasets/antaresnyc/metagenomics).
 We are only interested in the fiie named abundance.csv, if not present in the _raw folder it is downloaded programmatically.
+
+# Link to the presentation
+The project presentation is available [here](https://raw.githack.com/rforbiodatascience24/group_09_project/main/doc/presentation.html).
