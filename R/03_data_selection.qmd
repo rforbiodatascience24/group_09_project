@@ -1,56 +1,24 @@
----
-title: "03_data_selection"
-author: 
-  - "Andreis Marco(s243116)" 
-  - "Asiya Mohamad Yusuf Muse (s243930)"
-  - "Magnus Harthimmer (s233426)"  
-  - "Anita Skovbjerg Hjort-Gregersen (s201190)"
-  - "Rebecca Hjermind Millum (s215024)"
-
-execute:
-  warning: false
-  message: false
- 
-format: html
-output: html_document
-editor: visual
----
-
-This files aims at looking for inconsistences between the dataset and what was declared in the original paper.
-
-### The history of the dataset
-
-To do a efficient cleaning we need to understand the format of our data and what it represents, so let's investigate the dataset origins.
-
-The original paper is interested in comparing the microbial populations of patients both healthy and affected by various diseases with the aim of discovering disease biomarkers and predicting of health conditions. To do so, they collected the data, which are the results of shot-gun genome sequencing of the samples, from 8 different metagenomics studies (the only one savailable at the time of the study - 2016), which cover: liver cirrhosis, colorectal cancer, inflammatory bowel disease, obesity and Type 2 diabetes and healthy patients. Segata et. al declared a total of 2571 samples before their preprocessing and 2424 after.
-
-The sequencing data was analysed with a software called MetaPhlAn2 which outputs the species-level relative abundances and presence of strain-specific markers. Based on these Segata et. al. performed machine learning studies which are outside of the scope of this project. As we have no functional way of opening the output of MetaPhlAn2, we cannot consult this data.
-
-In 2020 a group of people (outside the SegataLab) transposed the dataset into CSV and published it on kaggle, which is where we found it.
-
-### Load the dataset
+# Is the dataset what we expect from the original paper?
 
 ```{r}
 library("tidyverse")
 library("here")
 ```
 
+### The history of the dataset
+
+To do a efficient cleaning we need to understand the format of our data and what it represents, so let's investigate the dataset origins.
+
+The [original paper](https://doi.org/10.1371/journal.pcbi.1004977) is interested in comparing the microbial populations of patients both healthy and affected by various diseases with the aim of discovering disease biomarkers and predicting health conditions. To do so, they collected the data, which are the results of shot-gun genome sequencing of the samples, from 8 different metagenomics studies (the only one savailable at the time of the study - 2016), which cover: liver cirrhosis, colorectal cancer, inflammatory bowel disease, obesity and Type 2 diabetes and healthy patients. Segata et. al declared a total of 2571 samples before their preprocessing and 2424 after.
+
+The sequencing data was analysed with a software called MetaPhlAn2 which outputs the species-level relative abundances and presence of strain-specific markers. Based on these Segata et. al. performed machine learning studies which are outside of the scope of this project. As we have no functional way of opening the output of MetaPhlAn2, we cannot consult this data.
+
+In 2020 a group of people (outside the SegataLab) transposed the dataset into CSV and published it on kaggle, which is where we found it.
+
 ```{r}
 data_path <- here("data/02_dat_load.csv")
 dataset <- read_csv(data_path, show_col_types = FALSE)
 ```
-
-We immediately get parsing errors due...
-
-(NOTE: this was really inconsistent and refreshing the page or restarting the R session was enough to change the behavior).
-
-```{r}
-problems(dataset)
-```
-
-We can see that they are due to some cells having the a different value type from the expected. We will firstly perform data selection and cleaning, if the issues persist we will handle them later.
-
-### Verify that the dataset reflects the paper description
 
 ```{r}
 dim(dataset)
@@ -105,8 +73,6 @@ traced_datasets <- c("Quin_gut_liver_cirrhosis", "Zeller_fecal_colorectal_cancer
 selected_data <- dataset |> 
   filter(dataset_name %in% traced_datasets)
 ```
-
-### Save the dataset
 
 ```{r}
 target_dir <- "../data"
