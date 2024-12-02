@@ -15,10 +15,8 @@ source("99_proj_func.R")
 
 
 ```{r}
-data_path <- here("data/06_dat_augmented.csv")
-dataset <- read_csv(data_path,
-                    na = c("nd", "-", "na"),
-                    show_col_types = FALSE)
+data_path <- here("data/06_dat_augmented.RData")
+load(data_path)
 ```
 
 ### Assessing relationships between species abundance and metadata features
