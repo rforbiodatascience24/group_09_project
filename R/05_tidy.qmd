@@ -1,37 +1,23 @@
 ---
-title: "05_tidy"
-author: 
-  - "Andreis Marco(s243116)" 
-  - "Asiya Mohamad Yusuf Muse (s243930)"
-  - "Magnus Harthimmer (s233426)"  
-  - "Anita Skovbjerg Hjort-Gregersen (s201190)"
-  - "Rebecca Hjermind Millum (s215024)"
-
-execute:
-  warning: false
-  message: false
- 
-format: html
-output: html_document
-editor: visual
+format: 
+  html:
+    self-contained: true
 ---
-
-In this file we visualize the dataset and see that it is already tidy after the cleaning process, but we still make a couple of changes to make the dataset more readable.
-
-### Load the dataset
+# Tidying the dataset
 
 ```{r}
 library("tidyverse")
 library("here")
 ```
 
+
+We visualize the dataset and see that it is already tidy after the cleaning process, but we still make a couple of changes to make the dataset more readable.
+
 ```{r}
 data_path <- here("data/04_dat_clean.csv")
 dataset <- read_csv(data_path,
                     show_col_types = FALSE)
 ```
-
-### Tidying
 
 The three rules of tidy are:
 
@@ -40,12 +26,12 @@ The three rules of tidy are:
 -   Each cell has only one value
 
 ```{r}
-#dataset
+head(dataset)
 ```
 
 We can see that the three rules are already satisfied.
 
-But we can still make some adjustments to prepare the dataset... first let's rename the disease columns to use easier to interpret.
+But we can still make some adjustments to prepare the dataset... first let's rename the disease column to make it easier to interpret.
 
 ```{r}
 dataset <- dataset |> 
@@ -88,14 +74,11 @@ dataset <- metadata |>
   bind_cols(abundance)
 ```
 
-### Save the dataset
-
 ```{r}
 target_dir <- "../data"
 
 # save the dataset in the data folder
 write_csv(dataset, str_c(target_dir, "/05_dat_tidy.csv"))
-
 # from now on we are going to mantain a RData copy for the files as we want to mantain columns formatted as factor
 file_path <- str_c(target_dir, "/05_dat_tidy.RData")
 save(dataset, file = file_path)

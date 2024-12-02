@@ -1,36 +1,20 @@
 ---
-title: "06_augment.qmd"
-author: 
-  - "Andreis Marco(s243116)" 
-  - "Asiya Mohamad Yusuf Muse (s243930)"
-  - "Magnus Harthimmer (s233426)"  
-  - "Anita Skovbjerg Hjort-Gregersen (s201190)"
-  - "Rebecca Hjermind Millum (s215024)"
-
-execute:
-  warning: false
-  message: false
- 
-format: html
-output: html_document
-editor: visual
+format: 
+  html:
+    self-contained: true
 ---
-
-Here we will create a couple of new variables that will come in handy during visualization and analysis.
-
-### Load the dataset
+# Augmentation
 
 ```{r}
 library("tidyverse")
 library("here")
 ```
 
+
 ```{r}
 data_path <- here("data/05_dat_tidy.RData")
 load(data_path)
 ```
-
-### Augment
 
 Create a variable which groups together samples from patients having type 2 diabetes or being in the pre-diabetes state.
 
@@ -68,7 +52,7 @@ dataset <- dataset |>
            .after = ldl)
 ```
 
-Create a variable for the HOMA-IR score (HOMA-IR (Homeostatic model assessment for insulin resistance) and its categories, a measure insulin resistance / sensitivity.
+Create a variable for the HOMA-IR score (HOMA-IR (Homeostatic model assessment for insulin resistance) and its categories, a measure insulin resistance / sensitivity ([reference](https://doi.org/10.3390/medicina55050158)).
 
 ```{r}
 dataset <- dataset |>
@@ -118,8 +102,6 @@ CLR_tranformed <- abundance |>
 dataset <- metadata |> 
   bind_cols(CLR_tranformed)
 ```
-
-### Save dataset
 
 ```{r}
 target_dir <- "../data"
