@@ -90,7 +90,7 @@ abundances |>
   select(row_sum)
 
 # apply CLR
-CLR_tranformed <- abundance |> 
+CLR_tranformed <- abundances |> 
   mutate(across(starts_with("s_"), ~ ifelse(. == 0, 1e-6, .))) |> 
   rowwise() |> 
   mutate(geom_mean = exp(mean(log(c_across(starts_with("s_")))))) |> 

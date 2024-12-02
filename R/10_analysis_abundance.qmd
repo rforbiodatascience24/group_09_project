@@ -108,20 +108,6 @@ pca_BMI
 
 Even by removing the outlier, the plots show that the samples do not cluster in any significant way, either for the BMI or for the glucose tolerance, this is in agreement with the observation made so far.
 
-We perform a PERMANOVA test to quantify the difference between the BMI groups, testing the following:
-
--   Null hypothesis : There is no difference in microbial community across composition across the BMI classes
--   Alternative hypothesis: There is a difference in microbial community composition across BMI classes.
-
-```{r}
-# PERMANOVA to   see whether the diversity of microbial communities differ across bmi
-anova_result_bmi <- adonis2(bc_dist ~ BMI_class,
-                         data = dataset)
-print(anova_result_bmi)
-```
-
-The results of the PERMANOVA agree with what is seen in the PCoA as the P.value is 0.208, which indicates that the differences in microbial composition across BMI classes is not significant. Also R2=0.0238 means that bmi contributes to only 2.38% of the variance in the diversity of microbial community across the bmi classes.
-
 ### Statistical analysis of samples microbiota
 
 Before we can study how the bacterial species may be related to type 2 diabetes, we need to find which bacteria have more than 50 values that are not 0. Even though 0 is a meaningful value in the dataset, we need some data points to vary in order to see if there is a meaning full relationship.
