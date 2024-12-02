@@ -137,7 +137,7 @@ GAD-Antibodies
 
 ::: {style="font-size: 0.6em;"}
 -   **Associated with Type 1 Diabetes**
--   **Pattern consistent across BMI classes**
+-   **Not significant across BMI classes**
 :::
 :::
 
@@ -168,7 +168,78 @@ Fasting Insulin
 :::
 :::
 
-## Hallmarks of Type II Diabetes
+::: notes
+-   Type 1 and type 2 diabetes are similar in the features showed before, but very different in other characteristics
+
+-   lets have a look at GAD antibodies, C-peptide and fasting insulin levels
+
+### GAD Antibodies Notes
+
+- GAD (Glutamic Acid Decarboxylase) antibodies with glucose tolerance grouped by BMI
+- not statistically significant in our analysis of type 2 diabetes
+- typically associated with type 1 diabetes. (autoimmunity target GAD and beta cell of pancreas)
+- Same for the BMI classes (hence not relevant in type 2 diabetes)
+
+Relevant image: `07_gad_ab_vs_bmi_glucose_tolerance.jpg`
+
+### C-Peptide Notes
+
+- C-peptide concentration with glucose tolerance grouped by BMI
+- C-peptide differentiate t1 and t2 diabetes since it is cleaved during insulin production (insulin is only produced in t2)
+- Higher levels of C-peptide in type 2 diabetes patients indicate that the body is producing more insulin to compensate for elevated blood sugar levels.
+- obese produce more due to increased insulin resistance
+
+% C-peptide is a 31-amino-acid sequence that connects the A and B chains of proinsulin. 
+Relevant image: `07_c_peptide_vs_bmi_glucose_tolerance.jpg`
+
+### Fasting Insulin Notes
+
+- fasting insulin levels for each glucose tolerance group
+- t2 diabetes have higher levels of fasting insulin due to insulin resistance
+- statistically significant parameter.
+
+Relevant image: `07_fasting_insuling_vs_glucose_tolerance_bar.jpg`
+:::
+
+
+## Treatment
+
+::: columns
+::: {.column width="50%"}
+![](../results/07_statins_cholesterol.jpg){width="380"}
+
+::: {style="font-size: 0.6em;"}
+-   **Statins: cardio vascular disease treatment**
+-   **Lowers colesterol levels**
+:::
+:::
+
+
+::: {.column width="50%"}
+![](../results/07_linear_fasting_insuline_cholesterol.jpg){width="380"}
+
+::: {style="font-size: 0.6em;"}
+-   **Insulin levels are not affected by statin**
+-   **Lowers colesterol levels**
+-   **Statins not directly linked to type 2 diabetes**
+
+:::
+:::
+:::
+
+::: notes
+### Statin Notes
+- Cholesterol level for each glucose tolerance group, grouped by on statins yes/no
+- Statins inhibit an enzyme essential for cholesterol production in the liver 
+- Statins reduce the risk of cardiovascular related events such as heart attack, stroke, and death due to CVD.
+- regardless the glucose tolerance
+% - Statins inhibit the enzyme HMG-CoA reductase, 
+
+### inuslin Notes
+-  fasting insulin is not affected by statin, 
+- but cholesterol level is lowered by statin
+- Hence statins are no diabetes medication
+:::
 
 ## Analysing the abundances
 
