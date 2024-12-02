@@ -1,0 +1,42 @@
+---
+title: "Asiya_presentation"
+format: revealjs
+editor: visual
+transition: slide
+theme: dark
+font-size: 14px
+---
+
+## Relative abundance data{style="font-size:40px"}
+
+### MetaPhlAn4 is a computational tool for profiling composition of microbial communities from metagenomic shotgun sequencing data.
+
+:::: columns
+::: {.column width="50%"}
+
+
+![](shotgun.jpg){width="110%"}
+:::
+
+::: {.column width="50%"}
+
+
+![](08_species_heatmap.jpg){width="100%"}
+:::
+::::
+
+## Distribution of species{style="font-size:40px"}
+
+:::: columns
+::: {.column width="50%"}
+
+
+![](pcaof%20clr.png){width="100%"}
+:::
+
+::: {.column width="50%"}
+
+
+![](08_most_different_species.jpg){width="100%"}
+:::
+::::
