@@ -394,10 +394,10 @@ c_peptide_vs_bmi_glucose_tolerance <- dataset|>
   theme_minimal(base_size = 15) +
   theme(legend.position = "bottom",
         plot.title = element_text(hjust = 0.5)) +
-    labs(x = "BMI class",
+    labs(x = "Glucose tolerance",
          y = "c-peptide [ng/mL]",
          title = "c-peptide concentration",
-         fill = "Glucose tolerance: ")
+         fill = "BMI class: ")
 
 save_plot_custom(
   plot = c_peptide_vs_bmi_glucose_tolerance,
