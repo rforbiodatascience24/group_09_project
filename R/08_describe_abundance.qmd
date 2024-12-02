@@ -103,9 +103,7 @@ species_heatmap <- mean_species_abundances |>
   #head(100) |> 
   pivot_longer(cols = -species,
                names_to = "glucose_tolerance",
-               values_to = "mean_abundance") |>
-  mutate(glucose_tolerance = factor(glucose_tolerance,
-                                    levels = c("normal", "impaired", "t2d"))) |> 
+               values_to = "mean_abundance") |> 
     ggplot(aes(x = glucose_tolerance,
                y = species,
                fill = mean_abundance)) +
@@ -121,8 +119,7 @@ species_heatmap <- mean_species_abundances |>
         fill = "Mean Abundance"
       ) +
       theme_minimal() +
-  theme(axis.text.y = element_blank(),
-        plot.title = element_text(hjust = 0.5))
+  theme(axis.text.y = element_blank())
 
 save_plot_custom(
   plot = species_heatmap,
@@ -138,7 +135,7 @@ species_difference <- mean_species_abundances |>
   mutate(difference = normal-t2d) |> 
   select(species, difference) |> 
   mutate(comparison = ifelse(difference > 0,
-                             "Healthy > diabetic", "Diabetic > healthy")) |> 
+                             "normal>t2d", "t2d>normal")) |> 
   mutate(difference = abs(difference)) |> 
   arrange(desc(difference))
 ```
