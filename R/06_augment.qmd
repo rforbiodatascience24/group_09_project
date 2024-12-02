@@ -71,6 +71,38 @@ dataset <- dataset |>
            .after = `HOMA-IR`)
 ```
 
+Another adjustment to do regards the abundance data, as it right now is composite which does not allow for direct comparison across samples. To prepare for future analysis we apply a center log ratio transformation.
+
+```{r}
+metadata <- dataset |> 
+  select(-starts_with("s_"))
+abundances <- dataset |> 
+  select(starts_with("s_"))
+
+rm(dataset)
+```
+
+```{r}
+# verify that the rows sum to 1
+abundances |> 
+  rowwise() |> 
+  mutate(row_sum = sum(c_across(everything()))) |> 
+  select(row_sum)
+
+# apply CLR
+CLR_tranformed <- abundance |> 
+  mutate(across(starts_with("s_"), ~ ifelse(. == 0, 1e-6, .))) |> 
+  rowwise() |> 
+  mutate(geom_mean = exp(mean(log(c_across(starts_with("s_")))))) |> 
+  mutate(across(starts_with("s_"),~ log(. / geom_mean))) |> 
+  select(-geom_mean)
+```
+
+```{r}
+dataset <- metadata |> 
+  bind_cols(CLR_tranformed)
+```
+
 ```{r}
 target_dir <- "../data"
 
