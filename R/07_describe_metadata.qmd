@@ -1,29 +1,19 @@
 ---
-title: "07_describe_metadata"
-author: 
-  - "Andreis Marco(s243116)" 
-  - "Asiya Mohamad Yusuf Muse (s243930)"
-  - "Magnus Harthimmer (s233426)"  
-  - "Anita Skovbjerg Hjort-Gregersen (s201190)"
-  - "Rebecca Hjermind Millum (s215024)"
-
-execute:
-  warning: false
-  message: false
- 
-format: html
-output: html_document
-editor: visual
+format: 
+  html:
+    self-contained: true
 ---
 
-### Load the dataset
+# Exploration of metadata
 
 ```{r}
 library("tidyverse")
 library("here")
 library("ggridges")
 library("patchwork")
-# Import costum function
+library("viridis")
+library("table1")
+
 source("99_proj_func.R")
 ```
 
@@ -42,10 +32,6 @@ dataset |>
          data = _)
 ```
 
-### Metadata visualization
-
-Now we will focus on the visualization of the metadata.
-
 Our dataset contains samples taken from patients either having type II diabetes, an impaired tolerance to glucose or being healthy individuals.
 
 We have access to many information regarding markers that correlate to the insurgence of diabetes, but let's start with the basics.
@@ -62,7 +48,8 @@ distribution_by_country <- dataset |>
     x = "Country",
     y = "Number of Samples"
   ) +
-  theme_minimal()
+  theme_minimal()+
+  theme(axis.text.x = element_text(angle = 45, vjust = 0.5))
 
 save_plot_custom(
   plot = distribution_by_country,
@@ -117,7 +104,7 @@ distribution_by_glucose_tolerance <- dataset |>
   theme_minimal(base_size = 15) +
   labs(x = "",
        y = "",
-       title = "Distribution of samples into glucose tolerance categories") +
+       title = "Sample distribution in glucose tolerance groups") +
   geom_hline(yintercept = 0) +
   geom_text(vjust = -0.5, size = 5)+
   ylim(0,45)+
@@ -180,10 +167,10 @@ bmi_vs_glucose_tolerance <- dataset |>
     alpha = 0.4) +
   geom_hline(yintercept = 0) +
   theme_minimal(base_size = 10) +
-  labs(x = "bmi",
+  labs(x = "BMI",
        y = "Count",
-       title = "bmi count by glucose tollerance",
-       fill = "Glucose tollerance: ")+
+       title = "BMI count by glucose tolerance",
+       fill = "Glucose tolerance: ") +
   theme(legend.position = "bottom",
         panel.grid.major.x = element_blank(),
         axis.text.x = element_text(vjust = 5))
@@ -217,7 +204,7 @@ save_plot_custom(
 stacked_bmi_vs_glucose_tolerance
 ```
 
-## Visualization of different parameters vs glucose tollerance
+## Visualization of different parameters vs glucose tolerance
 
 Here we will focus just on visualizing the relationship between glucose tolerance and many other variables. The statistical significance of these results will be analysed in the analysis part of the project.
 
@@ -229,9 +216,9 @@ ridges_hba1c_vs_glucose_tolerance <- dataset |>
                        y = glucose_tolerance,
                        fill = glucose_tolerance )) +
     geom_density_ridges(alpha = 0.5) +
-    labs(x = "hba1c [mmol/mol]",
-         y = "glucose tollerance",
-         title = "hba1c and glucose tolerance") +
+    labs(x = "HbA1c [mmol/mol]",
+         y = "glucose tolerance",
+         title = "HbA1c and glucose tolerance") +
     theme_minimal(base_family = "Avenir",
                   base_size = 12) +
     theme(legend.position = "none")
@@ -263,8 +250,8 @@ hba1c_48_threshold <- dataset |>
     angle = 45,
     hjust = 1)) +
   labs(x = "",
-       y = "Percent",
-       title = "Percentage of people with HbA1c > 48 by glucose tolerance") +
+       y = "%",
+       title = "% of people with HbA1c > 48 by glucose tolerance") +
   geom_hline(yintercept = 0) +
   geom_text(vjust = -0.5, size = 5) +
   ylim(0,45) +
@@ -287,7 +274,8 @@ ridges_wc_vs_glucose_tolerance <- dataset |>
                       fill = glucose_tolerance )) +
     geom_density_ridges(alpha = 0.5) +
     labs(x = "Waist circumference [cm]",
-         y = "") +
+         y = "",
+         title = "Glucose Tolerance vs Waist Circumfrence") +
   theme_minimal(base_family = "Avenir",
                   base_size = 12) +
     theme(legend.position = "none")
@@ -307,9 +295,9 @@ ridges_hdl_vs_glucose_tolerance <- dataset |>
                       y = glucose_tolerance,
                       fill = glucose_tolerance )) +
     geom_density_ridges(alpha = 0.5) +
-    labs(x = "hdl [mmol/L]",
-         y = "glucose tolerance",
-         title = "hdl and glucose tolerance ") +
+    labs(x = "HDL [mmol/L]",
+         y = "Glucose Tolerance",
+         title = "HDL and glucose tolerance ") +
     theme_minimal(base_family = "Avenir",
                   base_size = 12) +
     theme(legend.position = "none")
@@ -343,9 +331,9 @@ fasting_insuling_vs_glucose_tolerance_bar <- dataset |>
   geom_hline(yintercept = 0) +
   theme_minimal(base_size = 10) +
   labs(x = "Fasting insulin [pmol/L]",
-       y = "Count",
-       title = "Fasting insulin count group by glucose tollerance",
-       fill = "Glucose tollerance: ")+
+       y = "n",
+       title = "Fasting insulin count grouped by glucose tolerance",
+       fill = "Glucose tolerance: ")+
   theme(plot.title = element_text(hjust = 0.5),
         legend.position = "bottom",
         panel.grid.major.x = element_blank(),
@@ -366,9 +354,9 @@ fasting_insuling_vs_glucose_tolerance <- dataset |>
                       y = glucose_tolerance,
                       fill = glucose_tolerance )) +
     geom_density_ridges(alpha = 0.5) +
-    labs(x = "fasting insulin [pmol/L]",
-         y = "glucose tolerance",
-         title = "fasting insulin and glucose tolerance ") +
+    labs(x = "Fasting insulin [pmol/L]",
+         y = "Glucose tolerance",
+         title = "Fasting insulin and glucose tolerance ") +
     theme_minimal(base_family = "Avenir",
                   base_size = 12) +
     theme(legend.position = "none")
@@ -394,10 +382,10 @@ c_peptide_vs_bmi_glucose_tolerance <- dataset|>
   theme_minimal(base_size = 15) +
   theme(legend.position = "bottom",
         plot.title = element_text(hjust = 0.5)) +
-    labs(x = "BMI class",
+    labs(x = "Glucose tolerance",
          y = "c-peptide [ng/mL]",
          title = "c-peptide concentration",
-         fill = "Glucose tolerance: ")
+         fill = "BMI class: ")
 
 save_plot_custom(
   plot = c_peptide_vs_bmi_glucose_tolerance,
@@ -412,19 +400,19 @@ The c-peptide is a 31-aa sequence that binds the A and B chain of the proinsulin
 gad_ab_vs_bmi_glucose_tolerance <- dataset|>
   filter(BMI_class != "Underweight") |> 
   filter(`gad-antibodies` < 20) |> 
-  ggplot(aes(x = BMI_class,
+  ggplot(aes(x = glucose_tolerance,
              y = `gad-antibodies`,
-             fill = glucose_tolerance)) +
+             fill = BMI_class)) +
   geom_boxplot(position = position_dodge(
     preserve = "single"), 
     alpha = 0.4) +
   theme_minimal(base_size = 15) +
   theme(legend.position = "bottom",
         plot.title = element_text(hjust = 0.5)) +
-    labs(x = "BMI class",
-       y = "gad-antibodies [U/mL]",
-       title = "gad-antibodies concentration",
-       fill = "Glucose tolerance: ")
+    labs(x = "Glucose tolerance",
+       y = "GAD-antibodies [U/mL]",
+       title = "GAD-antibodies concentration",
+       fill = "BMI class ")
 
 save_plot_custom(
   plot = gad_ab_vs_bmi_glucose_tolerance,
@@ -454,8 +442,8 @@ linear_wc_hba1c_glucose_tolerance <- dataset |>
   geom_smooth(method = "lm",
               se = FALSE) +
   labs(x = "WC [cm]",
-       y = "hba1c [mmol/mol]",
-       title = "WC vs hba1c groupt by glucose tolerance",
+       y = "HbA1c [mmol/mol]",
+       title = "WC vs HbA1c groupt by glucose tolerance",
        colour = "Glucose tolerance: ")+
   theme_minimal(base_size = 12)
 
@@ -475,9 +463,9 @@ linear_hdl_hba1c_glucose_tolerance <- dataset |>
              colour = glucose_tolerance)) +
   geom_point(size = 2,
              alpha = 0.5) +
-  labs(x = "hdl [mmol/L]",
+  labs(x = "HDL [mmol/L]",
        y = "Hemoglobin A1C [mmol/mol]",
-       title = "hdl vs Hemoglobin A1C groupt by glucose tolerance",
+       title = "HDL vs Hemoglobin A1C groupt by glucose tolerance",
        colour = "Glucose tolerance: ") +
   theme_minimal(base_size = 12)
 
@@ -499,7 +487,7 @@ hdl_glucose_tolerance <- dataset |>
   labs(
     x = "Glucose tolerance",
     y = "HDL [mmol/L]",
-    title = "HDL vs glucose tollerance"
+    title = "HDL vs glucose tolerance"
   ) +
   theme_minimal() +
   theme(
@@ -524,7 +512,7 @@ ldl_glucose_tolerance <- dataset |>
   labs(
     x = "Glucose tolerance",
     y = "LDL level [mmol/L]",
-    title = "LDL level vs glucose tollerance"
+    title = "LDL level vs glucose tolerance"
   ) +
   theme_minimal() +
   theme(
@@ -549,7 +537,7 @@ hb1ac_glucose_tolerance <- dataset |>
   labs(
     x = "Glucose tolerance",
     y = "Hemoglobin A1C [mmol/mol]",
-    title = " Hemoglobin A1C vs glucose tollerance"
+    title = " Hemoglobin A1C vs glucose tolerance"
   ) +
   theme_minimal() +
   theme(
@@ -565,9 +553,9 @@ hb1ac_glucose_tolerance
 
 ## The effect of treatment
 
-First, we are interested in investigating how many people in each glucose tolerance category are on statins. We see that there are 26 people with type 2 diabetes who are on statins. We only consider statins as the treatment, as we know from the table that less than 5% of the samples are on insulin.
+First, we are interested in investigating how many people in each glucose tolerance category are on statins treatment. We see that there are 26 people with type 2 diabetes who are on statins. We only consider statins as the treatment, as we know from the table that less than 5% of the samples are on insulin.
 
-Statins are used as preventive treatment against cardiovascular diseases, but have been linked to an increase risk of developing diabetes ([reference](https://doi.org/10.3389/fendo.2023.1239335)).
+Statins are used as preventive treatment against cardiovascular diseases, but have been linked to an increased risk of developing diabetes ([reference](https://doi.org/10.3389/fendo.2023.1239335)).
 
 ```{r}
 count_statins_graph <- dataset |>
@@ -608,7 +596,8 @@ percentage_statins_graph <- dataset |>
            alpha = 0.4) +
   theme_minimal(base_size = 15) +
   labs(x = "",
-       y = "on statins") +
+       y = "% received statins",
+       title = "% of patient groups recieve statin treatment") +
   geom_hline(yintercept = 0) +
   geom_text(vjust = -0.5, size = 5)+
   ylim(0,45)+
@@ -634,10 +623,11 @@ linear_fasting_insuline_cholesterol <- dataset |>
              alpha = 0.4) +
   geom_smooth(method = "lm",
               se = FALSE) +
-  labs(x = "fasting_insulin [pmol/L]",
-       y = "cholesterol[mmol/L]",
-       title = "Fasting insulin vs hba1c groupt by statins for the type 2 diabect pationts",
-       colour = "statins: ") +
+  labs(x = "Fasting insulin [pmol/L]",
+       y = "Cholesterol [mmol/L]",
+       title = "Fasting insulin vs cholesterol grouped by 
+       statins for type 2 diabetes patients",
+       colour = "Recieve statins: ") +
   theme_minimal(base_size = 12)
 
 save_plot_custom(
@@ -660,9 +650,10 @@ linear_c_peptide_hdl <- dataset |>
   geom_smooth(method = "lm",
               se = FALSE) +
   labs(x = " c-peptide [ng/mL]",
-       y = "hdl [mmol/L]",
-       title = "c-peptide vs hdl groupt by statins for the type 2 diabect pationts",
-       colour = "statins: ")+
+       y = "HDL [mmol/L]",
+       title = "c-peptide vs HDL grouped by statins for 
+       type 2 diabetes patients",
+       colour = "Recieve statin: ")+
   theme_minimal(base_size = 12)
 
 save_plot_custom(
@@ -687,7 +678,7 @@ statins_cholesterol <- dataset |>
   labs(
     x = "",
     y = "Cholesterol [mmol/L]",
-    fill = "On statins"
+    fill = "Recieve statin"
   ) +
   facet_wrap(~glucose_tolerance) +
   theme_minimal() +
@@ -701,4 +692,11 @@ save_plot_custom(
 statins_cholesterol
 ```
 
-We can see that both the treatment with statins and with insulin have the effect of lowering cholesterol, which is coherent with what's expected.
+We can see that the treatment with statins have the effect of lowering cholesterol, which is coherent with what's expected.
+
+```{r}
+# # clean environment
+# rm(list = ls() |>  
+#       keep(~ !is.function(get(.))) |>  
+#       discard(~ . %in% ls()))
+```
