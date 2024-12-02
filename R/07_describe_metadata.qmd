@@ -663,7 +663,7 @@ save_plot_custom(
 linear_c_peptide_hdl
 ```
 
-We can see that the number of obese and overweight people increases in glucose impaired and diabetic categories.
+Now we want to explore how the statin treatment affect cholesterol levels for each glucose tolerance group. 
 
 ```{r}
 #split on BMI
@@ -692,7 +692,7 @@ save_plot_custom(
 statins_cholesterol
 ```
 
-We can see that the treatment with statins have the effect of lowering cholesterol, which is coherent with what's expected.
+We can see that the treatment with statins have the effect of lowering cholesterol, which is coherent with what's expected. The effect is seen for both healthy and glucose impaired as well as type 2 diabetic patients. 
 
 ```{r}
 # # clean environment
