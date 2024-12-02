@@ -4354,28 +4354,27 @@ white-space: normal;
 <div class="cell">
 <div class="sourceCode cell-code" id="cb88"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb88-1"><a href="#cb88-1" aria-hidden="true" tabindex="-1"></a>distribution_by_glucose_tolerance <span class="ot">&lt;-</span> dataset <span class="sc">|&gt;</span></span>
 <span id="cb88-2"><a href="#cb88-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">count</span>(glucose_tolerance) <span class="sc">|&gt;</span></span>
-<span id="cb88-3"><a href="#cb88-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">percentage =</span> n <span class="sc">/</span> <span class="fu">sum</span>(n) <span class="sc">*</span> <span class="dv">100</span>) <span class="sc">|&gt;</span></span>
-<span id="cb88-4"><a href="#cb88-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> glucose_tolerance,</span>
-<span id="cb88-5"><a href="#cb88-5" aria-hidden="true" tabindex="-1"></a>             <span class="at">y =</span> percentage,</span>
-<span id="cb88-6"><a href="#cb88-6" aria-hidden="true" tabindex="-1"></a>             <span class="at">fill =</span> glucose_tolerance,</span>
-<span id="cb88-7"><a href="#cb88-7" aria-hidden="true" tabindex="-1"></a>             <span class="at">label =</span> <span class="fu">str_c</span>(<span class="fu">round</span>(percentage,<span class="at">digits =</span> <span class="dv">2</span>),<span class="st">&quot;%&quot;</span>))) <span class="sc">+</span></span>
-<span id="cb88-8"><a href="#cb88-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_col</span>(<span class="at">colour =</span> <span class="st">&quot;black&quot;</span>,</span>
-<span id="cb88-9"><a href="#cb88-9" aria-hidden="true" tabindex="-1"></a>           <span class="at">alpha =</span> <span class="fl">0.6</span>) <span class="sc">+</span></span>
-<span id="cb88-10"><a href="#cb88-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>(<span class="at">base_size =</span> <span class="dv">15</span>) <span class="sc">+</span></span>
-<span id="cb88-11"><a href="#cb88-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">&quot;&quot;</span>,</span>
-<span id="cb88-12"><a href="#cb88-12" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">&quot;&quot;</span>,</span>
-<span id="cb88-13"><a href="#cb88-13" aria-hidden="true" tabindex="-1"></a>       <span class="at">title =</span> <span class="st">&quot;Sample distribution in glucose tolerance groups&quot;</span>) <span class="sc">+</span></span>
-<span id="cb88-14"><a href="#cb88-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_hline</span>(<span class="at">yintercept =</span> <span class="dv">0</span>) <span class="sc">+</span></span>
-<span id="cb88-15"><a href="#cb88-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_text</span>(<span class="at">vjust =</span> <span class="sc">-</span><span class="fl">0.5</span>, <span class="at">size =</span> <span class="dv">5</span>)<span class="sc">+</span></span>
-<span id="cb88-16"><a href="#cb88-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ylim</span>(<span class="dv">0</span>,<span class="dv">45</span>)<span class="sc">+</span></span>
-<span id="cb88-17"><a href="#cb88-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">&quot;none&quot;</span>,</span>
-<span id="cb88-18"><a href="#cb88-18" aria-hidden="true" tabindex="-1"></a>        <span class="at">axis.text.y =</span> <span class="fu">element_blank</span>())</span>
-<span id="cb88-19"><a href="#cb88-19" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb88-20"><a href="#cb88-20" aria-hidden="true" tabindex="-1"></a><span class="fu">save_plot_custom</span>(</span>
-<span id="cb88-21"><a href="#cb88-21" aria-hidden="true" tabindex="-1"></a>  <span class="at">plot =</span> distribution_by_glucose_tolerance,</span>
-<span id="cb88-22"><a href="#cb88-22" aria-hidden="true" tabindex="-1"></a>  <span class="at">filename =</span> <span class="st">&quot;07_distribution_of_sample_by_glucose_tolerance.jpg&quot;</span></span>
-<span id="cb88-23"><a href="#cb88-23" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb88-24"><a href="#cb88-24" aria-hidden="true" tabindex="-1"></a>distribution_by_glucose_tolerance</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb88-3"><a href="#cb88-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> glucose_tolerance,</span>
+<span id="cb88-4"><a href="#cb88-4" aria-hidden="true" tabindex="-1"></a>             <span class="at">y =</span> n,</span>
+<span id="cb88-5"><a href="#cb88-5" aria-hidden="true" tabindex="-1"></a>             <span class="at">fill =</span> glucose_tolerance,</span>
+<span id="cb88-6"><a href="#cb88-6" aria-hidden="true" tabindex="-1"></a>             <span class="at">label =</span> n)) <span class="sc">+</span></span>
+<span id="cb88-7"><a href="#cb88-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_col</span>(<span class="at">colour =</span> <span class="st">&quot;black&quot;</span>,</span>
+<span id="cb88-8"><a href="#cb88-8" aria-hidden="true" tabindex="-1"></a>           <span class="at">alpha =</span> <span class="fl">0.6</span>) <span class="sc">+</span></span>
+<span id="cb88-9"><a href="#cb88-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>(<span class="at">base_size =</span> <span class="dv">15</span>) <span class="sc">+</span></span>
+<span id="cb88-10"><a href="#cb88-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">&quot;&quot;</span>,</span>
+<span id="cb88-11"><a href="#cb88-11" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">&quot;count&quot;</span>,</span>
+<span id="cb88-12"><a href="#cb88-12" aria-hidden="true" tabindex="-1"></a>       <span class="at">title =</span> <span class="st">&quot;Sample distribution in glucose tolerance groups&quot;</span>) <span class="sc">+</span></span>
+<span id="cb88-13"><a href="#cb88-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_hline</span>(<span class="at">yintercept =</span> <span class="dv">0</span>) <span class="sc">+</span></span>
+<span id="cb88-14"><a href="#cb88-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_text</span>(<span class="at">vjust =</span> <span class="sc">-</span><span class="fl">0.5</span>, <span class="at">size =</span> <span class="dv">5</span>)<span class="sc">+</span></span>
+<span id="cb88-15"><a href="#cb88-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ylim</span>(<span class="dv">0</span>,<span class="dv">55</span>)<span class="sc">+</span></span>
+<span id="cb88-16"><a href="#cb88-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">&quot;none&quot;</span>,</span>
+<span id="cb88-17"><a href="#cb88-17" aria-hidden="true" tabindex="-1"></a>        <span class="at">axis.text.y =</span> <span class="fu">element_blank</span>())</span>
+<span id="cb88-18"><a href="#cb88-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb88-19"><a href="#cb88-19" aria-hidden="true" tabindex="-1"></a><span class="fu">save_plot_custom</span>(</span>
+<span id="cb88-20"><a href="#cb88-20" aria-hidden="true" tabindex="-1"></a>  <span class="at">plot =</span> distribution_by_glucose_tolerance,</span>
+<span id="cb88-21"><a href="#cb88-21" aria-hidden="true" tabindex="-1"></a>  <span class="at">filename =</span> <span class="st">&quot;07_distribution_of_sample_by_glucose_tolerance.jpg&quot;</span></span>
+<span id="cb88-22"><a href="#cb88-22" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb88-23"><a href="#cb88-23" aria-hidden="true" tabindex="-1"></a>distribution_by_glucose_tolerance</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -4522,34 +4521,35 @@ white-space: normal;
 <div class="cell">
 <div class="sourceCode cell-code" id="cb93"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb93-1"><a href="#cb93-1" aria-hidden="true" tabindex="-1"></a>hba1c_48_threshold <span class="ot">&lt;-</span> dataset <span class="sc">|&gt;</span></span>
 <span id="cb93-2"><a href="#cb93-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(glucose_tolerance) <span class="sc">|&gt;</span> </span>
-<span id="cb93-3"><a href="#cb93-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">count</span>(hba1c <span class="sc">&gt;</span> <span class="dv">48</span>) <span class="sc">|&gt;</span></span>
-<span id="cb93-4"><a href="#cb93-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">percentage =</span> n <span class="sc">/</span> <span class="fu">sum</span>(n) <span class="sc">*</span> <span class="dv">100</span>) <span class="sc">|&gt;</span></span>
-<span id="cb93-5"><a href="#cb93-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> glucose_tolerance,</span>
-<span id="cb93-6"><a href="#cb93-6" aria-hidden="true" tabindex="-1"></a>             <span class="at">y =</span> percentage,</span>
-<span id="cb93-7"><a href="#cb93-7" aria-hidden="true" tabindex="-1"></a>             <span class="at">fill =</span> glucose_tolerance,</span>
-<span id="cb93-8"><a href="#cb93-8" aria-hidden="true" tabindex="-1"></a>             <span class="at">label =</span> <span class="fu">str_c</span>(<span class="fu">round</span>(percentage,</span>
-<span id="cb93-9"><a href="#cb93-9" aria-hidden="true" tabindex="-1"></a>                                 <span class="at">digits =</span> <span class="dv">2</span>),</span>
-<span id="cb93-10"><a href="#cb93-10" aria-hidden="true" tabindex="-1"></a>                           <span class="st">&quot;%&quot;</span>))) <span class="sc">+</span></span>
-<span id="cb93-11"><a href="#cb93-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_col</span>(<span class="at">colour =</span> <span class="st">&quot;black&quot;</span>,</span>
-<span id="cb93-12"><a href="#cb93-12" aria-hidden="true" tabindex="-1"></a>           <span class="at">alpha =</span> <span class="fl">0.4</span>) <span class="sc">+</span></span>
-<span id="cb93-13"><a href="#cb93-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>(<span class="at">base_size =</span> <span class="dv">15</span>) <span class="sc">+</span></span>
-<span id="cb93-14"><a href="#cb93-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">axis.text.x =</span> <span class="fu">element_text</span>(</span>
-<span id="cb93-15"><a href="#cb93-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">angle =</span> <span class="dv">45</span>,</span>
-<span id="cb93-16"><a href="#cb93-16" aria-hidden="true" tabindex="-1"></a>    <span class="at">hjust =</span> <span class="dv">1</span>)) <span class="sc">+</span></span>
-<span id="cb93-17"><a href="#cb93-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">&quot;&quot;</span>,</span>
-<span id="cb93-18"><a href="#cb93-18" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">&quot;%&quot;</span>,</span>
-<span id="cb93-19"><a href="#cb93-19" aria-hidden="true" tabindex="-1"></a>       <span class="at">title =</span> <span class="st">&quot;% of people with HbA1c &gt; 48 by glucose tolerance&quot;</span>) <span class="sc">+</span></span>
-<span id="cb93-20"><a href="#cb93-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_hline</span>(<span class="at">yintercept =</span> <span class="dv">0</span>) <span class="sc">+</span></span>
-<span id="cb93-21"><a href="#cb93-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_text</span>(<span class="at">vjust =</span> <span class="sc">-</span><span class="fl">0.5</span>, <span class="at">size =</span> <span class="dv">5</span>) <span class="sc">+</span></span>
-<span id="cb93-22"><a href="#cb93-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ylim</span>(<span class="dv">0</span>,<span class="dv">45</span>) <span class="sc">+</span></span>
-<span id="cb93-23"><a href="#cb93-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>(<span class="at">base_size =</span> <span class="dv">12</span>) <span class="sc">+</span></span>
-<span id="cb93-24"><a href="#cb93-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">&quot;none&quot;</span> )</span>
-<span id="cb93-25"><a href="#cb93-25" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb93-26"><a href="#cb93-26" aria-hidden="true" tabindex="-1"></a><span class="fu">save_plot_custom</span>(</span>
-<span id="cb93-27"><a href="#cb93-27" aria-hidden="true" tabindex="-1"></a>  <span class="at">plot =</span> hba1c_48_threshold,</span>
-<span id="cb93-28"><a href="#cb93-28" aria-hidden="true" tabindex="-1"></a>  <span class="at">filename =</span> <span class="st">&quot;07_hba1c_48_threshold.jpg&quot;</span></span>
-<span id="cb93-29"><a href="#cb93-29" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb93-30"><a href="#cb93-30" aria-hidden="true" tabindex="-1"></a>hba1c_48_threshold</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb93-3"><a href="#cb93-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">n_48 =</span> <span class="fu">sum</span>(hba1c <span class="sc">&gt;</span> <span class="dv">48</span>),</span>
+<span id="cb93-4"><a href="#cb93-4" aria-hidden="true" tabindex="-1"></a>            <span class="at">n =</span> <span class="fu">sum</span>(hba1c <span class="sc">&gt;</span> <span class="dv">0</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb93-5"><a href="#cb93-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">percentage =</span> n_48 <span class="sc">/</span> <span class="fu">sum</span>(n) <span class="sc">*</span> <span class="dv">100</span>) <span class="sc">|&gt;</span></span>
+<span id="cb93-6"><a href="#cb93-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> glucose_tolerance,</span>
+<span id="cb93-7"><a href="#cb93-7" aria-hidden="true" tabindex="-1"></a>             <span class="at">y =</span> percentage,</span>
+<span id="cb93-8"><a href="#cb93-8" aria-hidden="true" tabindex="-1"></a>             <span class="at">fill =</span> glucose_tolerance,</span>
+<span id="cb93-9"><a href="#cb93-9" aria-hidden="true" tabindex="-1"></a>             <span class="at">label =</span> <span class="fu">str_c</span>(<span class="fu">round</span>(percentage,</span>
+<span id="cb93-10"><a href="#cb93-10" aria-hidden="true" tabindex="-1"></a>                                 <span class="at">digits =</span> <span class="dv">2</span>),</span>
+<span id="cb93-11"><a href="#cb93-11" aria-hidden="true" tabindex="-1"></a>                           <span class="st">&quot;%&quot;</span>))) <span class="sc">+</span></span>
+<span id="cb93-12"><a href="#cb93-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_col</span>(<span class="at">colour =</span> <span class="st">&quot;black&quot;</span>,</span>
+<span id="cb93-13"><a href="#cb93-13" aria-hidden="true" tabindex="-1"></a>           <span class="at">alpha =</span> <span class="fl">0.4</span>) <span class="sc">+</span></span>
+<span id="cb93-14"><a href="#cb93-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>(<span class="at">base_size =</span> <span class="dv">15</span>) <span class="sc">+</span></span>
+<span id="cb93-15"><a href="#cb93-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">axis.text.x =</span> <span class="fu">element_text</span>(</span>
+<span id="cb93-16"><a href="#cb93-16" aria-hidden="true" tabindex="-1"></a>    <span class="at">angle =</span> <span class="dv">45</span>,</span>
+<span id="cb93-17"><a href="#cb93-17" aria-hidden="true" tabindex="-1"></a>    <span class="at">hjust =</span> <span class="dv">1</span>)) <span class="sc">+</span></span>
+<span id="cb93-18"><a href="#cb93-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">&quot;&quot;</span>,</span>
+<span id="cb93-19"><a href="#cb93-19" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">&quot;%&quot;</span>,</span>
+<span id="cb93-20"><a href="#cb93-20" aria-hidden="true" tabindex="-1"></a>       <span class="at">title =</span> <span class="st">&quot;% of people with HbA1c &gt; 48 by glucose tolerance&quot;</span>) <span class="sc">+</span></span>
+<span id="cb93-21"><a href="#cb93-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_hline</span>(<span class="at">yintercept =</span> <span class="dv">0</span>) <span class="sc">+</span></span>
+<span id="cb93-22"><a href="#cb93-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_text</span>(<span class="at">vjust =</span> <span class="sc">-</span><span class="fl">0.5</span>, <span class="at">size =</span> <span class="dv">5</span>) <span class="sc">+</span></span>
+<span id="cb93-23"><a href="#cb93-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ylim</span>(<span class="dv">0</span>,<span class="dv">45</span>) <span class="sc">+</span></span>
+<span id="cb93-24"><a href="#cb93-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>(<span class="at">base_size =</span> <span class="dv">12</span>) <span class="sc">+</span></span>
+<span id="cb93-25"><a href="#cb93-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">&quot;none&quot;</span> )</span>
+<span id="cb93-26"><a href="#cb93-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb93-27"><a href="#cb93-27" aria-hidden="true" tabindex="-1"></a><span class="fu">save_plot_custom</span>(</span>
+<span id="cb93-28"><a href="#cb93-28" aria-hidden="true" tabindex="-1"></a>  <span class="at">plot =</span> hba1c_48_threshold,</span>
+<span id="cb93-29"><a href="#cb93-29" aria-hidden="true" tabindex="-1"></a>  <span class="at">filename =</span> <span class="st">&quot;07_hba1c_48_threshold.jpg&quot;</span></span>
+<span id="cb93-30"><a href="#cb93-30" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb93-31"><a href="#cb93-31" aria-hidden="true" tabindex="-1"></a>hba1c_48_threshold</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -4695,10 +4695,10 @@ white-space: normal;
 <span id="cb98-9"><a href="#cb98-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>(<span class="at">base_size =</span> <span class="dv">15</span>) <span class="sc">+</span></span>
 <span id="cb98-10"><a href="#cb98-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">&quot;bottom&quot;</span>,</span>
 <span id="cb98-11"><a href="#cb98-11" aria-hidden="true" tabindex="-1"></a>        <span class="at">plot.title =</span> <span class="fu">element_text</span>(<span class="at">hjust =</span> <span class="fl">0.5</span>)) <span class="sc">+</span></span>
-<span id="cb98-12"><a href="#cb98-12" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">&quot;BMI class&quot;</span>,</span>
+<span id="cb98-12"><a href="#cb98-12" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">&quot;Glucose tolerance&quot;</span>,</span>
 <span id="cb98-13"><a href="#cb98-13" aria-hidden="true" tabindex="-1"></a>         <span class="at">y =</span> <span class="st">&quot;c-peptide [ng/mL]&quot;</span>,</span>
 <span id="cb98-14"><a href="#cb98-14" aria-hidden="true" tabindex="-1"></a>         <span class="at">title =</span> <span class="st">&quot;c-peptide concentration&quot;</span>,</span>
-<span id="cb98-15"><a href="#cb98-15" aria-hidden="true" tabindex="-1"></a>         <span class="at">fill =</span> <span class="st">&quot;Glucose tolerance: &quot;</span>)</span>
+<span id="cb98-15"><a href="#cb98-15" aria-hidden="true" tabindex="-1"></a>         <span class="at">fill =</span> <span class="st">&quot;BMI class: &quot;</span>)</span>
 <span id="cb98-16"><a href="#cb98-16" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb98-17"><a href="#cb98-17" aria-hidden="true" tabindex="-1"></a><span class="fu">save_plot_custom</span>(</span>
 <span id="cb98-18"><a href="#cb98-18" aria-hidden="true" tabindex="-1"></a>  <span class="at">plot =</span> c_peptide_vs_bmi_glucose_tolerance,</span>
@@ -4718,19 +4718,19 @@ white-space: normal;
 <div class="sourceCode cell-code" id="cb99"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb99-1"><a href="#cb99-1" aria-hidden="true" tabindex="-1"></a>gad_ab_vs_bmi_glucose_tolerance <span class="ot">&lt;-</span> dataset<span class="sc">|&gt;</span></span>
 <span id="cb99-2"><a href="#cb99-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(BMI_class <span class="sc">!=</span> <span class="st">&quot;Underweight&quot;</span>) <span class="sc">|&gt;</span> </span>
 <span id="cb99-3"><a href="#cb99-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="st">`</span><span class="at">gad-antibodies</span><span class="st">`</span> <span class="sc">&lt;</span> <span class="dv">20</span>) <span class="sc">|&gt;</span> </span>
-<span id="cb99-4"><a href="#cb99-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> BMI_class,</span>
+<span id="cb99-4"><a href="#cb99-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> glucose_tolerance,</span>
 <span id="cb99-5"><a href="#cb99-5" aria-hidden="true" tabindex="-1"></a>             <span class="at">y =</span> <span class="st">`</span><span class="at">gad-antibodies</span><span class="st">`</span>,</span>
-<span id="cb99-6"><a href="#cb99-6" aria-hidden="true" tabindex="-1"></a>             <span class="at">fill =</span> glucose_tolerance)) <span class="sc">+</span></span>
+<span id="cb99-6"><a href="#cb99-6" aria-hidden="true" tabindex="-1"></a>             <span class="at">fill =</span> BMI_class)) <span class="sc">+</span></span>
 <span id="cb99-7"><a href="#cb99-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_boxplot</span>(<span class="at">position =</span> <span class="fu">position_dodge</span>(</span>
 <span id="cb99-8"><a href="#cb99-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">preserve =</span> <span class="st">&quot;single&quot;</span>), </span>
 <span id="cb99-9"><a href="#cb99-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">alpha =</span> <span class="fl">0.4</span>) <span class="sc">+</span></span>
 <span id="cb99-10"><a href="#cb99-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>(<span class="at">base_size =</span> <span class="dv">15</span>) <span class="sc">+</span></span>
 <span id="cb99-11"><a href="#cb99-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">&quot;bottom&quot;</span>,</span>
 <span id="cb99-12"><a href="#cb99-12" aria-hidden="true" tabindex="-1"></a>        <span class="at">plot.title =</span> <span class="fu">element_text</span>(<span class="at">hjust =</span> <span class="fl">0.5</span>)) <span class="sc">+</span></span>
-<span id="cb99-13"><a href="#cb99-13" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">&quot;BMI class&quot;</span>,</span>
+<span id="cb99-13"><a href="#cb99-13" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">&quot;Glucose tolerance&quot;</span>,</span>
 <span id="cb99-14"><a href="#cb99-14" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">&quot;GAD-antibodies [U/mL]&quot;</span>,</span>
 <span id="cb99-15"><a href="#cb99-15" aria-hidden="true" tabindex="-1"></a>       <span class="at">title =</span> <span class="st">&quot;GAD-antibodies concentration&quot;</span>,</span>
-<span id="cb99-16"><a href="#cb99-16" aria-hidden="true" tabindex="-1"></a>       <span class="at">fill =</span> <span class="st">&quot;Glucose tolerance: &quot;</span>)</span>
+<span id="cb99-16"><a href="#cb99-16" aria-hidden="true" tabindex="-1"></a>       <span class="at">fill =</span> <span class="st">&quot;BMI class &quot;</span>)</span>
 <span id="cb99-17"><a href="#cb99-17" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb99-18"><a href="#cb99-18" aria-hidden="true" tabindex="-1"></a><span class="fu">save_plot_custom</span>(</span>
 <span id="cb99-19"><a href="#cb99-19" aria-hidden="true" tabindex="-1"></a>  <span class="at">plot =</span> gad_ab_vs_bmi_glucose_tolerance,</span>
@@ -5046,7 +5046,7 @@ white-space: normal;
 </div>
 </div>
 </div>
-<p>We can see that the number of obese and overweight people increases in glucose impaired and diabetic categories.</p>
+<p>Now we want to explore how the statin treatment affect cholesterol levels for each glucose tolerance group.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb111"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb111-1"><a href="#cb111-1" aria-hidden="true" tabindex="-1"></a><span class="co">#split on BMI</span></span>
 <span id="cb111-2"><a href="#cb111-2" aria-hidden="true" tabindex="-1"></a>statins_cholesterol <span class="ot">&lt;-</span> dataset <span class="sc">|&gt;</span> </span>
@@ -5080,7 +5080,7 @@ white-space: normal;
 </div>
 </div>
 </div>
-<p>We can see that the treatment with statins have the effect of lowering cholesterol, which is coherent with what’s expected.</p>
+<p>We can see that the treatment with statins have the effect of lowering cholesterol, which is coherent with what’s expected. The effect is seen for both healthy and glucose impaired as well as type 2 diabetic patients.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb112"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb112-1"><a href="#cb112-1" aria-hidden="true" tabindex="-1"></a><span class="co"># # clean environment</span></span>
 <span id="cb112-2"><a href="#cb112-2" aria-hidden="true" tabindex="-1"></a><span class="co"># rm(list = ls() |&gt;  </span></span>
@@ -5190,29 +5190,32 @@ white-space: normal;
 <span id="cb117-3"><a href="#cb117-3" aria-hidden="true" tabindex="-1"></a>  <span class="co">#head(100) |&gt; </span></span>
 <span id="cb117-4"><a href="#cb117-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(<span class="at">cols =</span> <span class="sc">-</span>species,</span>
 <span id="cb117-5"><a href="#cb117-5" aria-hidden="true" tabindex="-1"></a>               <span class="at">names_to =</span> <span class="st">&quot;glucose_tolerance&quot;</span>,</span>
-<span id="cb117-6"><a href="#cb117-6" aria-hidden="true" tabindex="-1"></a>               <span class="at">values_to =</span> <span class="st">&quot;mean_abundance&quot;</span>) <span class="sc">|&gt;</span> </span>
-<span id="cb117-7"><a href="#cb117-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> glucose_tolerance,</span>
-<span id="cb117-8"><a href="#cb117-8" aria-hidden="true" tabindex="-1"></a>               <span class="at">y =</span> species,</span>
-<span id="cb117-9"><a href="#cb117-9" aria-hidden="true" tabindex="-1"></a>               <span class="at">fill =</span> mean_abundance)) <span class="sc">+</span></span>
-<span id="cb117-10"><a href="#cb117-10" aria-hidden="true" tabindex="-1"></a>      <span class="fu">geom_tile</span>() <span class="sc">+</span></span>
-<span id="cb117-11"><a href="#cb117-11" aria-hidden="true" tabindex="-1"></a>      <span class="fu">scale_fill_gradient2</span>(<span class="at">low =</span> <span class="st">&quot;purple&quot;</span>,</span>
-<span id="cb117-12"><a href="#cb117-12" aria-hidden="true" tabindex="-1"></a>                           <span class="at">mid =</span> <span class="st">&quot;white&quot;</span>,</span>
-<span id="cb117-13"><a href="#cb117-13" aria-hidden="true" tabindex="-1"></a>                           <span class="at">high =</span> <span class="st">&quot;green&quot;</span>,</span>
-<span id="cb117-14"><a href="#cb117-14" aria-hidden="true" tabindex="-1"></a>                           <span class="at">midpoint =</span> <span class="dv">2</span>) <span class="sc">+</span> </span>
-<span id="cb117-15"><a href="#cb117-15" aria-hidden="true" tabindex="-1"></a>      <span class="fu">labs</span>(</span>
-<span id="cb117-16"><a href="#cb117-16" aria-hidden="true" tabindex="-1"></a>        <span class="at">title =</span> <span class="st">&quot;Mean Abundance of Bacterial Species&quot;</span>,</span>
-<span id="cb117-17"><a href="#cb117-17" aria-hidden="true" tabindex="-1"></a>        <span class="at">x =</span> <span class="st">&quot;Glucose tolerance&quot;</span>,</span>
-<span id="cb117-18"><a href="#cb117-18" aria-hidden="true" tabindex="-1"></a>        <span class="at">y =</span> <span class="st">&quot;Bacterial Species&quot;</span>,</span>
-<span id="cb117-19"><a href="#cb117-19" aria-hidden="true" tabindex="-1"></a>        <span class="at">fill =</span> <span class="st">&quot;Mean Abundance&quot;</span></span>
-<span id="cb117-20"><a href="#cb117-20" aria-hidden="true" tabindex="-1"></a>      ) <span class="sc">+</span></span>
-<span id="cb117-21"><a href="#cb117-21" aria-hidden="true" tabindex="-1"></a>      <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
-<span id="cb117-22"><a href="#cb117-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">axis.text.y =</span> <span class="fu">element_blank</span>())</span>
-<span id="cb117-23"><a href="#cb117-23" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb117-24"><a href="#cb117-24" aria-hidden="true" tabindex="-1"></a><span class="fu">save_plot_custom</span>(</span>
-<span id="cb117-25"><a href="#cb117-25" aria-hidden="true" tabindex="-1"></a>  <span class="at">plot =</span> species_heatmap,</span>
-<span id="cb117-26"><a href="#cb117-26" aria-hidden="true" tabindex="-1"></a>  <span class="at">filename =</span> <span class="st">&quot;08_species_heatmap.jpg&quot;</span></span>
-<span id="cb117-27"><a href="#cb117-27" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb117-28"><a href="#cb117-28" aria-hidden="true" tabindex="-1"></a>species_heatmap</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb117-6"><a href="#cb117-6" aria-hidden="true" tabindex="-1"></a>               <span class="at">values_to =</span> <span class="st">&quot;mean_abundance&quot;</span>) <span class="sc">|&gt;</span></span>
+<span id="cb117-7"><a href="#cb117-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">glucose_tolerance =</span> <span class="fu">factor</span>(glucose_tolerance,</span>
+<span id="cb117-8"><a href="#cb117-8" aria-hidden="true" tabindex="-1"></a>                                    <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">&quot;normal&quot;</span>, <span class="st">&quot;impaired&quot;</span>, <span class="st">&quot;t2d&quot;</span>))) <span class="sc">|&gt;</span> </span>
+<span id="cb117-9"><a href="#cb117-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> glucose_tolerance,</span>
+<span id="cb117-10"><a href="#cb117-10" aria-hidden="true" tabindex="-1"></a>               <span class="at">y =</span> species,</span>
+<span id="cb117-11"><a href="#cb117-11" aria-hidden="true" tabindex="-1"></a>               <span class="at">fill =</span> mean_abundance)) <span class="sc">+</span></span>
+<span id="cb117-12"><a href="#cb117-12" aria-hidden="true" tabindex="-1"></a>      <span class="fu">geom_tile</span>() <span class="sc">+</span></span>
+<span id="cb117-13"><a href="#cb117-13" aria-hidden="true" tabindex="-1"></a>      <span class="fu">scale_fill_gradient2</span>(<span class="at">low =</span> <span class="st">&quot;purple&quot;</span>,</span>
+<span id="cb117-14"><a href="#cb117-14" aria-hidden="true" tabindex="-1"></a>                           <span class="at">mid =</span> <span class="st">&quot;white&quot;</span>,</span>
+<span id="cb117-15"><a href="#cb117-15" aria-hidden="true" tabindex="-1"></a>                           <span class="at">high =</span> <span class="st">&quot;green&quot;</span>,</span>
+<span id="cb117-16"><a href="#cb117-16" aria-hidden="true" tabindex="-1"></a>                           <span class="at">midpoint =</span> <span class="dv">2</span>) <span class="sc">+</span> </span>
+<span id="cb117-17"><a href="#cb117-17" aria-hidden="true" tabindex="-1"></a>      <span class="fu">labs</span>(</span>
+<span id="cb117-18"><a href="#cb117-18" aria-hidden="true" tabindex="-1"></a>        <span class="at">title =</span> <span class="st">&quot;Mean Abundance of Bacterial Species&quot;</span>,</span>
+<span id="cb117-19"><a href="#cb117-19" aria-hidden="true" tabindex="-1"></a>        <span class="at">x =</span> <span class="st">&quot;Glucose tolerance&quot;</span>,</span>
+<span id="cb117-20"><a href="#cb117-20" aria-hidden="true" tabindex="-1"></a>        <span class="at">y =</span> <span class="st">&quot;Bacterial Species&quot;</span>,</span>
+<span id="cb117-21"><a href="#cb117-21" aria-hidden="true" tabindex="-1"></a>        <span class="at">fill =</span> <span class="st">&quot;Mean Abundance&quot;</span></span>
+<span id="cb117-22"><a href="#cb117-22" aria-hidden="true" tabindex="-1"></a>      ) <span class="sc">+</span></span>
+<span id="cb117-23"><a href="#cb117-23" aria-hidden="true" tabindex="-1"></a>      <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
+<span id="cb117-24"><a href="#cb117-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">axis.text.y =</span> <span class="fu">element_blank</span>(),</span>
+<span id="cb117-25"><a href="#cb117-25" aria-hidden="true" tabindex="-1"></a>        <span class="at">plot.title =</span> <span class="fu">element_text</span>(<span class="at">hjust =</span> <span class="fl">0.5</span>))</span>
+<span id="cb117-26"><a href="#cb117-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb117-27"><a href="#cb117-27" aria-hidden="true" tabindex="-1"></a><span class="fu">save_plot_custom</span>(</span>
+<span id="cb117-28"><a href="#cb117-28" aria-hidden="true" tabindex="-1"></a>  <span class="at">plot =</span> species_heatmap,</span>
+<span id="cb117-29"><a href="#cb117-29" aria-hidden="true" tabindex="-1"></a>  <span class="at">filename =</span> <span class="st">&quot;08_species_heatmap.jpg&quot;</span></span>
+<span id="cb117-30"><a href="#cb117-30" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb117-31"><a href="#cb117-31" aria-hidden="true" tabindex="-1"></a>species_heatmap</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -5227,7 +5230,7 @@ white-space: normal;
 <span id="cb118-2"><a href="#cb118-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">difference =</span> normal<span class="sc">-</span>t2d) <span class="sc">|&gt;</span> </span>
 <span id="cb118-3"><a href="#cb118-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(species, difference) <span class="sc">|&gt;</span> </span>
 <span id="cb118-4"><a href="#cb118-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">comparison =</span> <span class="fu">ifelse</span>(difference <span class="sc">&gt;</span> <span class="dv">0</span>,</span>
-<span id="cb118-5"><a href="#cb118-5" aria-hidden="true" tabindex="-1"></a>                             <span class="st">&quot;normal&gt;t2d&quot;</span>, <span class="st">&quot;t2d&gt;normal&quot;</span>)) <span class="sc">|&gt;</span> </span>
+<span id="cb118-5"><a href="#cb118-5" aria-hidden="true" tabindex="-1"></a>                             <span class="st">&quot;Healthy &gt; diabetic&quot;</span>, <span class="st">&quot;Diabetic &gt; healthy&quot;</span>)) <span class="sc">|&gt;</span> </span>
 <span id="cb118-6"><a href="#cb118-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">difference =</span> <span class="fu">abs</span>(difference)) <span class="sc">|&gt;</span> </span>
 <span id="cb118-7"><a href="#cb118-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(difference))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
@@ -5641,10 +5644,8 @@ white-space: normal;
 <span id="cb140-5"><a href="#cb140-5" aria-hidden="true" tabindex="-1"></a><span class="fu">source</span>(<span class="st">&quot;99_proj_func.R&quot;</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb141"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb141-1"><a href="#cb141-1" aria-hidden="true" tabindex="-1"></a>data_path <span class="ot">&lt;-</span> <span class="fu">here</span>(<span class="st">&quot;data/06_dat_augmented.csv&quot;</span>)</span>
-<span id="cb141-2"><a href="#cb141-2" aria-hidden="true" tabindex="-1"></a>dataset <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(data_path,</span>
-<span id="cb141-3"><a href="#cb141-3" aria-hidden="true" tabindex="-1"></a>                    <span class="at">na =</span> <span class="fu">c</span>(<span class="st">&quot;nd&quot;</span>, <span class="st">&quot;-&quot;</span>, <span class="st">&quot;na&quot;</span>),</span>
-<span id="cb141-4"><a href="#cb141-4" aria-hidden="true" tabindex="-1"></a>                    <span class="at">show_col_types =</span> <span class="cn">FALSE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb141"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb141-1"><a href="#cb141-1" aria-hidden="true" tabindex="-1"></a>data_path <span class="ot">&lt;-</span> <span class="fu">here</span>(<span class="st">&quot;data/06_dat_augmented.RData&quot;</span>)</span>
+<span id="cb141-2"><a href="#cb141-2" aria-hidden="true" tabindex="-1"></a><span class="fu">load</span>(data_path)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <section id="assessing-relationships-between-species-abundance-and-metadata-features" class="level3">
 <h3 class="anchored" data-anchor-id="assessing-relationships-between-species-abundance-and-metadata-features">Assessing relationships between species abundance and metadata features</h3>
@@ -5813,7 +5814,7 @@ white-space: normal;
 <pre><code>[[1]]
 # A tibble: 96 × 30
    sampleID glucose_tolerance is_diseased   age country   bmi BMI_class      hdl
-   &lt;chr&gt;    &lt;chr&gt;                   &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;   &lt;dbl&gt; &lt;chr&gt;        &lt;dbl&gt;
+   &lt;chr&gt;    &lt;fct&gt;                   &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;   &lt;dbl&gt; &lt;fct&gt;        &lt;dbl&gt;
  1 S118     normal                      0  70.0 sweden   32.7 Obese         1.35
  2 S121     normal                      0  69.3 sweden   29.7 Overweight    2.82
  3 S126     normal                      0  69.5 germany  18.6 Normal weig…  2.72
@@ -5827,9 +5828,9 @@ white-space: normal;
 # ℹ 86 more rows
 # ℹ 22 more variables: ldl &lt;dbl&gt;, hdl_to_ldl_ratio &lt;dbl&gt;,
 #   `gad-antibodies` &lt;dbl&gt;, whr &lt;dbl&gt;, wc &lt;dbl&gt;, cholesterol &lt;dbl&gt;,
-#   triglycerides &lt;dbl&gt;, creatinine &lt;dbl&gt;, `y-gt` &lt;dbl&gt;, fasting_glucose &lt;chr&gt;,
-#   fasting_insulin &lt;dbl&gt;, `HOMA-IR` &lt;chr&gt;, HOMA_category &lt;chr&gt;, hba1c &lt;dbl&gt;,
-#   adiponectin &lt;chr&gt;, leptin &lt;chr&gt;, hscrp &lt;dbl&gt;, `c-peptide` &lt;dbl&gt;,
+#   triglycerides &lt;dbl&gt;, creatinine &lt;dbl&gt;, `y-gt` &lt;dbl&gt;, fasting_glucose &lt;dbl&gt;,
+#   fasting_insulin &lt;dbl&gt;, `HOMA-IR` &lt;dbl&gt;, HOMA_category &lt;fct&gt;, hba1c &lt;dbl&gt;,
+#   adiponectin &lt;dbl&gt;, leptin &lt;dbl&gt;, hscrp &lt;dbl&gt;, `c-peptide` &lt;dbl&gt;,
 #   tnfa &lt;dbl&gt;, statins &lt;chr&gt;, insulin &lt;chr&gt;, abundance &lt;dbl&gt;</code></pre>
 </div>
 </div>
