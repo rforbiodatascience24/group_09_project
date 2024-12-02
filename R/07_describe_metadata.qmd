@@ -94,11 +94,10 @@ Now we move on to more diabetes-specific metadata.
 ```{r}
 distribution_by_glucose_tolerance <- dataset |>
   count(glucose_tolerance) |>
-  mutate(percentage = n / sum(n) * 100) |>
   ggplot(aes(x = glucose_tolerance,
-             y = percentage,
+             y = n,
              fill = glucose_tolerance,
-             label = str_c(round(percentage,digits = 2),"%"))) +
+             label = n)) +
   geom_col(colour = "black",
            alpha = 0.6) +
   theme_minimal(base_size = 15) +
@@ -107,7 +106,7 @@ distribution_by_glucose_tolerance <- dataset |>
        title = "Sample distribution in glucose tolerance groups") +
   geom_hline(yintercept = 0) +
   geom_text(vjust = -0.5, size = 5)+
-  ylim(0,45)+
+  ylim(0,55)+
   theme(legend.position = "none",
         axis.text.y = element_blank())
 
@@ -235,8 +234,9 @@ Hemoglobin A1C is hemoglobin bound to glucose, which can be used as a measure of
 ```{r}
 hba1c_48_threshold <- dataset |>
   group_by(glucose_tolerance) |> 
-  count(hba1c > 48) |>
-  mutate(percentage = n / sum(n) * 100) |>
+  summarise(n_48 = sum(hba1c > 48),
+            n = sum(hba1c > 0)) |>
+  mutate(percentage = n_48 / sum(n) * 100) |>
   ggplot(aes(x = glucose_tolerance,
              y = percentage,
              fill = glucose_tolerance,
