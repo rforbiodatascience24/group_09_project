@@ -1,82 +1,31 @@
 ---
-author: 
-  - "Andreis Marco(s243116)" 
-  - "Asiya Mohamad Yusuf Muse (s243930)"
-  - "Magnus Harthimmer (s233426)"  
-  - "Anita Skovbjerg Hjort-Gregersen (s201190)"
-  - "Rebecca Hjermind Millum (s215024)"
-
-execute:
-  warning: false
-  message: false
- 
-format: html
-output: html_document
-editor: visual
+format: 
+  html:
+    self-contained: true
 ---
-
-In this file we are going to explore a the correlation of the metadata columns, and check if there are statistically significant differences between healthy and diseased individuals.
+# Metadata analysis
 
 ```{r}
 library("tidyverse")
-library("vegan")
 library("here")
 library("broom")
-# Import costum function
+library("vegan")
 source("99_proj_func.R")
 ```
 
+
+Now we are going to explore the correlation between metadata columns, and check if there are statistically significant differences between healthy and diseased individuals.
+
 ```{r}
-# verify that the dataset can be loaded successfully
 data_path <- here("data/06_dat_augmented.RData")
 load(data_path)
 ```
 
-### Metadata analysis
-
 What does impaired glucose tolerance mean? It means that blood sugar levels are elevated but not enough to warrant a diagnosis of diabetes.
-
-```{r}
-# Let's look at the proportions of our catagorical values
-# Our data is well proportionally split between the three distincs groups of "disease"
-dataset |> 
-  count(glucose_tolerance,
-        name = "Count") |> 
-  arrange(desc(Count))
-```
 
 ### Correlation analysis
 
 Calculating the correlation matrix on a subset of our data will tell us about linear relationships between data variables.
-
-Lets start with a subset of our data, containing metadata and a few high-level markers (e.g. LDL and HDL)
-
-```{r}
-# Filter for diabetics and impaired
-filtered_data <- dataset |> 
-  filter(glucose_tolerance %in% c("t2d", "impaired"))
-
-# # Choose the abundance data from the filtered data
-# df_selected <- filtered_data |> 
-#   select(starts_with("s_"))
-# 
-# # Calculate the mean of each column
-# mean_values <- df_selected |> 
-#   summarise(across(everything(),
-#                    mean))
-
-# Convert to long format and get the top 5 columns with the highest mean values
-# top_5_species <- mean_values |> 
-#   pivot_longer(everything(),
-#                names_to = "species",
-#                values_to = "mean_value") |> 
-#   arrange(desc(mean_value)) |> 
-#   slice_head(n = 5) |> 
-#   pull(species)
-# 
-# top_5_species <- dataset |> 
-#   select(all_of(top_5_species))
-```
 
 ```{r}
 # Select numeric columns after excluding ones starting with "s_"
@@ -141,6 +90,7 @@ corval_lm <- dataset |>
                       y = wc,
                       use = "complete.obs",
                       method = "pearson"))
+
 bmi_wc_correlation <- dataset |>
   ggplot(aes(x = bmi,
              y = bmi)) +
@@ -148,7 +98,7 @@ bmi_wc_correlation <- dataset |>
              color = "red",
              alpha = 0.5) +
   geom_smooth(method = "lm") +
-  labs(x = "WC",
+  labs(x = "WC [cm]",
        y = "Bmi",
        title = "Bmi vs wc")+
   labs(subtitle = str_c("PCC = ", corval_lm  |>  pull(PCC) |>round(3)))+
@@ -161,7 +111,7 @@ save_plot_custom(
 bmi_wc_correlation
 ```
 
-# P-value analysis meta_data
+### Statistical analysis of metadata
 
 Now we are interested in doing a p-value test to study which of the parameters of the metadata are relevant to describing T2D. We compare between the normal and type 2 diabetes group.
 

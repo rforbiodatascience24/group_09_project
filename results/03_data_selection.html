@@ -6,13 +6,8 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
-<meta name="author" content="Andreis Marco(s243116)">
-<meta name="author" content="Asiya Mohamad Yusuf Muse (s243930)">
-<meta name="author" content="Magnus Harthimmer (s233426)">
-<meta name="author" content="Anita Skovbjerg Hjort-Gregersen (s201190)">
-<meta name="author" content="Rebecca Hjermind Millum (s215024)">
 
-<title>03_data_selection</title>
+<title>data_selection</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -82,74 +77,48 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <main class="content" id="quarto-document-content">
 
-<header id="title-block-header" class="quarto-title-block default">
-<div class="quarto-title">
-<h1 class="title">03_data_selection</h1>
+
+
+
+<section id="is-the-dataset-what-we-expect-from-the-original-paper" class="level1">
+<h1>Is the dataset what we expect from the original paper?</h1>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(<span class="st">"tidyverse"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>── Attaching core tidyverse packages ──────────────────────── tidyverse 2.0.0 ──
+✔ dplyr     1.1.4     ✔ readr     2.1.5
+✔ forcats   1.0.0     ✔ stringr   1.5.1
+✔ ggplot2   3.5.1     ✔ tibble    3.2.1
+✔ lubridate 1.9.3     ✔ tidyr     1.3.1
+✔ purrr     1.0.2     
+── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
+✖ dplyr::filter() masks stats::filter()
+✖ dplyr::lag()    masks stats::lag()
+ℹ Use the conflicted package (&lt;http://conflicted.r-lib.org/&gt;) to force all conflicts to become errors</code></pre>
 </div>
-
-
-
-<div class="quarto-title-meta">
-
-    <div>
-    <div class="quarto-title-meta-heading">Authors</div>
-    <div class="quarto-title-meta-contents">
-             <p>Andreis Marco(s243116) </p>
-             <p>Asiya Mohamad Yusuf Muse (s243930) </p>
-             <p>Magnus Harthimmer (s233426) </p>
-             <p>Anita Skovbjerg Hjort-Gregersen (s201190) </p>
-             <p>Rebecca Hjermind Millum (s215024) </p>
-          </div>
-  </div>
-    
-  
-    
-  </div>
-  
-
-
-</header>
-
-
-<p>This files aims at looking for inconsistences between the dataset and what was declared in the original paper.</p>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(<span class="st">"here"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>here() starts at /home/marco/group_09_project</code></pre>
+</div>
+</div>
 <section id="the-history-of-the-dataset" class="level3">
 <h3 class="anchored" data-anchor-id="the-history-of-the-dataset">The history of the dataset</h3>
 <p>To do a efficient cleaning we need to understand the format of our data and what it represents, so let’s investigate the dataset origins.</p>
-<p>The original paper is interested in comparing the microbial populations of patients both healthy and affected by various diseases with the aim of discovering disease biomarkers and predicting of health conditions. To do so, they collected the data, which are the results of shot-gun genome sequencing of the samples, from 8 different metagenomics studies (the only one savailable at the time of the study - 2016), which cover: liver cirrhosis, colorectal cancer, inflammatory bowel disease, obesity and Type 2 diabetes and healthy patients. Segata et. al declared a total of 2571 samples before their preprocessing and 2424 after.</p>
+<p>The <a href="https://doi.org/10.1371/journal.pcbi.1004977">original paper</a> is interested in comparing the microbial populations of patients both healthy and affected by various diseases with the aim of discovering disease biomarkers and predicting health conditions. To do so, they collected the data, which are the results of shot-gun genome sequencing of the samples, from 8 different metagenomics studies (the only one savailable at the time of the study - 2016), which cover: liver cirrhosis, colorectal cancer, inflammatory bowel disease, obesity and Type 2 diabetes and healthy patients. Segata et. al declared a total of 2571 samples before their preprocessing and 2424 after.</p>
 <p>The sequencing data was analysed with a software called MetaPhlAn2 which outputs the species-level relative abundances and presence of strain-specific markers. Based on these Segata et. al.&nbsp;performed machine learning studies which are outside of the scope of this project. As we have no functional way of opening the output of MetaPhlAn2, we cannot consult this data.</p>
 <p>In 2020 a group of people (outside the SegataLab) transposed the dataset into CSV and published it on kaggle, which is where we found it.</p>
-</section>
-<section id="load-the-dataset" class="level3">
-<h3 class="anchored" data-anchor-id="load-the-dataset">Load the dataset</h3>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(<span class="st">"tidyverse"</span>)</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(<span class="st">"here"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>data_path <span class="ot">&lt;-</span> <span class="fu">here</span>(<span class="st">"data/02_dat_load.csv"</span>)</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>dataset <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(data_path, <span class="at">show_col_types =</span> <span class="cn">FALSE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>data_path <span class="ot">&lt;-</span> <span class="fu">here</span>(<span class="st">"data/02_dat_load.csv"</span>)</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>dataset <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(data_path, <span class="at">show_col_types =</span> <span class="cn">FALSE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-<p>We immediately get parsing errors due…</p>
-<p>(NOTE: this was really inconsistent and refreshing the page or restarting the R session was enough to change the behavior).</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">problems</span>(dataset)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 0 × 5
-# ℹ 5 variables: row &lt;int&gt;, col &lt;int&gt;, expected &lt;chr&gt;, actual &lt;chr&gt;, file &lt;chr&gt;</code></pre>
-</div>
-</div>
-<p>We can see that they are due to some cells having the a different value type from the expected. We will firstly perform data selection and cleaning, if the issues persist we will handle them later.</p>
-</section>
-<section id="verify-that-the-dataset-reflects-the-paper-description" class="level3">
-<h3 class="anchored" data-anchor-id="verify-that-the-dataset-reflects-the-paper-description">Verify that the dataset reflects the paper description</h3>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">dim</span>(dataset)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">dim</span>(dataset)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 3610 3513</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>dataset <span class="sc">|&gt;</span> </span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">distinct</span>() <span class="sc">|&gt;</span> </span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">dim</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>dataset <span class="sc">|&gt;</span> </span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">distinct</span>() <span class="sc">|&gt;</span> </span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">dim</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 3610 3513</code></pre>
 </div>
@@ -157,9 +126,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>Starting really really simple… the dataset has 3610 rows / samples and 3513 features. We immediately see that the number of samples is larger (by 1039) that the 2571 declared in the paper.</p>
 <p>We can see that all rows are different, so where do these additional samples come from?</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>dataset <span class="sc">|&gt;</span> </span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(dataset_name) <span class="sc">|&gt;</span> </span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">n_samples =</span> <span class="fu">n</span>())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>dataset <span class="sc">|&gt;</span> </span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(dataset_name) <span class="sc">|&gt;</span> </span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">n_samples =</span> <span class="fu">n</span>())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 18 × 2
    dataset_name                      n_samples
@@ -189,14 +158,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>“We initially considered a total of 2571 publicly available metagenomic samples (from eight main studies/datasets) that were reduced to 2424 after pre-processing and curation (see next sections). These are all the human-associated shotgun metagenomic studies with more than 70 samples and read length bigger than 70nt available as of January 2015. Six studies were devoted to the characterization of the human gut microbiome in presence of different diseases. Cirrhosis included 123 patients affected by liver cirrhosis and 114 healthy controls [<a href="https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1004977#pcbi.1004977.ref033">33</a>]. Colorectal consisted of a total of 156 samples, 53 of which were affected by colorectal cancer [<a href="https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1004977#pcbi.1004977.ref034">34</a>]. IBD represented the first available large metagenomic dataset and includes 124 individuals, 25 were affected by inflammatory bowel disease (IBD) [<a href="https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1004977#pcbi.1004977.ref035">35</a>]. Obesity included 123 non-obese and 169 obese individuals [<a href="https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1004977#pcbi.1004977.ref031">31</a>]. Two distinct studies were instead related to the alteration of the microbiome in subjects with type 2 diabetes (T2D). In the T2D dataset, 170 Chinese T2D patients and 174 non-diabetic controls were present [<a href="https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1004977#pcbi.1004977.ref037">37</a>]. The WT2D focused on European women and included 53 T2D patients, 49 impaired glucose tolerance individuals and 43 normal glucose tolerance people [<a href="https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1004977#pcbi.1004977.ref032">32</a>]. Among these six datasets, two of them comprise two independent stages. For cirrhosis, 181 and 56 samples were collected during the so defined discovery and validation phases, respectively. Similarly, for T2D, 145 and 199 samples were acquired during the first (stageI) and second (stageII) stages, respectively. Additionally, two studies focused on healthy subjects and not strictly related to the gut microbiome were also taken into account. HMP included samples collected from five major body sites (i.e., gastrointestinal tract, nasal cavity, oral cavity, skin, and urogenital tract). A subset of these samples were described in [<a href="https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1004977#pcbi.1004977.ref001">1</a>]. Finally, skin was composed by 291 samples acquired from several different skin sites [<a href="https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1004977#pcbi.1004977.ref036">36</a>].”</p>
 <p>We traced the mentioned datasets with those present in ours based on the names given in Table 1 of the original paper.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>datasets <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"liver_cirrhosis"</span>, <span class="st">"colorectal_cancer"</span>, <span class="st">"inflamatory_bowel_disease"</span>, <span class="st">"obesity"</span>,<span class="st">"T2D"</span>, <span class="st">"WT2D"</span>,<span class="st">"Human Microbiome Project"</span>, <span class="st">"Skin"</span>)</span>
-<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>equivalent <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"Quin_gut_liver_cirrhosis"</span>, <span class="st">"Zeller_fecal_colorectal_cancer"</span>, <span class="st">"metahit"</span>, <span class="st">"Chatelier_gut_obesity"</span>, <span class="st">"t2dmeta_long/short"</span>, <span class="st">"WT2D"</span>, <span class="st">"hmp/hmpii"</span>, <span class="st">"segre_Human_Skin"</span>)</span>
-<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>declared_before_processing <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">237</span>, <span class="dv">156</span>, <span class="dv">124</span>, <span class="dv">292</span>, <span class="dv">344</span>, <span class="dv">145</span>, <span class="dv">981</span>, <span class="dv">291</span>)</span>
-<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>declared_after_processing <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">232</span>, <span class="dv">121</span>, <span class="dv">110</span>, <span class="dv">253</span>, <span class="dv">344</span>, <span class="dv">96</span>, <span class="dv">981</span>, <span class="dv">287</span>)</span>
-<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>found <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">232</span>, <span class="dv">134</span>, <span class="dv">110</span>, <span class="dv">278</span>, <span class="dv">363</span>, <span class="dv">145</span>, <span class="dv">981</span>, <span class="dv">291</span>)</span>
-<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>mentioned_vs_found <span class="ot">&lt;-</span> <span class="fu">tibble</span>(datasets, equivalent, declared_before_processing, declared_after_processing, found)</span>
-<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>mentioned_vs_found</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>datasets <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"liver_cirrhosis"</span>, <span class="st">"colorectal_cancer"</span>, <span class="st">"inflamatory_bowel_disease"</span>, <span class="st">"obesity"</span>,<span class="st">"T2D"</span>, <span class="st">"WT2D"</span>,<span class="st">"Human Microbiome Project"</span>, <span class="st">"Skin"</span>)</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>equivalent <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"Quin_gut_liver_cirrhosis"</span>, <span class="st">"Zeller_fecal_colorectal_cancer"</span>, <span class="st">"metahit"</span>, <span class="st">"Chatelier_gut_obesity"</span>, <span class="st">"t2dmeta_long/short"</span>, <span class="st">"WT2D"</span>, <span class="st">"hmp/hmpii"</span>, <span class="st">"segre_Human_Skin"</span>)</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>declared_before_processing <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">237</span>, <span class="dv">156</span>, <span class="dv">124</span>, <span class="dv">292</span>, <span class="dv">344</span>, <span class="dv">145</span>, <span class="dv">981</span>, <span class="dv">291</span>)</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>declared_after_processing <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">232</span>, <span class="dv">121</span>, <span class="dv">110</span>, <span class="dv">253</span>, <span class="dv">344</span>, <span class="dv">96</span>, <span class="dv">981</span>, <span class="dv">287</span>)</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>found <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">232</span>, <span class="dv">134</span>, <span class="dv">110</span>, <span class="dv">278</span>, <span class="dv">363</span>, <span class="dv">145</span>, <span class="dv">981</span>, <span class="dv">291</span>)</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>mentioned_vs_found <span class="ot">&lt;-</span> <span class="fu">tibble</span>(datasets, equivalent, declared_before_processing, declared_after_processing, found)</span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>mentioned_vs_found</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 8 × 5
   datasets        equivalent declared_before_proc…¹ declared_after_proce…² found
@@ -211,15 +180,15 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 8 Skin            segre_Hum…                    291                    287   291
 # ℹ abbreviated names: ¹​declared_before_processing, ²​declared_after_processing</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>mentioned_vs_found <span class="sc">|&gt;</span> </span>
-<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pull</span>(declared_after_processing) <span class="sc">|&gt;</span> </span>
-<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">sum</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>mentioned_vs_found <span class="sc">|&gt;</span> </span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pull</span>(declared_after_processing) <span class="sc">|&gt;</span> </span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">sum</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 2424</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>mentioned_vs_found <span class="sc">|&gt;</span> </span>
-<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pull</span>(found) <span class="sc">|&gt;</span> </span>
-<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">sum</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>mentioned_vs_found <span class="sc">|&gt;</span> </span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pull</span>(found) <span class="sc">|&gt;</span> </span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">sum</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 2534</code></pre>
 </div>
@@ -227,19 +196,17 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>The numbers of samples that we have for each dataset is equal to those obtained after the processing or intermediate between those and the total number before processing.</p>
 <p>We will look better into this inconsistencies during cleaning. As for now, will proceed with the dataset as it is, though still not considering the datasets not mentioned as the source is not clear.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>traced_datasets <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"Quin_gut_liver_cirrhosis"</span>, <span class="st">"Zeller_fecal_colorectal_cancer"</span>, <span class="st">"metahit"</span>, <span class="st">"Chatelier_gut_obesity"</span>, <span class="st">"t2dmeta_long"</span>, <span class="st">"t2dmeta_short"</span>, <span class="st">"WT2D"</span>, <span class="st">"hmp"</span>, <span class="st">"hmpii"</span>, <span class="st">"segre_Human_Skin"</span>)</span>
-<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>selected_data <span class="ot">&lt;-</span> dataset <span class="sc">|&gt;</span> </span>
-<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(dataset_name <span class="sc">%in%</span> traced_datasets)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>traced_datasets <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"Quin_gut_liver_cirrhosis"</span>, <span class="st">"Zeller_fecal_colorectal_cancer"</span>, <span class="st">"metahit"</span>, <span class="st">"Chatelier_gut_obesity"</span>, <span class="st">"t2dmeta_long"</span>, <span class="st">"t2dmeta_short"</span>, <span class="st">"WT2D"</span>, <span class="st">"hmp"</span>, <span class="st">"hmpii"</span>, <span class="st">"segre_Human_Skin"</span>)</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>selected_data <span class="ot">&lt;-</span> dataset <span class="sc">|&gt;</span> </span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(dataset_name <span class="sc">%in%</span> traced_datasets)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>target_dir <span class="ot">&lt;-</span> <span class="st">"../data"</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a><span class="co"># save the dataset in the data fodler</span></span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a><span class="fu">write_csv</span>(selected_data, <span class="fu">str_c</span>(target_dir, <span class="st">"/03_dat_selected.csv"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
-<section id="save-the-dataset" class="level3">
-<h3 class="anchored" data-anchor-id="save-the-dataset">Save the dataset</h3>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>target_dir <span class="ot">&lt;-</span> <span class="st">"../data"</span></span>
-<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a><span class="co"># save the dataset in the data fodler</span></span>
-<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a><span class="fu">write_csv</span>(selected_data, <span class="fu">str_c</span>(target_dir, <span class="st">"/03_dat_selected.csv"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
 </section>
 
 </main>
