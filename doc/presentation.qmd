@@ -17,25 +17,21 @@ footer: "R4BDS - Group 09"
 
 ## Humans as a complex ecosystems
 
-:::{.columns}
-
-:::{.column width="65%"}
+::: columns
+::: {.column width="65%"}
 ![](../human_microbiota.png){fig-align="left" width="600"}
 :::
 
-:::{.column width="35%"}
-- key point 1
-- key point 2
-- key point 3
-![](../microbiota_in_health_and_disease.png){fig-align="bottom" width="100%"}
+::: {.column width="35%"}
+-   key point 1
+-   key point 2
+-   key point 3 ![](../microbiota_in_health_and_disease.png){fig-align="bottom" width="100%"}
 :::
-
-::::
+:::
 
 ## Data set history
 
-:::: {.columns}
-
+::: columns
 ::: {.column width="40%"}
 -   8 human associated shot-gun metagenomics studies
 -   Consolidated for assessment of relative abundance
@@ -46,12 +42,11 @@ footer: "R4BDS - Group 09"
 **Diagram of data processing**\
 ![](../Data_diagram.drawio.png){width="100%"}
 :::
-::::
+:::
 
 ## Data selection
 
-:::: {.columns}
-
+::: columns
 ::: {.column width="40%"}
 -   Selecting the WT2D data set\
 -   Data processing
@@ -60,13 +55,31 @@ footer: "R4BDS - Group 09"
 ::: {.column width="60"}
 ![](../results/04_valid_entries.jpg){width="1200"}
 :::
-::::
+:::
 
 ## The WT2D dataset
 
+::: columns
+::: {.column width="50.0%"}
+::: {style="font-size: 0.6em; font-weight: bold;"}
+What is Glucose tolerance
+:::
+
+![](images/WT2D-01.png){fig-align="left"}
+:::
+
+::: {.column width="50.%"}
+::: {style="font-size: 0.6em; font-weight: bold;"}
+Glucose tolerance distibution
+:::
+
+![](../results/07_distribution_of_sample_by_glucose_tolerance.jpg){width="405"}
+:::
+:::
+
 ## Hallmarks of Diabetes
 
-:::: {.columns}
+::: columns
 ::: {.column width="33.3%"}
 ::: {style="font-size: 0.6em; font-weight: bold;"}
 HDL ("Good Cholesterol")
@@ -108,26 +121,6 @@ BMI
 -   **Waist Circumference:** Stronger correlation
 :::
 :::
-:::
-
-::: notes
-### HDL Notes
-
-HDL, commonly referred to as "good" cholesterol, is known to be lower in individuals with type 2 diabetes. This reduction increases the risk of heart disease and stroke. Other documented factors that contribute to lower HDL levels include certain medications used to treat type 2 diabetes and being overweight. In our analysis, HDL was identified as a statistically significant parameter. The distribution plot shows a clear shift to the left, indicating lower HDL values in this group.
-
-Relevant image: `07_ridges_hdl_vs_glucose_tolerance.jpg`
-
-### Hemoglobin A1C Notes
-
-Hemoglobin A1C is a key measure that reflects the average plasma glucose concentration over the previous 10–12 weeks. A value above 48 mmol/mol is a strong indicator of type 2 diabetes. In our analysis, Hemoglobin A1C was also statistically significant. The distribution plot highlights that 34% of individuals with type 2 diabetes had values exceeding 48 mmol/mol, whereas the other two groups had 0% above this threshold.
-
-Relevant images: - `07_hba1c_vs_glucose_tolerance.jpg` - `07_hba1c_48_threshold.jpg`
-
-### BMI Notes
-
-BMI is often considered a statistically significant predictor of diabetes. However, in our study, we did not observe the same correlation. Instead, waist circumference emerged as a noteworthy parameter. These two measures are somewhat correlated, as shown in the analysis.
-
-Relevant image: `07_bmi_vs_glucose_tolerance.jpg`
 :::
 
 ------------------------------------------------------------------------
@@ -174,27 +167,6 @@ Fasting Insulin
 :::
 :::
 :::
-
-::: notes
-### GAD Antibodies Notes
-
-GAD (Glutamic Acid Decarboxylase) antibodies are typically associated with type 1 diabetes. As expected, this parameter is not statistically significant in our analysis of type 2 diabetes. Additionally, this pattern holds consistently across different BMI classes, reinforcing its lack of relevance in type 2 diabetes contexts.
-
-Relevant image: `07_gad_ab_vs_bmi_glucose_tolerance.jpg`
-
-### C-Peptide Notes
-
-C-peptide is a 31-amino-acid sequence that connects the A and B chains of proinsulin. It is cleaved during insulin production, making its levels a key marker to differentiate between insulin-producing (type 2 diabetes) and non-producing (type 1 diabetes) patients. Higher levels of C-peptide in type 2 diabetes patients indicate that the body is producing more insulin to compensate for elevated blood sugar levels.
-
-Relevant image: `07_c_peptide_vs_bmi_glucose_tolerance.jpg`
-
-### Fasting Insulin Notes
-
-As expected, patients with type 2 diabetes tend to have higher levels of fasting insulin due to insulin resistance. This was confirmed in our analysis, where fasting insulin was identified as a statistically significant parameter.
-
-Relevant image: `07_fasting_insuling_vs_glucose_tolerance_bar.jpg`
-:::
-
 
 ## Hallmarks of Type II Diabetes
 
