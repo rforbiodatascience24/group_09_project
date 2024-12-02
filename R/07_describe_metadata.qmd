@@ -3,6 +3,7 @@ format:
   html:
     self-contained: true
 ---
+
 # Exploration of metadata
 
 ```{r}
@@ -15,7 +16,6 @@ library("table1")
 
 source("99_proj_func.R")
 ```
-
 
 ```{r}
 data_path <- here("data/06_dat_augmented.RData")
@@ -400,19 +400,19 @@ The c-peptide is a 31-aa sequence that binds the A and B chain of the proinsulin
 gad_ab_vs_bmi_glucose_tolerance <- dataset|>
   filter(BMI_class != "Underweight") |> 
   filter(`gad-antibodies` < 20) |> 
-  ggplot(aes(x = BMI_class,
+  ggplot(aes(x = glucose_tolerance,
              y = `gad-antibodies`,
-             fill = glucose_tolerance)) +
+             fill = BMI_class)) +
   geom_boxplot(position = position_dodge(
     preserve = "single"), 
     alpha = 0.4) +
   theme_minimal(base_size = 15) +
   theme(legend.position = "bottom",
         plot.title = element_text(hjust = 0.5)) +
-    labs(x = "BMI class",
+    labs(x = "Glucose tolerance",
        y = "GAD-antibodies [U/mL]",
        title = "GAD-antibodies concentration",
-       fill = "Glucose tolerance: ")
+       fill = "BMI class ")
 
 save_plot_custom(
   plot = gad_ab_vs_bmi_glucose_tolerance,
