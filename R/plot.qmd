@@ -34,10 +34,10 @@ ungroup()
 #PCA analysis of species
 
 pca_clr <- prcomp(bacteria_log |> select(-c(sampleID,mean,statins)), center = TRUE, scale. = FALSE)
- # Get PCA results
+ 
 pca_data_clr <- as.data.frame(pca_clr$x)
 summary(pca_clr)
- # Create the PCA plot without coloring by sampleID
+
  
 ggplot(pca_data_clr, aes(x = PC1, y = PC2)) +
  geom_point(alpha = 0.6) +

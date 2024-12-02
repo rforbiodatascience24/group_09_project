@@ -115,8 +115,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(<span class="st">"tidyverse"</span>)</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(<span class="st">"vegan"</span>)</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(<span class="st">"here"</span>)</span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Import costum function</span></span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu">source</span>(<span class="st">"99_proj_func.R"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(<span class="st">"broom"</span>)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Import costum function</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="fu">source</span>(<span class="st">"99_proj_func.R"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># verify that the dataset can be loaded successfully</span></span>
@@ -220,12 +221,167 @@ Number of permutations: 999
 
 adonis2(formula = bc_dist ~ BMI_class, data = dataset)
            Df SumOfSqs      R2      F Pr(&gt;F)
-BMI_class   3   0.7155 0.02383 1.1475  0.215
+BMI_class   3   0.7155 0.02383 1.1475  0.211
 Residual  141  29.3066 0.97617              
 Total     144  30.0221 1.00000              </code></pre>
 </div>
 </div>
 <p>The results of the PERMANOVA agree with what is seen in the PCoA as the P.value is 0.208, which indicates that the differences in microbial composition across BMI classes is not significant. Also R2=0.0238 means that bmi contributes to only 2.38% of the variance in the diversity of microbial community across the bmi classes.</p>
+</section>
+<section id="p-value-analysis-for-bacterial-species" class="level1">
+<h1>P-value analysis for bacterial species</h1>
+<p>Before we can study how the bacterial species may be related to type 2 diabetes, we need to find which bacteria have more than 50 values that are not 0. Even though 0 is a meaningful value in the dataset, we need some data points to vary in order to see if there is a meaning full relationship.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Get a list of the bacteria that have less than n samples where the value is different from 0</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">50</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>sparse_columns <span class="ot">&lt;-</span> dataset <span class="sc">|&gt;</span>  </span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="fu">starts_with</span>(<span class="st">"s_"</span>)) <span class="sc">|&gt;</span> </span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(<span class="at">cols =</span> <span class="fu">starts_with</span>(<span class="st">"s_"</span>),</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>               <span class="at">names_to =</span> <span class="st">"backteria"</span>,</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>               <span class="at">values_to =</span> <span class="st">"abundance"</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(abundance <span class="sc">&gt;</span> <span class="dv">0</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(backteria) <span class="sc">|&gt;</span> </span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">non_zero_samples =</span> <span class="fu">n</span>()) <span class="sc">|&gt;</span> </span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(non_zero_samples <span class="sc">&lt;</span> n) <span class="sc">|&gt;</span> </span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pull</span>(backteria)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co">#splitting dataset into metadata and bacteria data </span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>metadata <span class="ot">&lt;-</span> dataset <span class="sc">|&gt;</span> </span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span><span class="fu">starts_with</span>(<span class="st">"s_"</span>)) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>We will perform the p-value analysis where we compare the bacterial samples from normal and T2D (type 2 diabetes) patients. Therefore, we will remove the impaired samples and sparse data. Next, we will transform the columns and convert the data from wide format to long format to conduct the p-value analysis.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>dataset_long <span class="ot">&lt;-</span> dataset <span class="sc">|&gt;</span> </span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(glucose_tolerance <span class="sc">!=</span> <span class="st">"impaired"</span> ) <span class="sc">|&gt;</span> </span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span><span class="fu">all_of</span>(sparse_columns)) <span class="sc">|&gt;</span> </span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(<span class="at">cols =</span> <span class="fu">starts_with</span>(<span class="st">"s_"</span>),</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>               <span class="at">names_to =</span> <span class="st">"backteria"</span>,</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>               <span class="at">values_to =</span> <span class="st">"abundance"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Then we group the data by bacteria and nest it. After that, we ungroup it. By doing so, we obtain another tibble, which is a table for each bacterium.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>dataset_long_nested <span class="ot">&lt;-</span> dataset_long<span class="sc">|&gt;</span> </span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(backteria) <span class="sc">|&gt;</span> </span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">nest</span>() <span class="sc">|&gt;</span> </span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ungroup</span>()</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>dataset_long_nested</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 92 × 2
+   backteria                      data              
+   &lt;chr&gt;                          &lt;list&gt;            
+ 1 s_Methanobrevibacter_smithii   &lt;tibble [96 × 30]&gt;
+ 2 s_Actinomyces_odontolyticus    &lt;tibble [96 × 30]&gt;
+ 3 s_Rothia_mucilaginosa          &lt;tibble [96 × 30]&gt;
+ 4 s_Bifidobacterium_adolescentis &lt;tibble [96 × 30]&gt;
+ 5 s_Bifidobacterium_longum       &lt;tibble [96 × 30]&gt;
+ 6 s_Adlercreutzia_equolifaciens  &lt;tibble [96 × 30]&gt;
+ 7 s_Collinsella_aerofaciens      &lt;tibble [96 × 30]&gt;
+ 8 s_Eggerthella_lenta            &lt;tibble [96 × 30]&gt;
+ 9 s_Gordonibacter_pamelaeae      &lt;tibble [96 × 30]&gt;
+10 s_Bacteroides_caccae           &lt;tibble [96 × 30]&gt;
+# ℹ 82 more rows</code></pre>
+</div>
+</div>
+<p>Here we see how the data can be pulled out for a choosen bacterium.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co">#How to get the data</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>dataset_long_nested <span class="sc">|&gt;</span> </span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(backteria <span class="sc">==</span> <span class="st">"s_Bacteroides_caccae"</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pull</span>(data)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[[1]]
+# A tibble: 96 × 30
+   sampleID glucose_tolerance is_diseased   age country   bmi BMI_class      hdl
+   &lt;chr&gt;    &lt;chr&gt;                   &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;   &lt;dbl&gt; &lt;chr&gt;        &lt;dbl&gt;
+ 1 S118     normal                      0  70.0 sweden   32.7 Obese         1.35
+ 2 S121     normal                      0  69.3 sweden   29.7 Overweight    2.82
+ 3 S126     normal                      0  69.5 germany  18.6 Normal weig…  2.72
+ 4 S127     normal                      0  70.0 sweden   26.6 Overweight    1.4 
+ 5 S137     normal                      0  70.0 sweden   23.2 Normal weig…  2.21
+ 6 S141     normal                      0  69.4 sweden   25.1 Overweight    2.56
+ 7 S143     normal                      0  69.5 sweden   28.8 Overweight    2.27
+ 8 S146     normal                      0  69.5 sweden   36.9 Obese         1.37
+ 9 S153     normal                      0  70.2 germany  21.6 Normal weig…  2.53
+10 S155     normal                      0  70.3 france   21.5 Normal weig…  2.35
+# ℹ 86 more rows
+# ℹ 22 more variables: ldl &lt;dbl&gt;, hdl_to_ldl_ratio &lt;dbl&gt;,
+#   `gad-antibodies` &lt;dbl&gt;, whr &lt;dbl&gt;, wc &lt;dbl&gt;, cholesterol &lt;dbl&gt;,
+#   triglycerides &lt;dbl&gt;, creatinine &lt;dbl&gt;, `y-gt` &lt;dbl&gt;, fasting_glucose &lt;chr&gt;,
+#   fasting_insulin &lt;dbl&gt;, `HOMA-IR` &lt;chr&gt;, HOMA_category &lt;chr&gt;, hba1c &lt;dbl&gt;,
+#   adiponectin &lt;chr&gt;, leptin &lt;chr&gt;, hscrp &lt;dbl&gt;, `c-peptide` &lt;dbl&gt;,
+#   tnfa &lt;dbl&gt;, statins &lt;chr&gt;, insulin &lt;chr&gt;, abundance &lt;dbl&gt;</code></pre>
+</div>
+</div>
+<p>Then we fit a linear fitting model to each bacterium.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>dataset_long_nested <span class="ot">&lt;-</span> dataset_long_nested <span class="sc">|&gt;</span> </span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(backteria) <span class="sc">|&gt;</span> </span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">model_object =</span> <span class="fu">map</span>(<span class="at">.x =</span> data,</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>                            <span class="at">.f =</span> <span class="sc">~</span><span class="fu">lm</span>(<span class="at">formula =</span> abundance <span class="sc">~</span> is_diseased,</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>                                     <span class="at">data =</span> .x))) <span class="sc">|&gt;</span> </span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">model_object_tidy =</span> <span class="fu">map</span>(<span class="at">.x =</span> model_object,</span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>                                 <span class="at">.f =</span> <span class="sc">~</span><span class="fu">tidy</span>(<span class="at">x =</span> .x,</span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>                                            <span class="at">conf.int =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>                                            <span class="at">conf.level =</span> <span class="fl">0.95</span>)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Then we show how a linear model for a random bacterium would look.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="co">#How to get the model</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>dataset_long_nested <span class="sc">|&gt;</span> </span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(backteria <span class="sc">==</span> <span class="st">"s_Bacteroides_caccae"</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pull</span>(model_object_tidy)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[[1]]
+# A tibble: 2 × 7
+  term        estimate std.error statistic   p.value conf.low conf.high
+  &lt;chr&gt;          &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;    &lt;dbl&gt;     &lt;dbl&gt;
+1 (Intercept)    0.671     0.160      4.19 0.0000640    0.353     0.989
+2 is_diseased   -0.225     0.216     -1.04 0.300       -0.653     0.203</code></pre>
+</div>
+</div>
+<p>We unnest the model object so we can access the data and values inside the model.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>dataset_estimates <span class="ot">&lt;-</span> dataset_long_nested <span class="sc">|&gt;</span> </span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">unnest</span>(model_object_tidy)</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>dataset_estimates</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 184 × 10
+# Groups:   backteria [92]
+   backteria    data     model_object term  estimate std.error statistic p.value
+   &lt;chr&gt;        &lt;list&gt;   &lt;list&gt;       &lt;chr&gt;    &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;   &lt;dbl&gt;
+ 1 s_Methanobr… &lt;tibble&gt; &lt;lm&gt;         (Int…  2.09e+0   0.450       4.64  1.11e-5
+ 2 s_Methanobr… &lt;tibble&gt; &lt;lm&gt;         is_d… -9.15e-1   0.605      -1.51  1.34e-1
+ 3 s_Actinomyc… &lt;tibble&gt; &lt;lm&gt;         (Int…  5.65e-3   0.00189     2.99  3.57e-3
+ 4 s_Actinomyc… &lt;tibble&gt; &lt;lm&gt;         is_d…  8.18e-4   0.00254     0.322 7.48e-1
+ 5 s_Rothia_mu… &lt;tibble&gt; &lt;lm&gt;         (Int…  5.43e-3   0.0173      0.314 7.54e-1
+ 6 s_Rothia_mu… &lt;tibble&gt; &lt;lm&gt;         is_d…  2.79e-2   0.0233      1.20  2.34e-1
+ 7 s_Bifidobac… &lt;tibble&gt; &lt;lm&gt;         (Int…  2.24e+0   0.674       3.32  1.28e-3
+ 8 s_Bifidobac… &lt;tibble&gt; &lt;lm&gt;         is_d…  2.22e-1   0.907       0.244 8.07e-1
+ 9 s_Bifidobac… &lt;tibble&gt; &lt;lm&gt;         (Int…  1.32e+0   0.239       5.51  3.11e-7
+10 s_Bifidobac… &lt;tibble&gt; &lt;lm&gt;         is_d…  1.49e-1   0.322       0.463 6.44e-1
+# ℹ 174 more rows
+# ℹ 2 more variables: conf.low &lt;dbl&gt;, conf.high &lt;dbl&gt;</code></pre>
+</div>
+</div>
+<p>Then we check if there are any bacteria that are significant at the alpha = 0.05 level. We filter for those, and we find that none of the bacteria are significant at that level.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>dataset_estimates1 <span class="ot">&lt;-</span> dataset_estimates <span class="sc">|&gt;</span> </span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(term <span class="sc">==</span> <span class="st">"is_diseased"</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(backteria,p.value,estimate,conf.low,conf.high,p.value) <span class="sc">|&gt;</span> </span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ungroup</span>() <span class="sc">|&gt;</span> </span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">q.value =</span> <span class="fu">p.adjust</span>(p.value),</span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>         <span class="at">is_significant =</span> <span class="fu">case_when</span>(q.value <span class="sc">&lt;=</span> <span class="fl">0.05</span> <span class="sc">~</span> <span class="st">"yes"</span>,</span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>                                    q.value <span class="sc">&gt;</span> <span class="fl">0.05</span> <span class="sc">~</span> <span class="st">"no"</span>))</span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a>dataset_estimates1 <span class="sc">|&gt;</span> </span>
+<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(is_significant <span class="sc">==</span> <span class="st">"yes"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 0 × 7
+# ℹ 7 variables: backteria &lt;chr&gt;, p.value &lt;dbl&gt;, estimate &lt;dbl&gt;,
+#   conf.low &lt;dbl&gt;, conf.high &lt;dbl&gt;, q.value &lt;dbl&gt;, is_significant &lt;chr&gt;</code></pre>
+</div>
+</div>
 </section>
 
 </main>
