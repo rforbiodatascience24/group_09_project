@@ -1,78 +1,108 @@
 ---
-title: "Changes in Microbiota in Type II Diabetes Patients"
-author:
-   - name: Anita Skovbjerg Hjort-Gregersen - s201190
-   - name: Asiya Mohamad Yusuf Muses - 243930
-   - name: Magnus Harthimmer - s233426
-   - name: Marco Andreis - s243116
-   - name: Rebecca Hjermind Millum - s215024
+title: "Changes in Microbiota in Type II diabetes"
+author: 
+  - "Anita Skovbjerg Hjort-Gregersen s201190"
+  - "Asiya Mohamad Yusuf Muses 243930"
+  - "Magnus Harthimmer s233426"
+  - "Marco Andreis s243116"
+  - "Rebecca Hjermind Millum s215024"
 date: "December 3, 2024"
 format:
   revealjs:
-    logo: "../DTU_logo.png"
-    css: "custom.css"
+    transition: slide
+    logo: "images/DTU_logo.png"
+    theme: [simple, custom.scss]
 self-contained: true 
 footer: "R4BDS - Group 09"
 ---
 
+
 ## Humans as a complex ecosystems
 
-:::{.columns}
+::: columns
 
-:::{.column width="65%"}
-![](../human_microbiota.png){fig-align="left" width="600"}
+::: {.column width="60%"}
+![](images/human_microbiota.png){fig-align="left" width="600"}
 :::
-
-:::{.column width="35%"}
-- key point 1
-- key point 2
-- key point 3
-![](../microbiota_in_health_and_disease.png){fig-align="bottom" width="100%"}
-:::
-
-::::
-
-## Data set history
-
-:::: {.columns}
 
 ::: {.column width="40%"}
--   8 human associated shot-gun metagenomics studies
--   Consolidated for assessment of relative abundance
--   Converted to CSV and posted on Kaggle
+::: {.fragment}
+<a href="https://doi.org/10.1038/s41392-022-00974-4">
+![](images/microbiota_paper.png){fig-align="bottom" width="100%" margin-bottom=0.5em}
+</a>
+![](images/microbiota_in_health_and_disease.png){fig-align="bottom" width="100%"}
+:::
 :::
 
-::: {.column width="60%" style="text-align: center;"}
-**Diagram of data processing**\
-![](../Data_diagram.drawio.png){width="100%"}
 :::
-::::
+
+## Data set history
+::: {style="display: flex; flex-direction: column; height: 25%; font-size: 35px"}
+::: columns
+::: {.column width="40%"}
+8 shotgun sequencing metagenomics studies
+
+:::
+
+::: {.column width="30%"}
+Merged into a single dataset
+:::
+
+::: {.column width="30%"}
+Uploaded on Kaggle as CSV
+:::
+:::
+:::
+
+::: {style="display: flex; flex-direction: column; height: 75%;"}
+![](images/dataset_history.png){width="100%"}
+:::
 
 ## Data selection
 
-:::: {.columns}
+::: columns
+::: {.column width="30%"}
+Using the **whole** dataset?
 
-::: {.column width="40%"}
--   Selecting the WT2D data set\
--   Data processing
+
+
+Focusing only on **one** study?
 :::
 
-::: {.column width="60"}
+::: {.column width="70%"}
 ![](../results/04_valid_entries.jpg){width="1200"}
 :::
-::::
+:::
 
 ## The WT2D dataset
+::: {.columns}
+::: {.column width="50%"}
+
+
+
+::: {style="font-size: 35px; margin-bottom: 40px"}
+What is glucose tolerance?
+::: 
+![](images/WT2D.png){fig-align="left" width="800"}
+:::
+
+::: {.column width="50%"}
+
+::: {style="font-size: 35px; margin-top: 60px"}
+![](../results/07_distribution_of_sample_by_glucose_tolerance.jpg){width="500"}
+:::
+:::
+:::
 
 ## Hallmarks of Diabetes
 
-:::: {.columns}
+::: columns
 ::: {.column width="33.3%"}
 ::: {style="font-size: 0.6em; font-weight: bold;"}
 HDL ("Good Cholesterol")
 :::
 
-![](../results/07_ridges_hdl_vs_glucose_tolerance.jpg){fig-align="left" width="281"}
+![](../results/07_ridges_hdl_vs_glucose_tolerance.jpg){width="400"}
 
 ::: {style="font-size: 0.6em;"}
 -   **Lower in Type 2 Diabetes**
@@ -87,12 +117,12 @@ HDL ("Good Cholesterol")
 Hemoglobin A1C
 :::
 
-![](../results/07_hba1c_vs_glucose_tolerance.jpg){width="220"} ![](../results/07_hba1c_48_threshold.jpg){width="207"}
+![](../results/07_hba1c_vs_glucose_tolerance.jpg){width="400"} 
 
 ::: {style="font-size: 0.5em;"}
 -   **Measures:** Avg. glucose (10–12 weeks)
 -   **Threshold:** \>48 mmol/mol = Type 2 Diabetes
--   **Findings:** 34% of Type 2 Diabetes cases above threshold
+-   **Findings:** 12.41% of Type 2 Diabetes cases above threshold
 :::
 :::
 
@@ -101,36 +131,14 @@ Hemoglobin A1C
 BMI
 :::
 
-![](../results/07_bmi_vs_glucose_tolerance.jpg){width="352"}
+![](../results/07_bmi_vs_glucose_tolerance.jpg){width="400"}
 
 ::: {style="font-size: 0.6em;"}
 -   **Not Significant**
--   **Waist Circumference:** Stronger correlation
+-   **Waist Circumference:** Strong correlation
 :::
 :::
 :::
-
-::: notes
-### HDL Notes
-
-HDL, commonly referred to as "good" cholesterol, is known to be lower in individuals with type 2 diabetes. This reduction increases the risk of heart disease and stroke. Other documented factors that contribute to lower HDL levels include certain medications used to treat type 2 diabetes and being overweight. In our analysis, HDL was identified as a statistically significant parameter. The distribution plot shows a clear shift to the left, indicating lower HDL values in this group.
-
-Relevant image: `07_ridges_hdl_vs_glucose_tolerance.jpg`
-
-### Hemoglobin A1C Notes
-
-Hemoglobin A1C is a key measure that reflects the average plasma glucose concentration over the previous 10–12 weeks. A value above 48 mmol/mol is a strong indicator of type 2 diabetes. In our analysis, Hemoglobin A1C was also statistically significant. The distribution plot highlights that 34% of individuals with type 2 diabetes had values exceeding 48 mmol/mol, whereas the other two groups had 0% above this threshold.
-
-Relevant images: - `07_hba1c_vs_glucose_tolerance.jpg` - `07_hba1c_48_threshold.jpg`
-
-### BMI Notes
-
-BMI is often considered a statistically significant predictor of diabetes. However, in our study, we did not observe the same correlation. Instead, waist circumference emerged as a noteworthy parameter. These two measures are somewhat correlated, as shown in the analysis.
-
-Relevant image: `07_bmi_vs_glucose_tolerance.jpg`
-:::
-
-------------------------------------------------------------------------
 
 ## Hallmark of [*Type 2*]{.underline} Diabetes
 
@@ -140,11 +148,11 @@ Relevant image: `07_bmi_vs_glucose_tolerance.jpg`
 GAD-Antibodies
 :::
 
-![](../results/07_gad_ab_vs_bmi_glucose_tolerance.jpg){width="383"}
+![](../results/07_gad_ab_vs_bmi_glucose_tolerance.jpg){width="400"}
 
 ::: {style="font-size: 0.6em;"}
 -   **Associated with Type 1 Diabetes**
--   **Pattern consistent across BMI classes**
+-   **Not significant across BMI or glucose tolerance classes**
 :::
 :::
 
@@ -153,7 +161,7 @@ GAD-Antibodies
 C-Peptide
 :::
 
-![](../results/07_c_peptide_vs_bmi_glucose_tolerance.jpg){width="380"}
+![](../results/07_c_peptide_vs_bmi_glucose_tolerance.jpg){width="400"}
 
 ::: {style="font-size: 0.6em;"}
 -   **Marker for insulin production**
@@ -166,7 +174,7 @@ C-Peptide
 Fasting Insulin
 :::
 
-![](../results/07_fasting_insuling_vs_glucose_tolerance_bar.jpg){width="368"}
+![](../results/07_fasting_insuling_vs_glucose_tolerance_bar.jpg){width="400"}
 
 ::: {style="font-size: 0.6em;"}
 -   **Higher in Type 2 Diabetes**
@@ -176,32 +184,122 @@ Fasting Insulin
 :::
 
 ::: notes
+-   Type 1 and type 2 diabetes are similar in the features showed before, but very different in other characteristics
+
+-   lets have a look at GAD antibodies, C-peptide and fasting insulin levels
+
 ### GAD Antibodies Notes
 
-GAD (Glutamic Acid Decarboxylase) antibodies are typically associated with type 1 diabetes. As expected, this parameter is not statistically significant in our analysis of type 2 diabetes. Additionally, this pattern holds consistently across different BMI classes, reinforcing its lack of relevance in type 2 diabetes contexts.
+- GAD (Glutamic Acid Decarboxylase) antibodies with glucose tolerance grouped by BMI
+- not statistically significant in our analysis of type 2 diabetes
+- typically associated with type 1 diabetes. (autoimmunity target GAD and beta cell of pancreas)
+- Same for the BMI classes (hence not relevant in type 2 diabetes)
 
 Relevant image: `07_gad_ab_vs_bmi_glucose_tolerance.jpg`
 
 ### C-Peptide Notes
 
-C-peptide is a 31-amino-acid sequence that connects the A and B chains of proinsulin. It is cleaved during insulin production, making its levels a key marker to differentiate between insulin-producing (type 2 diabetes) and non-producing (type 1 diabetes) patients. Higher levels of C-peptide in type 2 diabetes patients indicate that the body is producing more insulin to compensate for elevated blood sugar levels.
+- C-peptide concentration with glucose tolerance grouped by BMI
+- C-peptide differentiate t1 and t2 diabetes since it is cleaved during insulin production (insulin is only produced in t2)
+- Higher levels of C-peptide in type 2 diabetes patients indicate that the body is producing more insulin to compensate for elevated blood sugar levels.
+- obese produce more due to increased insulin resistance
 
+% C-peptide is a 31-amino-acid sequence that connects the A and B chains of proinsulin. 
 Relevant image: `07_c_peptide_vs_bmi_glucose_tolerance.jpg`
 
 ### Fasting Insulin Notes
 
-As expected, patients with type 2 diabetes tend to have higher levels of fasting insulin due to insulin resistance. This was confirmed in our analysis, where fasting insulin was identified as a statistically significant parameter.
+- fasting insulin levels for each glucose tolerance group
+- t2 diabetes have higher levels of fasting insulin due to insulin resistance
+- statistically significant parameter.
 
 Relevant image: `07_fasting_insuling_vs_glucose_tolerance_bar.jpg`
 :::
 
 
-## Hallmarks of Type II Diabetes
+## Statins and diabetes
 
-## Analysing the abundances
+::: columns
+::: {.column width="50%"}
+![](../results/07_statins_cholesterol.jpg){width="500"}
 
-## Statins - How do they interact?
+::: {style="font-size: 0.6em;"}
+-   **Used as cardiovascular disease treatment**
+-   **Lower cholesterol levels**
+:::
+:::
 
-## Does diabetes change the microbiota?
+
+::: {.column width="50%"}
+![](../results/07_linear_fasting_insuline_cholesterol.jpg){width="500"}
+
+::: {style="font-size: 0.6em;"}
+-   **Insulin levels are not affected by statin**
+-   **Lowers colesterol levels**
+-   **Statins not directly linked to type 2 diabetes**
+
+:::
+:::
+:::
+
+::: notes
+### Statin Notes
+- Cholesterol level for each glucose tolerance group, grouped by on statins yes/no
+- Statins inhibit an enzyme essential for cholesterol production in the liver 
+- Statins reduce the risk of cardiovascular related events such as heart attack, stroke, and death due to CVD.
+- regardless the glucose tolerance
+% - Statins inhibit the enzyme HMG-CoA reductase, 
+
+### inuslin Notes
+-  fasting insulin is not affected by statin, 
+- but cholesterol level is lowered by statin
+- Hence statins are no diabetes medication
+:::
+
+## Relative abundance data {style="font-size:40px"}
+
+::: columns
+::: {.column width="50%"}
+![](images/MetaPhlAn2.png){width="110%"}
+<a href="https://www.france-genomique.org/expertises-technologiques/metagenomique/metagenomique-shotgun/">
+  ![France genomique](images/shotgun.jpg){width="110%"}
+</a>
+:::
+
+::: {.column width="50%"}
+::: {style="font-size: 0.6em;"}
+Are there differences between healthy and diseased?
+:::
+![](../results/08_most_different_species.jpg){width="600"}
+:::
+:::
+
+## Are there really differences? {style="font-size:40px"}
+
+::: columns
+::: {.column width="50%"}
+![](../results/10_pca_glucose_tolerance.jpg){width="500"}
+:::
+
+::: {.column width="50%"}
+![](../results/08_species_heatmap.jpg){width="500"}
+:::
+:::
 
 ## Conclusions
+
+::: columns
+::: {.column width="50%"}
+![](../results/10_sig_diff_species.jpg){width="500"}
+:::
+
+::: {.column width="50%"}
+:::fragment
+<a href="https://doi.org/10.1038/nature12198">
+  ![](images/WT2D_paper.png){width="110%"}
+</a>
+![](images/Clostridium_confirmation.png){width="500"}
+:::
+
+:::
+:::
