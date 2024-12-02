@@ -94,19 +94,20 @@ Now we move on to more diabetes-specific metadata.
 ```{r}
 distribution_by_glucose_tolerance <- dataset |>
   count(glucose_tolerance) |>
+  mutate(percentage = n / sum(n) * 100) |>
   ggplot(aes(x = glucose_tolerance,
-             y = n,
+             y = percentage,
              fill = glucose_tolerance,
-             label = n)) +
+             label = str_c(round(percentage,digits = 2),"%"))) +
   geom_col(colour = "black",
            alpha = 0.6) +
   theme_minimal(base_size = 15) +
   labs(x = "",
-       y = "count",
+       y = "",
        title = "Sample distribution in glucose tolerance groups") +
   geom_hline(yintercept = 0) +
   geom_text(vjust = -0.5, size = 5)+
-  ylim(0,55)+
+  ylim(0,45)+
   theme(legend.position = "none",
         axis.text.y = element_blank())
 
@@ -234,9 +235,8 @@ Hemoglobin A1C is hemoglobin bound to glucose, which can be used as a measure of
 ```{r}
 hba1c_48_threshold <- dataset |>
   group_by(glucose_tolerance) |> 
-  summarise(n_48 = sum(hba1c > 48),
-            n = sum(hba1c > 0)) |>
-  mutate(percentage = n_48 / sum(n) * 100) |>
+  count(hba1c > 48) |>
+  mutate(percentage = n / sum(n) * 100) |>
   ggplot(aes(x = glucose_tolerance,
              y = percentage,
              fill = glucose_tolerance,
@@ -663,7 +663,7 @@ save_plot_custom(
 linear_c_peptide_hdl
 ```
 
-Now we want to explore how the statin treatment affect cholesterol levels for each glucose tolerance group. 
+We can see that the number of obese and overweight people increases in glucose impaired and diabetic categories.
 
 ```{r}
 #split on BMI
@@ -692,7 +692,7 @@ save_plot_custom(
 statins_cholesterol
 ```
 
-We can see that the treatment with statins have the effect of lowering cholesterol, which is coherent with what's expected. The effect is seen for both healthy and glucose impaired as well as type 2 diabetic patients. 
+We can see that the treatment with statins have the effect of lowering cholesterol, which is coherent with what's expected.
 
 ```{r}
 # # clean environment
